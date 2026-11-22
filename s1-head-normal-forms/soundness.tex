@@ -1,0 +1,124 @@
+%% S1 soundness section.  Drafted 2026-11-19 from lean-ski Ski/HnfSound.lean;
+%% definitions (spine, head step, blocks, walks, h-blocks) are in prelims.tex.
+
+\section{Soundness}\label{sec:soundness}
+
+We prove the direction that \citet[Question~10]{dots} call the challenge: a term whose
+block is not $\bot$ has a head normal form. The proof is a termination argument for the
+head reduction with a weight read along the spine; the weight is a finite certificate, and
+every fact about it is a finite check.
+
+\begin{lemma}[window]\label{lem:window}
+Let $\spine(t)=[x,y,z]\app\rho$ and let $t\to t'$ be the head step, so that
+\eqref{eq:headstep} holds. Both walks from
+$0$ reach $\rho$ in the same state.
+\end{lemma}
+\begin{proof}
+Before the step the state is $\beta(\beta(\beta(0,b x),b y),b z)$. After it, the walk of
+$\spine(x)$ ends at $b(x)$ and two more steps give
+$\beta(\beta(b x,b z),\beta(b y,b z))$. These agree by Lemma~\ref{lem:table}(i).
+\end{proof}
+
+\paragraph{The certificate.} Let $c$ assign a natural number to each pair of an h-block
+and a block, and $\pi$ to each h-block. The \emph{weight} of $t$ is
+$r(t)=\sum_{i}c(q_{i-1},b(u_i))$ over the walk of $\spine(t)$ from $0$. Write
+$E=\{0,17\}$ and $[\,\cdot\,]$ for the indicator. The certificate must satisfy
+\begin{gather}
+\pi(s)+c(s,a)\le\pi(\beta(s,a))\qquad\text{whenever } \beta(s,a)\ne\bot,\label{eq:pot}\\
+\begin{split}
+\pi^{\circ}(a)+c(a,a'')+c\bigl(\beta(a,a''),\beta(a',a'')\bigr)+[a\notin E]\qquad&\\
+\le c(0,a)+c(\beta(0,a),a')+c\bigl(\beta(\beta(0,a),a'),a''\bigr)&,
+\end{split}\label{eq:win}
+\end{gather}
+where \eqref{eq:pot} ranges over h-blocks $s$ and blocks $a$, and \eqref{eq:win} over
+the $9{,}725$ triples of blocks $(a,a',a'')$ with $a\ne\bot$ and
+$\beta(\beta(\beta(0,a),a'),a'')\ne\bot$, and
+$\pi^{\circ}(0)=0$ and $\pi^{\circ}(a)=\pi(a)$ otherwise. Integer programming finds a
+certificate with every entry at most $10$, and none exists with every entry at most~$9$;
+Table~\ref{tab:cert} gives $\pi$, and $c$ is \lean{HnfSound.wTable} in the artifact.
+Blocks $0,1,2,4,8$ each hold a single term ($S$, $S\,S$, $S(S\,S)$, \dots), but
+block~$17$ holds every tower $S(\cdots(S(S\,S)))$ with at least four outer $S$,
+since $\beta(0,17)=17$; a head step that strips an $S$ from such a tower can leave the
+walk unchanged, and $\tau$ pays for it instead. Neither exemption can be dropped: for $E=\{17\}$, \eqref{eq:pot} at $(12,0)$ and
+\eqref{eq:win} at $(0,\bot,0)$ give $c(12,0)\le0<c(12,0)$, and for $E=\{0\}$,
+\eqref{eq:pot} at $(0,17)$ and \eqref{eq:win} at $(17,\bot,\bot)$ give
+$\pi(0)+1\le0$.
+
+\begin{lemma}[potential]\label{lem:pot}
+If the walk of $w$ from an h-block $s$ stays among h-blocks and ends at $s'$, then
+$\pi(s)+\sum_i c(q_{i-1},b(w_i))\le\pi(s')$.
+\end{lemma}
+\begin{proof}
+Induction on $w$, by \eqref{eq:pot}.
+\end{proof}
+
+\begin{lemma}[two more table facts]\label{lem:facts}
+(i) No entry of $\beta$ is $0$; hence $b(u)=0$ only for $u=S$.
+(ii) If $\beta(a,a')=17$ then $a=0$ and $a'\ne0$; hence $b(u)=17$
+only for $u=S\,v$ with $v\ne S$.
+\end{lemma}
+
+\begin{theorem}[Soundness]\label{thm:soundness}
+Every closed pure-S term whose block is not $\bot$ reduces to a head normal form.
+\end{theorem}
+\begin{proof}
+Let $\tau(t)$ be the number of leading $S$ applications of the first item,
+$\tau(S\,v)=1+\tau(v)$ and $\tau(u)=0$ otherwise, and $\#_S(t)$ the number of items equal to $S$.
+We show that the head step from an h-fold $t$ with at least three items decreases
+$\bigl(r(t),\#_S(t),\tau(t)\bigr)$ lexicographically. Since $t'$ is again h-fold
+(Lemma~\ref{lem:inv}), head reduction then halts, at a spine of at most two items.
+
+Let $\spine(t)=[x,y,z]\app\rho$ with blocks $a,a',a''$. The block $a$ is
+not $\bot$: otherwise the state at $\rho$, which is not $\bot$, would equal
+$\beta(\beta(\bot,a''),\beta(a',a''))=\bot$ by Lemma~\ref{lem:window} and Lemma~\ref{lem:table}(iii). By
+Lemma~\ref{lem:window} the walk reads $\rho$ identically before and after the step, so
+$r(t)-r(t')$ is the window's contribution. Before the step it is the right side of
+\eqref{eq:win}. After it, $\spine(x)$ contributes $0$ if $x=S$ and at most $\pi(a)$
+otherwise (Lemma~\ref{lem:pot} from $s=0$, as $\pi(0)\ge0$), and $z$, $yz$ contribute
+the last two terms on the left. So $r(t')+[a\notin E]\le r(t)$.
+
+If $a\notin E$ the weight drops. If $a=0$ then $x=S$ by Lemma~\ref{lem:facts}(i); the new spine
+$[z,yz]\app\rho$ has lost the item $x$, and $yz\ne S$, so $\#_S$ drops. If
+$a=17$ then $x=S\,v$ with $v\ne S$ by Lemma~\ref{lem:facts}(ii); the new spine is
+$[v,z,yz]\app\rho$, which has no more $S$ items than before and whose first
+item has $\tau(v)=\tau(x)-1$.
+\end{proof}
+
+With Corollary~\ref{cor:q10}, Theorem~\ref{thm:soundness} settles Question~10: the
+automaton of Fig.~5.14 of \citet{dots} accepts exactly the closed $S$-terms with a head
+normal form. Both are proved in Lean~4 inside an axiom gate admitting only
+\texttt{propext} and \texttt{Quot.sound} (\lean{HnfSound.sound}, \lean{HnfSound.q10} in
+\texttt{lean-ski}~1.4.1); the inequalities \eqref{eq:pot}, \eqref{eq:win} and the facts
+of Lemma~\ref{lem:facts} are checked by kernel evaluation. This also answers the
+question \citet{dots} attach to the challenge, whether ``this local head normalization
+problem'' can be verified automatically: it is, by a certificate of $37\times38$ weights and $37$ potentials, all at most~$10$.
+
+\paragraph{Root normal forms.} \citet[footnote~4]{dots} note that a closed $S$-term is a
+root normal form iff it is $S$, $S\,A$, $S\,A\,B$, or $M_1\,M_2$ with $M_1$ of order~$0$,
+that is, with an infinite head reduction, and that being a root normal form is therefore
+decidable ``with the proviso that the automaton in Fig.~5.14 has yet to be proved
+correct''. Theorem~\ref{thm:main} discharges the proviso.
+
+\begin{corollary}\label{cor:rnf}
+A closed $S$-term is a root normal form iff it is $S$, $S\,A$, $S\,A\,B$, or $M_1\,M_2$
+with $d(M_1)=\circledast$. In particular this is decidable.
+\end{corollary}
+
+The characterization of root normal forms is that of \citet{dots}; only its link to
+the automaton is mechanized here.
+
+%% Table generated from lean-ski v1.4.1 Ski/HnfSound.lean piTable.
+\begin{table}[t]
+\centering\small\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{l*{19}{c}}
+\toprule
+$a$ & 0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18 \\
+$\pi(a)$ & 0 & 0 & 1 & 0 & 2 & 1 & 0 & 3 & 3 & 0 & 0 & 1 & 0 & 1 & 3 & 2 & 2 & 4 & 0 \\
+\midrule
+$a$ & 19 & 20 & 21 & 22 & 23 & 24 & 25 & 26 & 27 & 28 & 29 & 30 & 31 & 32 & 33 & 34 & 35 & 37 \\
+$\pi(a)$ & 0 & 0 & 2 & 4 & 2 & 3 & 5 & 5 & 0 & 0 & 1 & 5 & 10 & 3 & 3 & 3 & 5 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{The potentials $\pi$ on the h-blocks (\lean{HnfSound.piTable}). The weights $c$,
+a $37\times38$ table with entries $0$--$9$, are \lean{HnfSound.wTable}.}\label{tab:cert}
+\end{table}

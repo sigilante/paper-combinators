@@ -1,0 +1,99 @@
+%% S1: Head normal forms of S.  Neutral amsart shell; port to the venue class
+%% (LIPIcs for FSCD, lmcs for LMCS) once the venue is fixed.
+%%
+%% Paper-to-Lean map (lean-ski v1.4.1; namespaces HnfS = Ski/HnfS.lean,
+%% HnfSound = Ski/HnfSound.lean; all in the #audit_clean gate, Ski/Audit.lean).
+%% Keep each statement in step with its Lean name when rewriting.
+%%   pure S terms, \mathcal S ........ HnfS.PureS (closed under reduction: wstep_pure)
+%%   hnf; has an hnf ................. HnfS.IsHnf; HnfS.HasHnf  (t ->> u, u hnf)
+%%   beta, fold b, bot=36 ............ HnfS.β (blockTable), HnfS.fold; β_lt, fold_lt
+%%   lem:table (i) S-law ............. HnfS.compat (compatB_eq)
+%%   lem:table (ii) hnf blocks ....... HnfS.hnf_blocks (hnfB_eq); used as fold_hnf
+%%   lem:table (iii) bot absorbs ..... HnfSound.absorb (absorbB_eq)
+%%   lem:inv invariance .............. HnfS.fold_wsteps
+%%   prop:complete ................... HnfS.no_hnf_of_bot
+%%   delta, star=34, phi ............. HnfS.δ (danceTable), HnfS.P, HnfS.φ (blockToDance)
+%%   eq:hom .......................... HnfS.hom, HnfS.reject, HnfS.phi_onto (ontoB_eq);
+%%                                     phi(0)=0 is by rfl
+%%   d(t) = phi(b(t)) ................ HnfS.dance_fold; d is HnfS.dance
+%%   cor:q10 ......................... HnfS.dance_rejects_iff, HnfS.q10_rejecting,
+%%                                     HnfS.q10_of_soundness; invariance of d: dance_wsteps
+%%   spine fr, eq:headstep ........... HnfSound.spine, pure_eq_foldl; HnfSound.root_step
+%%   walk; walk of fr(t) = b(t) ...... HnfSound.walk, walk_append, walk_spine
+%%   h-blocks along a walk ........... HnfSound.AllH, allH_of_walk, allH_spine, walk_bot
+%%   c, pi, exempt E={0,17} .......... HnfSound.cw (wTable), pw (piTable), exempt, towerBlock
+%%   lem:window, eq:win .............. HnfSound.window (windowB_eq)
+%%   eq:pot .......................... HnfSound.pot (potB_eq)
+%%   lem:pot ......................... HnfSound.wt_le_pot (weight wt, wt_append)
+%%   lem:facts (i) / (ii) ............ HnfSound.beta_ne_zero, fold_eq_zero /
+%%                                     HnfSound.tower_entry (towerB_eq)
+%%   measure (r, #S, tau) ............ HnfSound.r₁, nS, hd (tau = td of the first item)
+%%   one step decreases it ........... HnfSound.measure_dec (lex3)
+%%   spine of length <= 2 is hnf ..... HnfSound.isHnf_of_short
+%%   thm:soundness ................... HnfSound.sound
+%%   thm:main ........................ HnfSound.q10  (HasHnf t <-> dance t ≠ P)
+%%   cor:rnf ......................... NOT mechanized (Dance's characterization of rnf);
+%%                                     the automaton link is dance_rejects_iff
+%%   not in Lean: the Farkas pairs (minimality of E) and "no certificate with
+%%   every entry <= 9" (MILP, scratch scripts only).
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\spine}{\operatorname{fr}}
+\newcommand{\lean}[1]{\texttt{#1}}
+\newcommand{\app}{\mathbin{+\!\!+}}
+
+\title{Head Normal Forms of the Combinator $S$}
+\author{N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+A closed term built from $S$ alone has a head normal form when it reduces to $S$,
+$S\,X$ or $S\,X\,Y$. Barendregt, Endrullis, Klop and Waldmann asked whether a 35-state
+tree automaton they gave accepts exactly these terms (\emph{Dance of the Starlings},
+Question~10). We prove that it does. The automaton is a homomorphic image of a 38-element
+model of the $S$-law, so its state is a reduction invariant, and rejection implies the
+absence of a head normal form. For the converse we read a weight along the spine of a
+term; a finite certificate of small integers makes the weight, with two tie-breakers,
+decrease at every head step. The whole proof is mechanized in Lean~4 with no axioms beyond
+propositional extensionality and quotient soundness, and the finite facts are checked by
+kernel evaluation.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, head normal form, tree automata,
+termination certificates, Lean}
+\maketitle
+
+\input{intro}
+\input{prelims}
+\input{q10}
+\input{soundness}
+
+\section*{Data availability}
+All results are proved in \texttt{lean-ski} version~1.4.1~\citep{leanski}, files
+\texttt{Ski/HnfS.lean} and \texttt{Ski/HnfSound.lean}. Every theorem is listed in the
+repository's axiom gate \texttt{Ski/Audit.lean}, which fails the build if a result
+depends on an axiom other than \texttt{propext} and \texttt{Quot.sound}. The tables
+$\beta$, $\delta$, $\varphi$, $c$ and $\pi$ appear there as data.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

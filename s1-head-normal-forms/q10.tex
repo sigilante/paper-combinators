@@ -1,0 +1,38 @@
+\section{The automaton and the easy direction}\label{sec:q10}
+
+\begin{proposition}[completeness]\label{prop:complete}
+A term with block $\bot$ has no head normal form.
+\end{proposition}
+\begin{proof}
+If $t\twoheadrightarrow u$ with $u$ a head normal form, then $b(u)\ne\bot$ by
+Lemma~\ref{lem:table}(ii), and $b(t)=b(u)$ by Lemma~\ref{lem:inv}.
+\end{proof}
+
+\citet[Fig.~5.14]{dots} give a bottom-up tree automaton with states
+$Q=\{0,\dots,34\}$, initial state $0$ for $S$, transition table $\delta$, and one
+rejecting state $\circledast=34$; it \emph{accepts} $t$ when the state $d(t)$, defined by
+$d(S)=0$ and $d(u\,v)=\delta(d(u),d(v))$, is not $\circledast$. Question~10 asks whether
+it accepts exactly the terms with a head normal form. Let $\varphi\colon B\to Q$ be the map
+of \lean{HnfS.blockToDance}. Kernel evaluation checks that
+\begin{equation}\label{eq:hom}
+\varphi(\beta(a,a'))=\delta(\varphi(a),\varphi(a')),\qquad
+\varphi(0)=0,\qquad
+\varphi(a)=\circledast\iff a=\bot,
+\end{equation}
+and that $\varphi$ is onto. So the automaton is a homomorphic image of the block model,
+and by induction on $t$, $d(t)=\varphi(b(t))$.
+
+\begin{corollary}\label{cor:q10}
+For $t\in\mathcal S$, the automaton rejects $t$ iff $b(t)=\bot$. Hence every rejected
+term has no head normal form, and the automaton accepts exactly the terms with a head
+normal form iff every h-fold term has one.
+\end{corollary}
+\begin{proof}
+The first claim is $d(t)=\varphi(b(t))$ with~\eqref{eq:hom}. The second is
+Proposition~\ref{prop:complete}. For the third, by the first claim acceptance is the
+condition $b(t)\ne\bot$; one inclusion is Proposition~\ref{prop:complete}, and the other
+is the statement that h-fold terms have head normal forms.
+\end{proof}
+
+The state $d(t)$ is therefore itself a reduction invariant. What remains is the direction
+\citet{dots} call the challenge, soundness of the fold.

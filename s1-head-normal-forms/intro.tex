@@ -1,0 +1,38 @@
+\section{Introduction}\label{sec:intro}
+
+The combinator $S$, with rule $S\,x\,y\,z\to x\,z\,(y\,z)$, never erases a subterm, so on
+its own it cannot express $K$~\citep{waldmann-thesis}; whether it is computationally
+universal is open. The closed terms built from $S$ alone behave in intricate ways. Some normalize, some
+reduce forever, and whether a term reaches a head normal form ($S$, $S\,X$ or $S\,X\,Y$)
+depends on the whole term. Waldmann showed that normalization of these terms is
+decidable and that the normalizing terms form a regular tree language
+\citep{waldmann-thesis,waldmann-ic}; see \citet[Theorem~9]{dots}.
+%% Checked 2026-11-20 against the thesis abstract (thesis.pdf, from thesis.dvi) and Dance Thm 9.
+\citet{dots} surveyed what is known and posed open questions. Their Question~10 offers a
+35-state bottom-up tree automaton (their Fig.~5.14) and asks whether it accepts exactly
+the closed $S$-terms with a head normal form. They expect one direction to be easy and
+call the other, that every accepted term has a head normal form, the challenge.
+
+We answer the question positively.
+
+\begin{theorem}\label{thm:main}
+A closed $S$-term has a head normal form if and only if the automaton of
+\textup{\citet[Fig.~5.14]{dots}} accepts it.
+\end{theorem}
+
+The proof has two parts. First (Sections~\ref{sec:prelims} and~\ref{sec:q10}), the
+automaton is a homomorphic image of a 38-element model of the $S$-law. Its state is
+therefore invariant under reduction, the rejecting state is the image of a single
+absorbing element, and rejection implies the absence of a head normal form. Second
+(Section~\ref{sec:soundness}), head reduction of a term whose model value is not that
+element terminates. The termination measure reads a weight along the spine of the term.
+A head step changes the spine only in a window of three items, and the model guarantees
+that the walk resumes after the window in the same state, so the weight drops whenever a
+finite inequality holds on every window. A certificate of small integers found by integer
+programming satisfies these inequalities, and two tie-breakers handle the windows where
+the weight stays the same.
+
+Every step is mechanized in Lean~4~\citep{lean4} within \texttt{lean-ski}~\citep{leanski}.
+The finite facts about the tables are checked by \texttt{decide} in the kernel, without
+compiled evaluation, and the axiom gate admits only \texttt{propext} and
+\texttt{Quot.sound}. We use the notation of \citet{barendregt}.

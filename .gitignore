@@ -1,0 +1,51 @@
+# ---------------------------------------------------------------------------
+# LaTeX build artifacts (the PDFs themselves are tracked deliverables)
+# ---------------------------------------------------------------------------
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+*.idx
+*.ind
+*.ilg
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------------------
+# Long-run checkpoints / scratch (regenerable; large .pkl/.jsonl data such as
+# teases.pkl and km2_certs.pkl are kept deliberately and NOT ignored)
+# ---------------------------------------------------------------------------
+*.ckpt
+
+# ---------------------------------------------------------------------------
+# OS / editor cruft
+# ---------------------------------------------------------------------------
+.DS_Store
+*.swp
+*~
+
+# ---------------------------------------------------------------------------
+# Local tooling state (Claude Code per-machine settings; shared agents/skills
+# under .claude/ can still be force-added if you choose to track them)
+# ---------------------------------------------------------------------------
+.claude/settings.local.json
+survey/*.jsonl
+survey/*.log
+survey/*.out
+survey/*.pkl

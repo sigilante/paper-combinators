@@ -1,0 +1,48 @@
+\section{Terms, spines and the block model}\label{sec:prelims}
+
+\paragraph{Terms.} We write $\mathcal S$ for the closed terms built from the constant $S$
+by application, associating to the left. Weak reduction $\to$ is the compatible closure
+of $S\,x\,y\,z\to x\,z\,(y\,z)$, and $\twoheadrightarrow$ its reflexive--transitive
+closure. Every $t\in\mathcal S$ is uniquely $S\,u_1\cdots u_m$ with $m\ge0$; the list
+$\spine(t)=[u_1,\dots,u_m]$ is its \emph{spine} and the $u_i$ its \emph{items}. A term is
+a \emph{head normal form} if its spine has at most two items, that is, if it is $S$,
+$S\,X$ or $S\,X\,Y$; it \emph{has} a head normal form if it reduces to one. If
+$\spine(t)=[x,y,z]\app\rho$, the \emph{head step} contracts the leftmost redex,
+$t\to t'=x\,z\,(y\,z)\,\rho$, and
+\begin{equation}\label{eq:headstep}
+\spine(t')=\spine(x)\app[z,\;y\,z]\app\rho .
+\end{equation}
+
+\paragraph{The block model.} Let $B=\{0,\dots,37\}$ and let $\beta\colon B\times B\to B$
+be the table of \lean{HnfS.blockTable}. Its elements are \emph{blocks}; block $0$
+interprets $S$ and block $36$, written $\bot$, plays the role of ``no head normal
+form''. The \emph{block} of a term is the fold $b(S)=0$, $b(u\,v)=\beta(b(u),b(v))$. The
+table was found by computer search; the proofs below use only the following finite facts,
+each checked by evaluation in the Lean kernel.
+
+\begin{lemma}[table facts]\label{lem:table}
+For all $a,a',a''\in B$:
+\begin{enumerate}
+\item[(i)] $\beta(\beta(\beta(0,a),a'),a'')=\beta(\beta(a,a''),\beta(a',a''))$
+  \textup{(the $S$-law; $38^3=54{,}872$ instances)};
+\item[(ii)] $\beta(0,a)\ne\bot$ and $\beta(\beta(0,a),a')\ne\bot$;
+\item[(iii)] $\beta(\bot,a)=\bot$.
+\end{enumerate}
+\end{lemma}
+
+\begin{lemma}[invariance]\label{lem:inv}
+If $t\twoheadrightarrow t'$ then $b(t')=b(t)$.
+\end{lemma}
+\begin{proof}
+For a single contraction of $S\,x\,y\,z$ this is Lemma~\ref{lem:table}(i) at the
+blocks of $x$, $y$ and~$z$. The fold is compositional, so equality passes to contexts, and then
+along the reduction.
+\end{proof}
+
+By (ii) a head normal form never has block $\bot$. A block other than $\bot$ is an
+\emph{h-block}, and $t$ is \emph{h-fold} if $b(t)$ is one.
+
+\paragraph{Walks.} The \emph{walk} of a list of terms $[u_1,\dots,u_m]$ from a block $s$
+is $q_0=s$, $q_i=\beta(q_{i-1},b(u_i))$. From $s=0$ the walk of $\spine(t)$ ends at
+$b(t)$, since $t=S\,u_1\cdots u_m$. By Lemma~\ref{lem:table}(iii), a walk that ends at an
+h-block visits only h-blocks.

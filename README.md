@@ -33,3 +33,11 @@ This work was carried out in a centaur fashion, with high-level human direction 
   **It machine-checks a published self-interpreter for $SKI$ against the terms as printed, so the 618-atom interpreter and 43-atom unquoter are certified to do what their paper claims, and it adds a converse of fuel adequacy, which shows that the interpreter's answer does not depend on its budget.**
 
   > A recent paper gives a self-interpreter for the $SKI$ combinator calculus: a 618-atom closed term `whnfF` that runs a Scott-encoded term to weak head normal form under a fuel budget, with a 43-atom unquoter `UQ`, and proves that the interpreter is adequate. We prove in Lean 4 that the definitions bracket-abstract to the printed terms, that these satisfy step and fuel adequacy as stated, and that `UQ` inverts the encoding. We also prove a converse of fuel adequacy and the independence of the answer from the budget, from which the paper's three listed consequences follow.
+
+## Related papers
+
+Other papers by N. E. Davis on combinatory logic, outside this series; their mechanizations are also in [`sigilante/lean-ski`](https://github.com/sigilante/lean-ski).
+
+* N. E. Davis, *A Self-Interpreter for $SKI$: Authoring Semantics for New Symbols*. In review at the *Journal of Functional Programming*. Preprint: [doi:10.5281/zenodo.22867957](https://doi.org/10.5281/zenodo.22867957). Mechanized above in *The $SKI$ Self-Interpreter, Mechanized*.
+* N. E. Davis, *SKIjack: A Low-Level Native Language for the $SKI$ Calculus*. In review at *The Art, Science, and Engineering of Programming*. Compiler: [`sigilante/SKIjack`](https://github.com/sigilante/SKIjack).
+* N. E. Davis, *The Staging Line, Calibrated: Uniform Continuity of Oracle Functionals Is the Decidable Fan Theorem*. In preparation.

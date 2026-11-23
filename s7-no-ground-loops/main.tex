@@ -1,0 +1,127 @@
+%% S7: no closed S-term reduces to a term that contains it (Waldmann's Cor. 17), constructively.
+%% DRAFT 2026-11-23 (skinock).  Neutral amsart shell, as S1--S6.
+%% Paper-to-Lean map (lean-ski, module Ski/HeadRec.lean since v1.8.0; all in #audit_clean):
+%%   lem:label ...... HeadRec.acc_all (acc_app, acc_app_aux; relation Rel, labelled step LStep)
+%%   lem:bounded .... HeadRec.bsn (tag, Cons, lift, rd_bstep, cons_tag)
+%%   thm:main ....... HeadRec.no_ground_loop (sub_replay)
+%%   cor:nhr ........ HeadRec.no_head_recurrence (sub_apps)
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\red}{\twoheadrightarrow}
+\newcommand{\rd}{\operatorname{rd}}
+\newcommand{\lab}[1]{\mathbin{\cdot_{#1}}}
+
+\title{No Ground Loops for the Combinator $S$, Constructively}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+Waldmann proved that no closed term built from the combinator $S$ reduces, in one or more steps,
+to a term that contains it. We give a constructive proof and mechanize it in Lean~4. The
+termination of Waldmann's labelled reduction is shown by a direct induction on accessibility
+instead of a recursive path order, and the theorem follows by replaying a loop inside its own
+result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, termination, accessibility, Lean}
+\maketitle
+
+\section{Introduction}
+
+$\Ter$ is the set of closed terms built from $S$ by application, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at
+any position; $\to^+$ is the transitive closure and $\red$ the reflexive--transitive closure. A
+\emph{ground loop} is a reduction $t\to^+u$ in which $t$ occurs in $u$. Waldmann showed that
+there are none~\citep[Cor.~17]{waldmann-ic}. His proof labels the terms and shows that the labelled
+system terminates by a recursive path order~\citep[Thm.~8]{waldmann-ic}. We replace the order by a
+direct induction on accessibility, so that every step is constructive, and check the whole argument
+in Lean.
+
+\begin{theorem}\label{thm:main}
+No $t\in\Ter$ has $t\to^+u$ with $t$ a subterm of $u$.
+\end{theorem}
+
+\begin{corollary}\label{cor:nhr}
+No $t\in\Ter$ head-reduces in one or more steps to $t\,X_1\cdots X_k$, for any $k\ge0$.
+\end{corollary}
+
+\begin{proof}
+Head steps are steps, and $t$ occurs in $t\,X_1\cdots X_k$.
+\end{proof}
+
+\section{Labelled reduction}
+
+The \emph{right depth} is $\rd(S)=0$ and $\rd(f\,x)=\rd(x)+1$. A \emph{labelled term} is $S$ or
+$a\lab k b$ with labelled terms $a,b$ and $k\in\mathbb N$. For $N\in\mathbb N$, an \emph{$N$-step}
+rewrites, at any position,
+\[
+  ((S\lab i x)\lab j y)\lab k z\;\to\;(x\lab k z)\lab{k+1}(y\lab k z)\qquad\text{if }k<N.
+\]
+Write $a\prec b$ if $b$ makes an $N$-step to $a$, if $a$ is the function part or the argument of
+$b$, or if $b=(l\lab i a)\lab k r$. A term is \emph{accessible} if every descending $\prec$-chain from it
+ends, in the inductive sense: all its $\prec$-predecessors are accessible.
+
+\begin{lemma}[{\citep[Thm.~8]{waldmann-ic}}]\label{lem:label}
+For every $N$, every labelled term is accessible; in particular $N$-steps terminate.
+\end{lemma}
+
+\begin{proof}
+We show that $u\lab k r$ is accessible whenever $u$ and $r$ are, by induction on $\max(N-k,0)$, and
+within it by induction on the accessibility of $u$, then of $r$. The predecessors of $u\lab k r$ are
+$u$, $r$, the argument $x$ of $u=l\lab i x$, which precedes $u$, and the results of $N$-steps. A
+step inside $u$ or inside $r$ gives a term covered by the inner hypotheses. A step at the root
+needs $k<N$ and $u=(S\lab i x)\lab j y$, and gives $(x\lab k r)\lab{k+1}(y\lab k r)$. Here $x$ and $y$
+precede $u$, so $x\lab k r$ and $y\lab k r$ are accessible by the hypothesis for $u$, and the outer
+hypothesis for $k+1$, where $N-(k+1)<N-k$, makes the result accessible. Induction on the structure
+of the term finishes the proof.
+\end{proof}
+
+\begin{lemma}[{\citep[Thm.~16]{waldmann-ic}}]\label{lem:bounded}
+For every $N$, reduction restricted to redexes $S\,f\,g\,x$ with $\rd(x)<N$ terminates on $\Ter$.
+\end{lemma}
+
+\begin{proof}
+Call a labelling of $t$ \emph{consistent} if every label is at most the right depth of the argument
+below it; labelling each node $f\,x$ with $\rd(x)$ is consistent. A restricted step never lowers the
+right depth of a term: at the root $\rd(S\,f\,g\,x)=\rd(x)+1<\rd(x)+2=\rd(f\,x\,(g\,x))$, and
+elsewhere by induction. So the labels away from the contracted redex stay consistent. At the redex, the label $k\le\rd(x)<N$ lets the $N$-step fire, and
+the new labels satisfy $k\le\rd(x)$ and $k+1\le\rd(g\,x)$. So every restricted step lifts to an
+$N$-step of a consistent labelling, and accessibility transfers from Lemma~\ref{lem:label} by
+induction on it.
+\end{proof}
+
+\section{Proof of Theorem~\ref{thm:main}}
+
+Suppose $t\to t'\red u$ with $t$ a subterm of $u$, and let $N$ exceed the right depths of the
+arguments of the finitely many redexes contracted. Then the reduction is restricted in the sense of
+Lemma~\ref{lem:bounded}, and if $t$ occurs in a term $w$, the same steps at that occurrence give
+restricted reductions $w\to w'\red w''$ with $t$ occurring in $w''$.
+
+We show, by induction on the accessibility of $w$ for restricted steps, that no restricted
+reduction $w\red v$ has $t$ occurring in $v$. If $w\to w_0\red v$, apply the hypothesis to $w_0$. If
+$v=w$, then $t$ occurs in $w$, and the replay gives $w\to w'\red w''$ with $t$ in $w''$, against the
+hypothesis for $w'$. Since $t$ is accessible by Lemma~\ref{lem:bounded}, taking $w=v=t$ is a
+contradiction.\qed
+
+\section*{Data availability}
+Lemmas~\ref{lem:label} and~\ref{lem:bounded}, Theorem~\ref{thm:main} and
+Corollary~\ref{cor:nhr} are proved in the Lean~4~\citep{lean4} development
+\texttt{lean-ski}~\citep{leanski}, module \texttt{HeadRec}, using only the axioms
+\texttt{propext} and \texttt{Quot.sound}.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

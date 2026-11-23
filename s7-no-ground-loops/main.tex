@@ -1,16 +1,18 @@
 %% S7: no closed S-term reduces to a term that contains it (Waldmann's Cor. 17), constructively.
 %% DRAFT 2026-11-23 (skinock).  Neutral amsart shell, as S1--S6.
-%% Paper-to-Lean map (lean-ski, module Ski/HeadRec.lean since v1.8.0; all in #audit_clean):
+%% Paper-to-Lean map (lean-ski, modules Ski/HeadRec.lean since v1.8.0 and Ski/HeadRecF.lean since v1.15.0; all in #audit_clean):
 %%   lem:label ...... HeadRec.acc_all (acc_app, acc_app_aux; relation Rel, labelled step LStep)
 %%   lem:bounded .... HeadRec.bsn (tag, Cons, lift, rd_bstep, cons_tag)
 %%   thm:main ....... HeadRec.no_ground_loop (sub_replay)
 %%   cor:nhr ........ HeadRec.no_head_recurrence (sub_apps)
+%%   thm:f .......... HeadRec.theorem_H (Ski/HeadRecF.lean, v1.15.0; FStep, confluent, nf_unique, fstep_tag, sub_lift, le_sims, h_core)
 \documentclass[11pt]{amsart}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[numbers,sort]{natbib}
 \usepackage[hidelinks]{hyperref}
+\usepackage{bm}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
@@ -23,7 +25,7 @@
 \newcommand{\rd}{\operatorname{rd}}
 \newcommand{\lab}[1]{\mathbin{\cdot_{#1}}}
 
-\title{No Ground Loops for the Combinator $S$, Constructively}
+\title{No Ground Loops for the Combinator $\bm{S}$, Constructively}
 \author{Claude Opus \& Fable with N.\ E.\ Davis}
 \address{ZeroAttest, Champaign, Illinois, USA}
 \email{NDavis@ZeroAttest.com}
@@ -35,7 +37,7 @@
 Waldmann proved that no closed term built from the combinator $S$ reduces, in one or more steps,
 to a term that contains it. We give a constructive proof and mechanize it in Lean~4. We
 prove termination of a variant of Waldmann's labelled reduction by direct induction on accessibility instead
-of a recursive path order. The theorem follows by replaying a loop inside its own result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments.
+of a recursive path order. The theorem follows by replaying a loop inside its own result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments. More generally, if a term reaches $u$ without contracting an argument, for instance by head steps, then it reduces to no term $C[u]$ with $C\ne[\,]$ a context.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, termination, accessibility, Lean}
@@ -66,7 +68,7 @@ Head steps are steps, and $t$ occurs in $t\,X_1\cdots X_k$.
 \section{Labelled reduction}
 
 The \emph{right depth} is $\rd(S)=0$ and $\rd(f\,x)=\rd(x)+1$. A \emph{labelled term} is $S$ or
-$a\lab k b$ with labelled terms $a,b$ and $k\in\mathbb N$. For $N\in\mathbb N$, an \emph{$N$-step}
+$a\lab k b$ with labelled terms $a,b$ and $k\in\mathbb N$. A \emph{labelling} of $t\in\Ter$ is a labelled term that becomes $t$ when its labels are erased. For $N\in\mathbb N$, an \emph{$N$-step}
 rewrites, at any position,
 \[
   ((S\lab i x)\lab j y)\lab k z\;\to\;(x\lab k z)\lab{k+1}(y\lab k z)\qquad\text{if }k<N.
@@ -121,10 +123,46 @@ $v=w$, then $t$ occurs in $w$, and the replay gives $w\to w'\red w''$ with $t$ i
 hypothesis for $w'$. Since $t$ is accessible by Lemma~\ref{lem:bounded}, taking $w=v=t$ gives a
 contradiction.\qed
 
+\section{Reducts reached without contracting an argument}
+
+A \emph{context} $C$ is a term with one hole $[\,]$, and $C[u]$ fills the hole with $u$. A step is
+an \emph{f-step} if its redex is the whole term or the function part of its parent, that is, not an
+argument (it may lie inside one); head steps are f-steps. Write $t\red_f u$ for a reduction by f-steps.
+
+\begin{theorem}\label{thm:f}
+If $t\in\Ter$, $t\red_f u$ and $t\red C[u]$ for a context $C$, then $C=[\,]$.
+\end{theorem}
+
+\noindent Taking $u=t$, with no f-steps, gives the case of Theorem~\ref{thm:main} in which $t$ is a
+proper subterm of the reduct.
+
+\begin{proof}
+Let $t_{\rd}$ label each node $f\,x$ of $t$ with $\rd(x)$, write $T\le T'$ if two labellings of one
+term are pointwise ordered, and let $|T|$ count the occurrences of $S$. Fix $N$ above the right
+depths of the arguments of the redexes contracted in both reductions. $N$-steps are orthogonal: their left-hand sides are linear, the
+proper subpatterns $(S\lab i x)\lab j y$ and $S\lab i x$ of a redex are not redexes, and the
+condition $k<N$ reads only the label at the root of the redex. Orthogonal systems are
+confluent~\citep[Ch.~4]{terese}, so by Lemma~\ref{lem:label} every labelled term $T$ has a unique
+$N$-normal form $\hat T$ (a reduct with no $N$-step); and $|\hat T|\ge|T|$, since an $N$-step deletes one $S$ and copies $z$,
+which contains one.
+
+An f-step $t\to t'$ gives an $N$-step $t_{\rd}\to t'_{\rd}$: the new labels are $\rd(x)$, $\rd(x)$ and
+$\rd(x)+1=\rd(g\,x)$ for the redex $S\,f\,g\,x$, and the right depth of an argument depends only on
+its right spine, whose nodes are arguments, and an f-step contracts none of them. So $t_{\rd}$ reduces
+by $N$-steps to $u_{\rd}$ and, by the proof of Lemma~\ref{lem:bounded}, to a consistent labelling
+$C'[R]$ of $C[u]$. Consistency compares a label only with the argument below it, so $R$ is a
+consistent labelling of $u$, that is, $R\le u_{\rd}$.
+
+If $T\le T'$ then $|\hat T|\ge|\hat T'|$: an $N$-step of $T'$ fires at the same redex of $T$ and
+keeps the order, so $T$ reduces to some $V\le\hat T'$, and $|\hat T|=|\hat V|\ge|V|=|\hat T'|$.
+Now $\hat u_{\rd}=\widehat{C'[R]}=\widehat{C'[\hat R]}$. Suppose $C\ne[\,]$. Then $C$ contains an
+$S$ outside the hole, and $|\hat u_{\rd}|=|\widehat{C'[\hat R]}|\ge|C'[\hat R]|>|\hat R|\ge|\hat
+u_{\rd}|$, which is absurd.
+\end{proof}
+
 \section{Closing}
 
-A \emph{context} $E$ is a term with one hole $[\,]$, and $\conv$ is convertibility, the equivalence
-closure of $\to$. Theorem~\ref{thm:main} excludes $t\to^+E[t]$. Excluding $t\conv E[t]$ is stronger: in
+Let $\conv$ be convertibility, the equivalence closure of $\to$. Theorem~\ref{thm:main} excludes $t\to^+E[t]$. Excluding $t\conv E[t]$ for $E\ne[\,]$ is stronger: in
 the $\lambda$-calculus, with Curry's fixed-point combinator $Y$, the term $Y\,f$ is convertible with
 $f\,(Y\,f)$, although $Y\,f$ does not reduce in one or more steps to a term containing $Y\,f$.
 
@@ -133,15 +171,15 @@ No $t\in\Ter$ and context $E\ne[\,]$ satisfy $t\conv E[t]$.
 \end{conjecture}
 
 \noindent By Church--Rosser, the conjecture says that $t$ and $E[t]$ have no common reduct. It holds
-when $t$ has a normal form $n$: then $E[n]\conv n$, so $E[n]\red n$; but a step
-$S\,x\,y\,z\to x\,z\,(y\,z)$ never lowers the number of occurrences of $S$, as $z$ contains one, and
-$E[n]$ has more occurrences than $n$. The conjecture would strengthen Statman's theorem that $S$ alone
+when $t$ has a normal form $n$. Then $E[n]\conv n$, so $E[n]\red n$. But a step
+$S\,x\,y\,z\to x\,z\,(y\,z)$ never lowers the number of occurrences of $S$, since $z$ contains one,
+and $E[n]$ has more occurrences than $n$. The conjecture would strengthen Statman's theorem that $S$ alone
 defines no fixed-point combinator~\citep[Rem.~15]{dots}: such a $Y$ would give $Y\,S\conv S\,(Y\,S)$.
 
 \section*{Data availability}
-Lemmas~\ref{lem:label} and~\ref{lem:bounded}, Theorem~\ref{thm:main} and
+Lemmas~\ref{lem:label} and~\ref{lem:bounded}, Theorems~\ref{thm:main} and~\ref{thm:f}, and
 Corollary~\ref{cor:nhr} are proved in the Lean~4~\citep{lean4} development
-\texttt{lean-ski}~\citep{leanski}, module \texttt{HeadRec}, using only the axioms
+\texttt{lean-ski}~\citep{leanski}, modules \texttt{HeadRec} and \texttt{HeadRecF}, using only the axioms
 \texttt{propext} and \texttt{Quot.sound}.
 
 \bibliographystyle{plainnat}

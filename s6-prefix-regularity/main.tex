@@ -11,7 +11,7 @@
 %%   thm:index ........ pencil. Phi.theorem_phi is an analogue for the hnf observable (grade 10,
 %%                      only towers normalized); S6's relation does not imply its hypothesis.
 %%   lem:decide, proof of thm:main ... pencil
-%% TODO before release: version/DOI of lean-ski (needs psi-skeleton + g-certificate merged); Grammarian, Wizard.
+%% Mechanized in lean-ski v1.14.0 (Tower, Full, Conv, GCert, PsiSkel, BExp, Phi).
 \documentclass[11pt]{amsart}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -46,7 +46,8 @@ that for every depth $d$ a finite model of the $S$-law computes the depth-$d$ pr
 fold of $t$ into the model determines it. The models are computable from $d$. Consequently, for every
 finite tree $P$ the terms whose prefix is $P$ form a regular tree language, and it is decidable whether
 some closed $S$-term has an infinitary normal form beginning with $P$. The proof rests on two
-bounds on head reduction, one of which uses a finite computation on a 38-element table.
+bounds on head reduction, one of which uses a finite computation on a 38-element table, and it is
+mechanized in Lean~4.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, infinitary normal forms, tree automata, finite models}
@@ -323,12 +324,14 @@ If $t^\infty=u^\infty$, then $t\conv u$.
 \end{conjecture}
 
 \section*{Data availability}
-Lemmas~\ref{lem:kinds}, \ref{lem:productive}, \ref{lem:burst} and~\ref{lem:psiskel}, the latter including the soundness of the round abstractions behind $G_1$ and $G_2$ and the check
-of the ranks, are proved in the
-Lean~4~\citep{lean4} development \texttt{lean-ski}~\citep{leanski}, using only the axioms
-\texttt{propext} and \texttt{Quot.sound}. The same development proves an analogue of Theorem~\ref{thm:index} for the
-head-normal-form part of $O$, with grade $10$ and only the towers $S^k(S\,S)$ normalized. Facts about the strongly connected components of $G_1$ and $G_2$ are computed only and are not
-used. The remaining arguments are proved here.
+Every result of this paper is proved in
+Lean~4~\citep{lean4}, in the development \texttt{lean-ski}~\citep{leanski}, using only the axioms \texttt{propext} and \texttt{Quot.sound}:
+Lemmas~\ref{lem:invariant}--\ref{lem:psiskel} and~\ref{lem:decide}, Theorem~\ref{thm:index},
+Theorem~\ref{thm:main}, with $M_d$ an explicit table computed by a function of $d$, and the decidability
+in Corollary~\ref{cor:realize}, stated for the prefixes $\pi_d$. Lemma~\ref{lem:invariant} is proved for every $S$-model, and Lemma~\ref{lem:decide} by
+a refinement on signature classes rather than the iteration above. Two steps are not mechanized: the
+identification of the prefixes $\pi_d$ with prefixes of $t^\infty$~\citep{s3,s5}, used in the last
+sentence of Corollary~\ref{cor:realize}, and the reading of the fold as a tree automaton.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

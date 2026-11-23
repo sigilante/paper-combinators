@@ -1,4 +1,4 @@
-# S5: build with latexmk.  `make` builds main.pdf; `make watch` rebuilds on save;
+# S6: build with latexmk.  `make` builds main.pdf; `make watch` rebuilds on save;
 # `make clean` removes auxiliaries; `make distclean` also removes the PDF.
 MAIN := main
 SRC  := $(MAIN).tex refs.bib

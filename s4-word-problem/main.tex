@@ -1,0 +1,140 @@
+%% S4: a computable join bound decides the word problem for S; no additive bound exists.
+%% Neutral amsart shell, as S1--S3.  Paper-to-Lean map (lean-ski v1.10.0; all in #audit_clean):
+%%   lem:monotone ............ WordProblem.sz_wstep, mem_reductsUpTo   (file SmallJoin.lean;
+%%                             Lean bounds the search fuel via HeadRec.no_ground_loop)
+%%   thm:smalljoin ........... WordProblem.smallJoin_decides            (file SmallJoin.lean)
+%%   thm:lower ............... WordProblem.Family.conv_family, family_lower, not_smallJoin_max_add
+%% The combined pre-split draft is ~/Code/ski/notes/S4-combined-draft-2026-11-23.tex.
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\conv}{=_{\beta}}
+\newcommand{\sz}[1]{|#1|}
+
+\title{Join Bounds and the Word Problem for the Combinator $S$}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+Whether convertibility of closed terms built from $S$ alone is decidable has been open since
+Barendregt asked in 1975. We show that it is decidable if convertible terms always have a common
+reduct whose size is bounded by a computable function of their sizes. We also show that no bound
+has the form $\max(\sz t,\sz u)+c$, by a family of convertible pairs whose common reducts all exceed
+the larger term by a linear amount. Both results are mechanized in Lean~4.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, word problem, convertibility, Lean}
+\maketitle
+
+\section{Introduction}
+
+$\Ter$ is the set of closed terms built from $S$ by application, written left-associated, with
+$S\,x\,y\,z\to x\,z\,(y\,z)$ at any position; $\twoheadrightarrow$ is the reflexive--transitive
+closure and $\conv$ the equivalence closure. Normalization is
+decidable~\citep{waldmann-rta98,waldmann-ic}, and so is the existence of a head normal
+form~\citep{s1}. Barendregt asked whether $\conv$ is decidable~\citep{barendregt-open}, the word
+problem for $S$; it is RTA open problem~\#97~\citep{rtaloop97}, and Waldmann conjectured that it is
+decidable~\citep[\S5]{waldmann-ic}.
+
+The system is orthogonal, so $t\conv u$ iff $t$ and $u$ have a common reduct, and a search for one
+succeeds when they are convertible. The search needs a point at which to stop. A computable size
+bound, called Small Join below, supplies one (Theorem~\ref{thm:smalljoin}); no bound
+$\max(\sz t,\sz u)+c$ can (Theorem~\ref{thm:lower}).
+
+\section{Finite reduct sets}
+
+The size $\sz t$ is the number of occurrences of $S$ in $t$. A step adds $\sz z-1\ge0$ occurrences,
+so size never decreases along a reduction.
+
+\begin{lemma}\label{lem:monotone}
+For each $s$, the set $\{w : t\twoheadrightarrow w,\ \sz w\le s\}$ is finite and computable from $t$
+and $s$.
+\end{lemma}
+\begin{proof}
+Every term on a reduction from $t$ to such a $w$ has size at most $s$. A shortest such reduction
+visits distinct terms, so its length is less than the number $N_s$ of terms of size at most $s$,
+and breadth-first search to depth $N_s$ finds them all.
+\end{proof}
+
+\section{A size bound decides convertibility}
+
+\begin{definition}
+For $g\colon\mathbb N^2\to\mathbb N$, \emph{Small Join for $g$} is the statement: if $t\conv u$ then
+$t$ and $u$ have a common reduct (a \emph{join}) $w$ with $\sz w\le g(\sz t,\sz u)$.
+\end{definition}
+
+Classically, Small Join holds for some $g$: only finitely many convertible pairs have given sizes,
+and $g(a,b)$ can be the largest size among their smallest joins. Only the computability of $g$ is
+in question.
+
+\begin{theorem}\label{thm:smalljoin}
+If Small Join holds for a computable $g$, convertibility of $S$-terms is decidable.
+\end{theorem}
+\begin{proof}
+$t\conv u$ iff the finite sets of Lemma~\ref{lem:monotone} for $t$ and $u$, at bound
+$g(\sz t,\sz u)$, meet.
+\end{proof}
+
+\section{No additive bound}
+
+Let $P=S\,S\,S$, $Q=S\,(S\,S)$, $R=S\,S$, $f_0=S\,P$, $f_{k+1}=S\,S\,f_k$, $h_0=S\,Q$,
+$h_{k+1}=S\,S\,h_k$, and $t_k=f_k\,P\,R$, $u_k=h_k\,Q\,Q$. Then $\sz{t_k}=2k+9$ and
+$\sz{u_k}=2k+10$.
+
+\begin{theorem}\label{thm:lower}
+$t_k\conv u_k$ for every $k$, and every common reduct of $t_k$ and $u_k$ has size at least $3k+10$.
+Hence Small Join fails for $g(a,b)=\max(a,b)+c$, for every constant $c$.
+\end{theorem}
+\begin{proof}
+$S\,S\,f\,x\,y\to S\,x\,(f\,x)\,y\to x\,y\,(f\,x\,y)$, so $t_k\twoheadrightarrow P\,R\,t_{k-1}$ and
+$u_k\twoheadrightarrow Q\,Q\,u_{k-1}$. Moreover $P\,R\to S\,R\,(S\,R)=Q\,Q$, and $t_0$, $u_0$ both
+reduce to $Q\,Q\,(Q\,Q)$. By induction both reduce to the same term, of size $6k+12$.
+
+For the bound, let $A$ be $\{S\}$ or $\{S,\,S\,S\}$, and call a term \emph{$A$-clean} if every
+subterm $a\,S$ has $a\in A$. In an $A$-clean term the argument of a redex is never $S$, since a
+redex $S\,f\,g\,S$ would have $S\,f\,g\notin A$. So a step adds at least one leaf, and it preserves
+$A$-cleanness: the new subterms $f\,x$, $g\,x$ and $f\,x\,(g\,x)$ have arguments other than $S$,
+and the members of $A$ are normal forms, so no subterm $a\,S$ loses its form. $u_k$ is
+$\{S\}$-clean, so no reduct of $u_k$ contains $P=(S\,S)\,S$; $t_k$ is $\{S,\,S\,S\}$-clean.
+
+Let $\rho(w)$ be the largest $m$ such that $f_{m-1}$ is a subterm of $w$, or $0$ if there is none.
+Each $f_m$ is a normal form, so a step either leaves an occurrence intact or consumes only its outer
+link: as the $S\,S\,c$ of a redex, leaving $c=f_{m-1}$, or, for $f_0$, as the $S\,f$ of a redex. Thus $\rho$ drops by
+at most one per step, and $\sz{\cdot}+\rho$ never decreases along reductions from $t_k$, where it
+starts at $(2k+9)+(k+1)$. A common reduct is a reduct of $u_k$, so it has $\rho=0$ and size at
+least $3k+10$.
+\end{proof}
+
+\section{Open problem}
+
+Is there a computable $g$ for which Small Join holds? The family is no obstacle to a linear $g$.
+
+\begin{conjecture}
+The smallest common reduct of $t_k$ and $u_k$ has size $6k+12$ for every $k$.
+\end{conjecture}
+
+\noindent It holds for $k\le5$, by exhaustive search; Theorem~\ref{thm:lower} gives $3k+10$, and the gap is open.
+
+\section*{Data availability}
+Lemma~\ref{lem:monotone} and Theorems~\ref{thm:smalljoin} and~\ref{thm:lower} are proved in
+\texttt{lean-ski} version~1.10.0~\citep{leanski}, using only the axioms \texttt{propext} and
+\texttt{Quot.sound}.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

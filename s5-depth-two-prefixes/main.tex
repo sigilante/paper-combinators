@@ -1,0 +1,108 @@
+%% S5: a 373-element model of the S-law computes the depth-2 prefix of t^inf.
+%% Neutral amsart shell, as S1--S4.  Paper-to-Lean map (lean-ski v1.10.0; all in #audit_clean):
+%%   def:prefix (pi'_d) ........ D2.Pre ;  relation to S3's prefix: D2.pre_nf, D2.d2_nf
+%%   thm:main ................... D2.d2_prefix ;  table: D2.d2_slaw, d2_closed ;  quotient: D2.d2_block
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\hole}{\bullet}
+
+\title{A 373-Element Model Computes the Depth-Two Prefix of an $S$-Term}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+Every closed term $t$ built from the combinator $S$ has an infinitary normal form $t^\infty$, whose
+finite prefixes are computable. We show that the prefix of depth two is computed by a 373-element
+model of the $S$-law: the fold of $t$ into the model determines it. The 38-element model that decides
+head normal forms is a homomorphic image of this one. The proof reduces the claim to finitely many conditions
+on the model's table, and it is mechanized in Lean~4 for the prefix rules of~\citep{s3}.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, infinitary normal forms, tree automata, Lean}
+\maketitle
+
+\section{Introduction}
+
+$\Ter$ is the set of closed terms built from $S$ by application, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at
+any position. Each $t\in\Ter$ has a unique infinitary normal form $t^\infty$~\citep{waldmann-thesis,s3},
+and each finite prefix of $t^\infty$ is computable~\citep{s3}. A 38-element model of the $S$-law
+decides whether $t$ has a head normal form~\citep{s1}; that is the depth-one information in
+$t^\infty$. We show that a 373-element model of the $S$-law also computes the depth-two prefix. Since
+the fold is a homomorphism into a finite algebra, the set of terms with a given depth-two prefix is a
+regular tree language.
+
+\section{Models and prefixes}
+
+An \emph{$S$-model} is a set $M$ with a binary operation and an element $s$ such that
+$s\,a\,b\,c=a\,c\,(b\,c)$ for all $a,b,c\in M$. Its \emph{fold} $t\mapsto\bar t$ sends $S$ to $s$ and
+$t\,u$ to $\bar t\,\bar u$. Because the law holds, $\bar t=\bar u$ whenever $t\twoheadrightarrow u$.
+The model of~\citep{s1} has 38 elements, the \emph{blocks}; one of them, $\bot$, is the fold exactly
+of the terms with no head normal form, and $\bot\,a=\bot$ for all $a$.
+
+By~\citep{s1} and top-termination~\citep{waldmann-thesis,s3}, the head reduction of $t$ reaches one
+of four shapes: $S$, $S\,a$, $S\,a\,b$, or a term $f\,w$ whose function part $f$ has block $\bot$.
+
+\begin{definition}\label{def:prefix}
+Trees are built from $S$, a hole $\hole$, and binary nodes. The relation ``$P$ is a $\pi'_d$-prefix
+of $t$'' is defined by: $\hole$ is the $\pi'_0$-prefix of every $t$, with $\pi'_{-1}=\hole$; and for
+$d\ge1$, $\pi'_d(t)$ is the first, second, third or fourth tree below, according to the shape, in the
+order above, that the head reduction of $t$ reaches:
+\[
+S,\qquad S\,\pi'_{d-1}(a),\qquad S\,\pi'_{d-2}(a)\,\pi'_{d-1}(b),\qquad
+\pi'_{d-1}(f)\,\pi'_{d-1}(w).
+\]
+Cutting a tree to depth $k$ replaces every node at depth $k$ by $\hole$.
+\end{definition}
+
+\noindent These are the rules of~\citep[Prop.~9]{s3}, except that the head $S$ of a head normal form
+is shown even where the prefix of $t^\infty$ would cut it. Cutting that $S$ gives the depth-$d$
+prefix of $t^\infty$ in the sense of~\citep{s3}.
+
+\section{The theorem}
+
+\begin{theorem}\label{thm:main}
+There is a 373-element $S$-model $D$ and a map $o$ from $D$ to trees such that $\pi'_2(t)=o(\bar t)$
+for every $t\in\Ter$, where $\bar t$ is the fold of $t$ into $D$; in particular $\pi'_2(t)$ is
+unique. The 38-element model of~\citep{s1} is a homomorphic image of $D$.
+\end{theorem}
+
+\begin{proof}
+A $\pi'_2$-prefix exists for every $t$, by the four shapes and the definition. Let $o_1(x)$ be
+$S$, $S\,\hole$, $S\,\hole\,\hole$ or $\hole\,\hole$ according as $o(x)$ has the form $S$,
+$S\,X$, $S\,\hole\,X$ or $(\hole\,\hole)\,X$, and let $\varphi\colon D\to\{\text{blocks}\}$ be
+the homomorphism, with $\varphi(s)=s$. The fold is invariant under reduction, so it
+suffices to treat the four shapes. In these shapes $\bar t$ is $s$, $s\,\bar a$, $s\,\bar a\,\bar b$,
+or $\bar f\,\bar w$ with $\varphi(\bar f)=\bot$. Hence it suffices that for all $e,e'\in D$ and all
+$c\in D$ with $\varphi(c)=\bot$,
+\begin{gather*}
+o(s)=S,\qquad o(s\,e)=S\,o_1(e),\qquad o(s\,e\,e')=S\,\hole\,o_1(e'),\\
+o(c\,e)=o_1(c)\,o_1(e),\qquad o_1(c)=\hole\,\hole,
+\end{gather*}
+and that $o_1$ computes $\pi'_1$; by the same four shapes, $\pi'_1(t)$ is $S$, $S\,\hole$,
+$S\,\hole\,\hole$ or $\hole\,\hole$, and the conditions give $o_1(\bar t)$ the same value. A finite computation
+verifies these conditions, the $S$-law on all $373^3$ triples, and the homomorphism property of
+$\varphi$.
+\end{proof}
+
+\section*{Data availability}
+Theorem~\ref{thm:main} is proved in \texttt{lean-ski} version~1.10.0~\citep{leanski}, module
+\texttt{D2}, using only the axioms \texttt{propext} and \texttt{Quot.sound}; the finite computation
+is checked by the Lean kernel, and the model's table is part of that release.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

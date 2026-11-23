@@ -1,0 +1,139 @@
+%% The SKI self-interpreter of Davis (JFP, in review), mechanized.  Neutral amsart shell.
+%% Paper-to-Lean map (lean-ski v1.11.0; all in #audit_clean; file Ski/SelfInterp.lean):
+%%   thm:terms ...... SelfInterp.whnfF_eq_paper, UQ_eq_paper, quote_eq_paper, whnfF_atoms, UQ_atoms
+%%   (Lemma 5.1) .... step_whnf, step_step
+%%   thm:fuel ....... fuel_adequacy_value, fuel_adequacy_timeout, fuel_exact, fuel_exact_value
+%%   injectivity .... quote_inj ;  answers apart: just_nothing_apart ;  cor:indep: value_independent
+%%   thm:unquote .... UQ_unquote
+%%   scope (closing) Lemma 5.3 at l = Err: Ski/SelfInterpErr.lean (faithful_site, faithful_run);
+%%                   340-step run: t0 (kernel); 91,556 and 504,930: #guard build tests only
+%% Numbering of the cited paper checked against its compiled mss.aux (2026-11-23).
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\newcommand{\tw}[1]{\texttt{#1}}
+\newcommand{\enc}[1]{\langle #1\rangle}
+\newcommand{\red}{\twoheadrightarrow}
+
+\title{The $SKI$ Self-Interpreter, Mechanized}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+A recent paper gives a self-interpreter for the $SKI$ combinator calculus: a 618-atom closed term
+\tw{whnfF} that runs a Scott-encoded term to weak head normal form under a fuel budget, with a
+43-atom unquoter \tw{UQ}, and proves that the interpreter is adequate. We prove in Lean~4 that the
+definitions bracket-abstract to the printed terms, that these satisfy step and fuel adequacy as
+stated, and that \tw{UQ} inverts the encoding. We also prove a converse of fuel adequacy and the independence of the answer
+from the budget, from which the paper's three listed consequences follow.
+\end{abstract}
+
+\keywords{combinatory logic, self-interpreter, metacircular evaluation, Scott encoding, Lean}
+\maketitle
+
+\section{Introduction}
+
+\citet{davis-si} constructs a self-interpreter for $SKI$. Object terms over $\{S,K,I\}$ are
+Scott-encoded~\citep[\S3.1]{davis-si}: $\enc t$ takes four continuations, one per constructor ($S$,
+$K$, $I$, application), and applies its own. The interpreter \tw{whnfF} walks the spine of an encoded
+term, selects the arm of the head leaf, and rebuilds the spine~\citep[\S3.1]{davis-si}. It takes a
+fuel numeral $\enc k$ and answers \tw{just}~$\enc N$ or \tw{nothing}~\citep[Thm.~5.2]{davis-si}. An
+unquoter \tw{UQ} recovers $t$ from $\enc t$~\citep[\S3.1]{davis-si}. The paper prints both terms in
+full, as 618 and 43 atoms, and proves the interpreter adequate.
+
+We check those statements mechanically for the printed terms. Write $M\Downarrow_n N$ when the
+closed term $M$ reaches the weak head normal form $N$ in exactly $n$ normal-order contractions, and
+$M\Uparrow$ when it has none, as in~\citep[\S5.1]{davis-si}.
+
+\section{Setting}
+
+Both papers use normal order for the object language: $\Downarrow_n$ counts head-redex
+contractions. The paper writes $\red$ without defining it; its artifact's host reducer performs
+head reduction. We read $\red$ as weak reduction, the reflexive--transitive closure of contraction at
+any position. In the artifact, \tw{step} returns \tw{just}~$(\tw{rb}\,x\,r)$ with the rebuilt spine
+$\tw{rb}\,x\,r$ unevaluated, so under head reduction Lemma~5.1 for a redex, and Theorem~5.2(1) when
+$n\ge1$, would stop short of \tw{just}~$\enc{N}$; under weak reduction they hold as stated.
+
+\begin{theorem}\label{thm:terms}
+Bracket abstraction of the artifact's definitions yields the 618-atom \tw{whnfF} and the 43-atom
+\tw{UQ} printed in~\citep[App.~A]{davis-si}, and the leaf encodings are those of~\citep[\S3.1]{davis-si}.
+\end{theorem}
+\begin{proof}
+Equality of closed terms, decided by the Lean kernel against the printed terms.
+\end{proof}
+
+\section{Adequacy}
+
+Encodings of distinct terms have no common reduct. By induction on the terms: distinct leaves are
+told apart by applying them to distinct atoms; a leaf and an application, by continuations whose
+results are distinct normal forms; and two applications are projected onto their components with $K$
+and $K\,I$, after which a common reduct of the encodings gives common reducts of the components, by
+Church--Rosser. Step
+adequacy~\citep[Lemma~5.1]{davis-si} holds as stated, and the paper's induction on the fuel gives
+fuel adequacy. We add a converse.
+
+\begin{theorem}[fuel adequacy~{\citep[Thm.~5.2]{davis-si}}]\label{thm:fuel}
+Let $M$ be closed over $\{S,K,I\}$ and $k\in\mathbb N$.
+\begin{enumerate}
+\item If $M\Downarrow_n N$ and $n<k$, then $\tw{whnfF}\,\enc k\,\enc M\red\tw{just}\,\enc N$.
+\item If $M\Uparrow$, or $M\Downarrow_n N$ with $n\ge k$, then
+  $\tw{whnfF}\,\enc k\,\enc M\red\tw{nothing}$.
+\item Conversely, $\tw{whnfF}\,\enc k\,\enc M\red\tw{just}\,\enc N$ holds iff $M\Downarrow_n N$ for
+  some $n<k$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(1) and (2) are the paper's proof, by induction on $k$ with Lemma~5.1 at each step. For (3), apply
+\tw{nothing} and \tw{just}~$X$ to the continuations $S$ and $K\,K$: they reduce to $S$ and $K$,
+distinct normal forms, so by Church--Rosser no term reduces to both. Run $M$ for at most $k$ head
+steps; this decides whether $M\Downarrow_n N'$ for some $n<k$. If not, (2) gives \tw{nothing}, which
+a \tw{just} answer excludes. If so, (1) gives $\tw{just}\,\enc{N'}$, and by Church--Rosser
+$\tw{just}\,\enc N$ and $\tw{just}\,\enc{N'}$ have a common reduct; applied to $S\,I$ they project
+to $\enc N$ and $\enc{N'}$, which therefore share a reduct, so $N=N'$.
+\end{proof}
+
+\begin{corollary}\label{cor:indep}
+The value is independent of the budget: if $\tw{whnfF}\,\enc k\,\enc M\red\tw{just}\,\enc N$ and
+$\tw{whnfF}\,\enc{k'}\,\enc M\red\tw{just}\,\enc{N'}$, then $N=N'$.
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:fuel}(3) both come from normal-order runs of $M$, which are deterministic.
+\end{proof}
+
+\noindent The three consequences listed after~\citep[Thm.~5.2]{davis-si} follow on paper: head
+reduction is deterministic, so $n$ is unique, and by Theorem~\ref{thm:fuel}(3) the least adequate
+budget is $n+1$ and the outcome is monotone in $k$; by Corollary~\ref{cor:indep} the value is
+independent of $k$.
+
+\begin{theorem}\label{thm:unquote}
+$\tw{UQ}\,\enc t\red t$ for every $t$ over $\{S,K,I\}$.
+\end{theorem}
+\begin{proof}
+By induction on $t$, following the unquoter's case analysis on the four constructors.
+\end{proof}
+
+\section*{Data availability}
+\sloppy
+Theorems~\ref{thm:terms}, \ref{thm:fuel} and~\ref{thm:unquote}, Corollary~\ref{cor:indep} and
+Lemma~5.1 of~\citep{davis-si} are proved in the Lean~4~\citep{lean4} development \texttt{lean-ski}
+version~1.11.0~\citep{leanski}, file \texttt{Ski/SelfInterp.lean}, using only the axioms
+\texttt{propext} and \texttt{Quot.sound}. Faithfulness at a site~\citep[Lemma~5.3]{davis-si} is
+mechanized only for the leaf \tw{Err} (file \texttt{Ski/SelfInterpErr.lean}). Of the host
+contraction counts of~\citep[\S3.2]{davis-si}, the kernel checks the 340 head contractions to a weak
+head normal form that weakly reduces to $\tw{just}\,\enc K$; the counts 91,556 and 504,930 are
+reproduced by evaluation only.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

@@ -2,6 +2,8 @@
 
 This repository contains preprints and mechanized proofs related to N. E. Davis' research on combinators, particularly the combinator $S = \lambda x.\lambda y.\lambda z. x z (y z)$ or Smullyan's Starling.  All theorems are mechanized in [`sigilante/lean-ski`](https://github.com/sigilante/lean-ski).
 
+This work was carried out in a centaur fashion, with high-level human direction but the bulk of the mechanization and formalization done by the LLM agent.
+
 ## Papers
 
 * [Head Normal Forms of the Combinator $S$](s1-head-normal-forms/main.pdf)

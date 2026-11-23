@@ -29,7 +29,7 @@ This work was carried out in a centaur fashion, with high-level human direction 
 * [No Ground Loops for the Combinator $S$, Constructively](s7-no-ground-loops/main.pdf)
   **It gives a constructive, machine-checked proof of Waldmann's theorem that no $S$-term reduces to a term containing itself, so no $S$-term can head-reduce back to itself with extra arguments, emitting them forever.**
 
-  > Waldmann proved that no closed term built from the combinator $S$ reduces, in one or more steps, to a term that contains it. We give a constructive proof and mechanize it in Lean 4. The termination of Waldmann's labelled reduction is shown by a direct induction on accessibility instead of a recursive path order, and the theorem follows by replaying a loop inside its own result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments.
+  > Waldmann proved that no closed term built from the combinator $S$ reduces, in one or more steps, to a term that contains it. We give a constructive proof and mechanize it in Lean 4. We prove termination of a variant of Waldmann's labelled reduction by direct induction on accessibility instead of a recursive path order. The theorem follows by replaying a loop inside its own result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments.
 
 ## Ancillary papers
 

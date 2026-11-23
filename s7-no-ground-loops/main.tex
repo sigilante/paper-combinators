@@ -31,10 +31,9 @@
 \begin{document}
 \begin{abstract}
 Waldmann proved that no closed term built from the combinator $S$ reduces, in one or more steps,
-to a term that contains it. We give a constructive proof and mechanize it in Lean~4. The
-termination of Waldmann's labelled reduction is shown by a direct induction on accessibility
-instead of a recursive path order, and the theorem follows by replaying a loop inside its own
-result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments.
+to a term that contains it. We give a constructive proof and mechanize it in Lean~4. We
+prove termination of a variant of Waldmann's labelled reduction by direct induction on accessibility instead
+of a recursive path order. The theorem follows by replaying a loop inside its own result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, termination, accessibility, Lean}
@@ -44,14 +43,14 @@ result. As a consequence, no closed $S$-term head-reduces to itself applied to a
 
 $\Ter$ is the set of closed terms built from $S$ by application, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at
 any position; $\to^+$ is the transitive closure and $\red$ the reflexive--transitive closure. A
-\emph{ground loop} is a reduction $t\to^+u$ in which $t$ occurs in $u$. Waldmann showed that
+\emph{head step} contracts the redex at the head of the left spine. A \emph{ground loop} is a reduction $t\to^+u$ in which $t$ occurs in $u$. Waldmann showed that
 there are none~\citep[Cor.~17]{waldmann-ic}. His proof labels the terms and shows that the labelled
-system terminates by a recursive path order~\citep[Thm.~8]{waldmann-ic}. We replace the order by a
-direct induction on accessibility, so that every step is constructive, and check the whole argument
-in Lean.
+system terminates by a recursive path order~\citep[Thm.~8]{waldmann-ic}. We use a variant of his labelling,
+and replace the order and the infinite reduction of~\citep[Cor.~17]{waldmann-ic} by a direct
+induction on accessibility, which avoids both; the whole argument is checked in Lean.
 
 \begin{theorem}\label{thm:main}
-No $t\in\Ter$ has $t\to^+u$ with $t$ a subterm of $u$.
+No $t\in\Ter$ has $t\to^+u$ with $t$ a subterm of $u$ (possibly $u=t$).
 \end{theorem}
 
 \begin{corollary}\label{cor:nhr}
@@ -71,49 +70,53 @@ rewrites, at any position,
   ((S\lab i x)\lab j y)\lab k z\;\to\;(x\lab k z)\lab{k+1}(y\lab k z)\qquad\text{if }k<N.
 \]
 Write $a\prec b$ if $b$ makes an $N$-step to $a$, if $a$ is the function part or the argument of
-$b$, or if $b=(l\lab i a)\lab k r$. A term is \emph{accessible} if every descending $\prec$-chain from it
-ends, in the inductive sense: all its $\prec$-predecessors are accessible.
+$b$, or if $b=(l\lab i a)\lab k r$. The \emph{accessible} terms are defined inductively: a term is accessible if all its
+$\prec$-predecessors are.
 
-\begin{lemma}[{\citep[Thm.~8]{waldmann-ic}}]\label{lem:label}
+\begin{lemma}[{cf.\ \citep[Thm.~8]{waldmann-ic}}]\label{lem:label}
 For every $N$, every labelled term is accessible; in particular $N$-steps terminate.
 \end{lemma}
 
 \begin{proof}
 We show that $u\lab k r$ is accessible whenever $u$ and $r$ are, by induction on $\max(N-k,0)$, and
 within it by induction on the accessibility of $u$, then of $r$. The predecessors of $u\lab k r$ are
-$u$, $r$, the argument $x$ of $u=l\lab i x$, which precedes $u$, and the results of $N$-steps. A
+$u$, $r$, the argument $x$ of $u=l\lab i x$ (which precedes $u$), and the results of $N$-steps. A
 step inside $u$ or inside $r$ gives a term covered by the inner hypotheses. A step at the root
 needs $k<N$ and $u=(S\lab i x)\lab j y$, and gives $(x\lab k r)\lab{k+1}(y\lab k r)$. Here $x$ and $y$
-precede $u$, so $x\lab k r$ and $y\lab k r$ are accessible by the hypothesis for $u$, and the outer
-hypothesis for $k+1$, where $N-(k+1)<N-k$, makes the result accessible. Induction on the structure
-of the term finishes the proof.
+precede $u$, so the hypothesis for $u$ makes $x\lab k r$ and $y\lab k r$ accessible, and the outer
+hypothesis for $k+1$, where $N-(k+1)<N-k$, makes the result accessible. Since $S$ has no
+predecessors, induction on the structure of labelled terms finishes the proof.
 \end{proof}
 
-\begin{lemma}[{\citep[Thm.~16]{waldmann-ic}}]\label{lem:bounded}
-For every $N$, reduction restricted to redexes $S\,f\,g\,x$ with $\rd(x)<N$ terminates on $\Ter$.
+\begin{lemma}[{cf.\ \citep[Thm.~16]{waldmann-ic}}]\label{lem:bounded}
+For every $N$, every $t\in\Ter$ is accessible for reduction restricted to redexes $S\,f\,g\,x$
+with $\rd(x)<N$; in particular this reduction terminates.
 \end{lemma}
 
 \begin{proof}
 Call a labelling of $t$ \emph{consistent} if every label is at most the right depth of the argument
 below it; labelling each node $f\,x$ with $\rd(x)$ is consistent. A restricted step never lowers the
-right depth of a term: at the root $\rd(S\,f\,g\,x)=\rd(x)+1<\rd(x)+2=\rd(f\,x\,(g\,x))$, and
-elsewhere by induction. So the labels away from the contracted redex stay consistent. At the redex, the label $k\le\rd(x)<N$ lets the $N$-step fire, and
-the new labels satisfy $k\le\rd(x)$ and $k+1\le\rd(g\,x)$. So every restricted step lifts to an
-$N$-step of a consistent labelling, and accessibility transfers from Lemma~\ref{lem:label} by
-induction on it.
+right depth of a term: at the root
+$\rd(S\,f\,g\,x)=\rd(x)+1<\rd(x)+2=\rd(f\,x\,(g\,x))$, and at other positions by induction on
+the term. So the labels away from the contracted redex stay consistent. At the redex, the label
+$k\le\rd(x)<N$ lets the $N$-step fire, and
+the new labels satisfy $k\le\rd(x)$ and $k+1\le\rd(g\,x)$. So for every consistent labelling $T$ of $t$ and restricted step $t\to t'$ there is an
+$N$-step $T\to T'$ with $T'$ a consistent labelling of $t'$. By induction on the accessibility of
+$T$ (Lemma~\ref{lem:label}), $t$ is accessible; take $T$ the right-depth labelling.
 \end{proof}
 
 \section{Proof of Theorem~\ref{thm:main}}
 
 Suppose $t\to t'\red u$ with $t$ a subterm of $u$, and let $N$ exceed the right depths of the
 arguments of the finitely many redexes contracted. Then the reduction is restricted in the sense of
-Lemma~\ref{lem:bounded}, and if $t$ occurs in a term $w$, the same steps at that occurrence give
+Lemma~\ref{lem:bounded}. If $t$ occurs in a term $w$, the same steps at that occurrence (the
+\emph{replay}) give
 restricted reductions $w\to w'\red w''$ with $t$ occurring in $w''$.
 
 We show, by induction on the accessibility of $w$ for restricted steps, that no restricted
 reduction $w\red v$ has $t$ occurring in $v$. If $w\to w_0\red v$, apply the hypothesis to $w_0$. If
-$v=w$, then $t$ occurs in $w$, and the replay gives $w\to w'\red w''$ with $t$ in $w''$, against the
-hypothesis for $w'$. Since $t$ is accessible by Lemma~\ref{lem:bounded}, taking $w=v=t$ is a
+$v=w$, then $t$ occurs in $w$, and the replay gives $w\to w'\red w''$ with $t$ in $w''$, contradicting the
+hypothesis for $w'$. Since $t$ is accessible by Lemma~\ref{lem:bounded}, taking $w=v=t$ gives a
 contradiction.\qed
 
 \section*{Data availability}

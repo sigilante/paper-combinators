@@ -15,9 +15,11 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
 
 \newcommand{\Ter}{\mathcal S}
 \newcommand{\red}{\twoheadrightarrow}
+\newcommand{\conv}{=_\beta}
 \newcommand{\rd}{\operatorname{rd}}
 \newcommand{\lab}[1]{\mathbin{\cdot_{#1}}}
 
@@ -118,6 +120,23 @@ reduction $w\red v$ has $t$ occurring in $v$. If $w\to w_0\red v$, apply the hyp
 $v=w$, then $t$ occurs in $w$, and the replay gives $w\to w'\red w''$ with $t$ in $w''$, contradicting the
 hypothesis for $w'$. Since $t$ is accessible by Lemma~\ref{lem:bounded}, taking $w=v=t$ gives a
 contradiction.\qed
+
+\section{Closing}
+
+A \emph{context} $E$ is a term with one hole $[\,]$, and $\conv$ is convertibility, the equivalence
+closure of $\to$. Theorem~\ref{thm:main} excludes $t\to^+E[t]$. Excluding $t\conv E[t]$ is stronger: in
+the $\lambda$-calculus, with Curry's fixed-point combinator $Y$, the term $Y\,f$ is convertible with
+$f\,(Y\,f)$, although $Y\,f$ does not reduce in one or more steps to a term containing $Y\,f$.
+
+\begin{conjecture}
+No $t\in\Ter$ and context $E\ne[\,]$ satisfy $t\conv E[t]$.
+\end{conjecture}
+
+\noindent By Church--Rosser, the conjecture says that $t$ and $E[t]$ have no common reduct. It holds
+when $t$ has a normal form $n$: then $E[n]\conv n$, so $E[n]\red n$; but a step
+$S\,x\,y\,z\to x\,z\,(y\,z)$ never lowers the number of occurrences of $S$, as $z$ contains one, and
+$E[n]$ has more occurrences than $n$. The conjecture would strengthen Statman's theorem that $S$ alone
+defines no fixed-point combinator~\citep[Rem.~15]{dots}: such a $Y$ would give $Y\,S\conv S\,(Y\,S)$.
 
 \section*{Data availability}
 Lemmas~\ref{lem:label} and~\ref{lem:bounded}, Theorem~\ref{thm:main} and

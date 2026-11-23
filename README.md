@@ -26,6 +26,10 @@ This work was carried out in a centaur fashion, with high-level human direction 
   **It shows that a finite algebra can read two levels of an $S$-term's infinitary normal form, not just whether it has a head normal form, so the terms with a given depth-two prefix form a regular set; it is the first step beyond head normal forms toward finite descriptions of the infinite behaviour of $S$-terms.**
 
   > Every closed term $t$ built from the combinator $S$ has an infinitary normal form $t^\infty$, whose finite prefixes are computable. We show that the prefix of depth two is computed by a 373-element model of the $S$-law: the fold of $t$ into the model determines it. The 38-element model that decides head normal forms is a homomorphic image of this one. The proof reduces the claim to finitely many conditions on the model's table, and it is mechanized in Lean 4 for the prefix rules of the companion paper on infinitary normal forms.
+* [No Ground Loops for the Combinator $S$, Constructively](s7-no-ground-loops/main.pdf)
+  **It gives a constructive, machine-checked proof of Waldmann's theorem that no $S$-term reduces to a term containing itself, so no $S$-term can head-reduce back to itself with extra arguments, emitting them forever.**
+
+  > Waldmann proved that no closed term built from the combinator $S$ reduces, in one or more steps, to a term that contains it. We give a constructive proof and mechanize it in Lean 4. The termination of Waldmann's labelled reduction is shown by a direct induction on accessibility instead of a recursive path order, and the theorem follows by replaying a loop inside its own result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments.
 
 ## Ancillary papers
 

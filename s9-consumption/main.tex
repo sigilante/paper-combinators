@@ -1,9 +1,26 @@
-%% S9: no closed S-term with a head normal form is convertible with itself applied to arguments.
+%% S9: no closed S-term is convertible with itself applied to normalizing arguments.
 %% DRAFT 2026-11-24 (skinock).  Neutral amsart shell, as S1--S8.
-%% Sources: ~/Code/ski/notes/NCFP-D4.md section 11 (Theorems C and NC, with the Wizard's repairs G1, G2)
+%% Sources: ~/Code/ski/notes/NCFP-D4.md section 11 (Theorems C and NC, with the Wizard's repairs G1, G2),
+%%          ~/Code/ski/notes/NCFP-proof.md (Theorem B, Lemmas T and A, the Moves, Corollary B1; Lemma SS)
 %%          and the last dated lines of ~/Code/ski/notes/A1-lock1-S3.md.
-%% Paper-to-Lean map (lean-ski v1.17.0, branch ncfp-c; module Ski/NcfpC.lean, namespace Ncfp;
-%% gates Ski/Audit.lean and Ski/NcfpAudit.lean):
+%% Paper-to-Lean map (lean-ski v1.17.0; modules Ski/NcfpC.lean, Ski/Ncfp.lean, Ski/NcfpTheta.lean,
+%% namespace Ncfp; gates Ski/Audit.lean and Ski/NcfpAudit.lean):
+%%   thm:main ........ Ncfp.thm_NC (block form), Ncfp.thm_NC_hnf; the set Q is Ncfp.SComb, the step
+%%                     p -> p' is Ncfp.scomb_closed, and S S b S^k ->> S S (b S^k) is Ncfp.comb_S_steps.
+%%                     Lean takes "Q is empty" from Ncfp.right_combs (combs with bounded teeth, Ski/Ncfp.lean),
+%%                     not from lem:ss.
+%%   thm:left ........ Ncfp.cor_B1, cor_B1' (Ski/Ncfp.lean)
+%%   cor:all ......... Ncfp.ncfp_left_comb (Ski/NcfpC.lean)
+%%   imported (A) .... hnf part: Ncfp.hnf2_conv (Ski/NcfpTheta.lean; S6 Lemma 4), Conv.run_hnf_hnf;
+%%                     stable frames: Ncfp.lemma_T (Ski/Ncfp.lean), Conv.FirstStable
+%%   imported (B) .... Conv.reach_frame, Ncfp.firstStable_exists
+%%   imported (C) .... HeadRec.no_ground_loop, HeadRec.no_head_recurrence (S7)
+%%   lem:frames ...... (a) Ncfp.lemma_L, lemma_L', hnf1_literal; (b) Ncfp.last_item_step (HeadRec.step_inv)
+%%   lem:ss .......... Ncfp.lemma_SS, lemma_SS_sz, cor_SS1 (Ski/NcfpTheta.lean); Ncfp.ss_link, ss_bound
+%%                     (Ski/Ncfp.lean: a chain from g has at most 2 sz g links)
+%%   lem:moves ....... Ncfp.lemma_A (a stable frame is its own first stable frame) and Ncfp.bmove (the
+%%                     size bounds only; the identities of the lemma are not a Lean statement)
+%%   thm:teeth ....... Ncfp.teeth_unbounded (for a set of terms), teeth_unbounded_seq; tooth_descent
 %%   (M1) ............ Ncfp.fold_conv (Ski/Ncfp.lean; HnfS.compat, HnfS.fold_wsteps, Conv.conv_iff_join)
 %%   (M2) ............ Conv.stable_iff (HnfSound.sound, HnfS.fold_hnf)
 %%   (M3) ............ Ncfp.fold_apps (Ski/Ncfp.lean); Ncfp.β_ne_zero, Ncfp.fold_eq_zero
@@ -12,19 +29,14 @@
 %%   lem:walk ........ Ncfp.comb_walk; for a conversion Ncfp.thm_C, thm_C_hnf (Theorem C of the note).
 %%                     Its corollaries Ncfp.cor_C, cor_C_sub, cor_C_block are subsumed by thm:main
 %%                     and are not stated in the paper.
-%%   thm:main ........ Ncfp.thm_NC (block form), Ncfp.thm_NC_hnf; the set Q is Ncfp.SComb, the step
-%%                     p -> p' is Ncfp.scomb_closed, and S S b S^k ->> S S (b S^k) is Ncfp.comb_S_steps
-%%   cor:left ........ Ncfp.ncfp_left_comb
-%%   imported (A) .... Ncfp.right_combs (Ski/Ncfp.lean; S8 Theorem 2, hnf combs with teeth a_n)
-%%   imported (B) .... Ncfp.cor_B1, cor_B1' (Ski/Ncfp.lean; S8 Corollary 9)
-%%   imported (C) .... Ncfp.hnf2_conv (Ski/NcfpTheta.lean; S6 Lemma 4), Conv.run_hnf_hnf
 %% TODO before release:
-%%   1. lean-ski v1.17.0 is being released: check the tag URL in refs.bib (leanski) and add the DOI.
-%%   2. S8 is in preparation: recheck the numbers "Theorem 2" and "Corollary 9" cited from it, and
-%%      "Lemmas 2, 3 and 8, Theorem 9" of S1 and "Lemma 4" of S6, against the final versions.
+%%   1. lean-ski v1.17.0: check the tag URL in refs.bib (leanski) and add the DOI.
+%%   2. Recheck "Lemmas 2, 3 and 8, Proposition 4, Theorem 9" of S1 and "Lemma 4" of S6 against the
+%%      final versions.  S8 is cited in the closing only, as the companion; no result of it is used.
 %%   3. polonsky: no page range (LMCS vol. 16, issue 3, paper 7, published 23 July 2020; checked
 %%      on Crossref and arXiv:1810.02239).  intrigila checked on Crossref.
-%%   4. Wizard on this text; Grammarian on the prose.
+%%   4. Restructured 2026-11-24 (Section 6 of S8 moved here; lem:ss replaces the import of right
+%%      combs): Grammarian on the prose, then Wizard on this text.
 %%   5. `make figs` regenerates fig/graph.pdf (reads fig/s1table.json).
 \documentclass[11pt]{amsart}
 \usepackage[T1]{fontenc}
@@ -45,8 +57,9 @@
 \newcommand{\hred}{\twoheadrightarrow_h}
 \newcommand{\conv}{=_\beta}
 \newcommand{\bl}{b}
+\newcommand{\sz}[1]{\lvert#1\rvert}
 
-\title[$S$-Terms with a Head Normal Form Absorb No Arguments]{No Closed $\bm{S}$-Term with a Head Normal Form Is Convertible with Itself Applied to Arguments}
+\title[$S$-Terms Absorb No Normalizing Arguments]{No Closed $\bm{S}$-Term Is Convertible with Itself Applied to Normalizing Arguments}
 \author{Claude Opus \& Fable with N.\ E.\ Davis}
 \address{ZeroAttest, Champaign, Illinois, USA}
 \email{NDavis@ZeroAttest.com}
@@ -55,14 +68,13 @@
 
 \begin{document}
 \begin{abstract}
-We show that a closed term $p$ built from the combinator $S$ that has a head normal form is not
-convertible with $p\,Y_1\cdots Y_k$, for any $k\ge1$ and closed $Y_1,\dots,Y_k$. In the 38-element
-model that detects head normal forms, such a conversion is a closed walk in the graph of right
-multiplication. Apart from the absorbing element $\bot$, this graph has one cycle, a loop. The loop
-forces $Y_1=\dots=Y_k=S$ and a head normal form $S\,S\,p'$ with $p'$ convertible with $p'$ applied to $k$ arguments $S$.
-Iterating gives an infinite comb with teeth $S$, which cannot exist. Combined with the companion
-result for terms without a head normal form, the theorem shows that no closed $S$-term is
-convertible with itself applied to one or more normalizing arguments. The proofs are mechanized in Lean~4.
+We show that no term $p$ built from the combinator $S$ is convertible with $p\,x_1\cdots x_k$
+for $k\ge1$ and normalizing $S$-terms $x_1,\dots,x_k$; if $p$ has a head normal form, the $x_i$
+may be arbitrary $S$-terms. In that case a 38-element model that detects head normal forms turns
+the conversion into a closed walk, and the walk leads to an infinite chain of terms, each of size
+two less than the last, which cannot exist. Otherwise the head run of $p$ splits off arguments of
+unbounded size, yet a conversion makes each convertible with some $x_j$, which bounds its size.
+The results are mechanized in Lean~4.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, head normal form, finite model, convertibility}
@@ -72,42 +84,154 @@ convertible with itself applied to one or more normalizing arguments. The proofs
 
 $\Ter$ is the set of closed terms built from $S$ by application, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at
 any position; $\red$ is the reflexive--transitive closure of $\to$ and $\conv$ is convertibility,
-which by Church--Rosser~\citep{terese} is the existence of a common reduct. A term is
-\emph{normalizing} if it reduces to a normal form, and its \emph{size} is its number of occurrences of $S$. Every $t\in\Ter$ is $S\,u_1\cdots u_m$ for a
-unique $m\ge0$, with \emph{items} $u_i$; it is a \emph{head normal form} (hnf) iff $m\le2$. If
-$m\ge3$, the \emph{head step} is $t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$. Head steps give the
-\emph{head run} of $t$; $\hred$ is their reflexive--transitive closure, and $t$ \emph{has an hnf} if
-its head run reaches one. We write $x\,S^k$ for $x$ applied to $k$ arguments $S$.
+which by Church--Rosser~\citep{terese} is the existence of a common reduct. The \emph{size}
+$\sz t$ is the number of occurrences of $S$ in $t$; a step never lowers it, since the duplicated argument $z$ contains an $S$. A term is \emph{normalizing} if it reduces to a normal form $n$; every term convertible with
+it then reduces to $n$ and has size at most $\sz n$.
+
+Every $t\in\Ter$ is $S\,u_1\cdots u_m$ for a unique $m\ge0$, with \emph{items} $u_i$; it is a
+\emph{head normal form} (hnf) iff $m\le2$. If $m\ge3$, the \emph{head step} is
+$t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$. Head steps give the \emph{head run} of $t$, whose terms
+are its \emph{frames}; $\hred$ is their reflexive--transitive closure. If the head run of $t$
+reaches an hnf $h$, then $t$ \emph{has the hnf} $h$; $t$ is \emph{literal} if $t=h$, and otherwise
+the frame before $h$ is the \emph{last frame} of $t$. A frame $f\,w$ in which $f$ has no hnf is
+\emph{stable}. We write $x\,S^k$ for $x$ applied to $k$ arguments $S$.
 
 \begin{theorem}\label{thm:main}
 No $p\in\Ter$ with an hnf satisfies $p\conv p\,Y_1\cdots Y_k$ with $k\ge1$ and
 $Y_1,\dots,Y_k\in\Ter$.
 \end{theorem}
 
-\begin{corollary}\label{cor:left}
+\begin{theorem}\label{thm:left}
+No $p\in\Ter$ without an hnf satisfies $p\conv p\,x_1\cdots x_k$ with $k\ge1$ and
+$x_1,\dots,x_k\in\Ter$ normalizing.
+\end{theorem}
+
+\begin{corollary}\label{cor:all}
 No $p\in\Ter$ satisfies $p\conv p\,x_1\cdots x_k$ with $k\ge1$ and $x_1,\dots,x_k\in\Ter$
 normalizing.
 \end{corollary}
 
-\noindent We import three results. In (A), $q_0,q_1,\dots$ and $a_0,a_1,\dots$ are infinite sequences in $\Ter$.
+\begin{proof}
+Theorem~\ref{thm:main} covers $p$ with an hnf, Theorem~\ref{thm:left} covers $p$ without one.
+\end{proof}
+
+Three known results are used below.
 \begin{itemize}
-\item[(A)] \citep[Theorem~2, for hnf combs]{s8} If $q_n\hred S\,a_n\,q_{n+1}$ for all $n$ (an infinite
-  hnf comb with teeth $a_n$), then the sizes of the $a_n$ are unbounded.
-\item[(B)] \citep[Corollary~9]{s8} No $p\in\Ter$ without an hnf satisfies
-  $p\conv p\,x_1\cdots x_k$ with $k\ge1$ and $x_1,\dots,x_k\in\Ter$ normalizing.
-\item[(C)] \citep[Lemma~4, for the model of terms modulo $\conv$]{s6} If $t\conv t'$ and the head run of $t$ reaches the hnf $S\,u_1\,u_2$,
-  then the head run of $t'$ reaches an hnf $S\,u_1'\,u_2'$ with $u_1\conv u_1'$ and $u_2\conv u_2'$.
+\item[(A)] \citep[Lemma~4, for the model of terms modulo $\conv$]{s6} Let $t\conv t'$. If $t$ has
+  the hnf $S\,u_1\,u_2$, then $t'$ has an hnf $S\,u_1'\,u_2'$ with $u_1\conv u_1'$ and
+  $u_2\conv u_2'$. If $t$ has no hnf, then $t'$ has none, and the first stable frames $f\,w$ and
+  $f'\,w'$ on their head runs, which exist by (B), satisfy $f\conv f'$ and $w\conv w'$.
+\item[(B)] \citep[Proposition~9(b), $d=1$]{s3}, with \citep[Proposition~4 and Theorem~9]{s1}.
+  The head run of every term reaches an hnf or a stable frame.
+\item[(C)] \citep[Cor.~17]{waldmann-ic}, \citep[Theorem~1]{s7} No term reduces to a term of which it is a proper subterm.
 \end{itemize}
-\emph{Proof of Corollary~\ref{cor:left}.} If $p$ has an hnf, Theorem~\ref{thm:main} applies; otherwise (B) applies.\qed
+
+\section{Head runs}
+
+\begin{lemma}\label{lem:frames}
+Let $F\to F'$ be a head step, where $F=S\,u_1\cdots u_m$ and $m\ge3$.
+
+\textup{(a)} The items of $F'$ are those of $u_1$ followed by $m-1\ge2$ more, so $F'$ has at least
+  two items. Hence, if a term is not literal and has an hnf, its last step produces an hnf with
+  two items, so the last frame is $S\,S\,y\,z$ and the hnf is $S\,z\,(y\,z)$.
+
+\textup{(b)} If $m\ge4$, the step is a head step of $S\,u_1\cdots u_{m-1}$ with $u_m$ appended. If
+  $m=3$, the last item of $F'$ is the application $u_2\,u_3$.
+
+\textup{(c)} While the frames of a term $f$ have at least three items, the head run of $f\,w$ is
+  that of $f$ with $w$ appended. So if $f$ has the hnf $h$, then $f\,w\hred h\,w$; and if $f$ has
+  no hnf, then $f\,w$ has none.
+\end{lemma}
+
+\begin{proof}
+The items of $F'$ are those of $u_1$, then $u_3,\ u_2\,u_3,\ u_4,\dots,u_m$. In (a), two items
+need $m=3$ and $u_1=S$. Part (c) follows from (b), one step at a time.
+\end{proof}
+
+\begin{lemma}\label{lem:ss}
+If $\varphi\hred S\,S\,y$, then $\sz\varphi=\sz y+2$. Hence there is no infinite sequence
+$q_0,q_1,\dots$ in $\Ter$ with $q_n\hred S\,S\,q_{n+1}$ for all $n$.
+\end{lemma}
+
+\begin{proof}
+By induction on $\sz\varphi$. If $\varphi$ is literal, then $\varphi=S\,S\,y$. Otherwise, by
+Lemma~\ref{lem:frames}(a), the last frame of $\varphi$ is $S\,S\,y'\,z$ with
+$S\,z\,(y'\,z)=S\,S\,y$, so $z=S$ and $y=y'\,S$. By Lemma~\ref{lem:frames}(b), the step from a
+frame with three items makes the last item an application, and the step from a longer frame keeps
+the last item. The last item of the last frame is $S$, so every frame before it has at least four
+items and the last item $S$. Hence $\varphi=\varphi^-\,S$ for some $\varphi^-$, and the steps to
+the last frame are head steps of $\varphi^-$ with $S$ appended. So $\varphi^-\hred S\,S\,y'$, and by the induction hypothesis
+$\sz\varphi=\sz{\varphi^-}+1=\sz{y'}+3=\sz y+2$. In a sequence as stated,
+$\sz{q_{n+1}}=\sz{q_n}-2$ for all $n$, so the sizes fall by two forever in $\mathbb N$, which is
+impossible.
+\end{proof}
+
+\section{Terms without a head normal form}
+
+\begin{lemma}\label{lem:moves}
+Let $f=g\,u$ have no hnf, and let $f'\,w$ be the first stable frame on its head run. If $g$ has
+no hnf, then $f'=g$ and $w=u$. Otherwise there are $k\ge0$ and terms $a_i$, $b_i$ \textup{(}$i\le k$\textup{)}, $w_i$
+\textup{(}$i\le k+1$\textup{)} with
+$w_0=u$, $w_{i+1}=b_i\,w_i$, $f'=a_k\,w_k$, $w=w_{k+1}$, and
+$g\hred S\,a_0\,b_0$, $a_i\,w_i\hred S\,a_{i+1}\,b_{i+1}$ for $i<k$.
+\end{lemma}
+
+\begin{proof}
+If $g$ has no hnf, $f$ is stable. Otherwise, by Lemma~\ref{lem:frames}(c), the head run of $f$
+follows that of $g$, with $u$ appended, to the hnf of $g$. This hnf has two items, since $f$ has no
+hnf, so $f\hred S\,a_0\,b_0\,w_0$. From $S\,a_i\,b_i\,w_i$ a head step gives $a_i\,w_i\,w_{i+1}$.
+If $a_i\,w_i$ has no hnf, this frame is stable; put $k=i$. Otherwise the run follows that of
+$a_i\,w_i$ to its hnf, which again has two items, and reaches $S\,a_{i+1}\,b_{i+1}\,w_{i+1}$.
+Every frame passed before the construction stops is $c\,w_j$ for some $j$ and some frame $c$ of a
+term that has an hnf, so none is stable. Since $f$ has no hnf, (B) gives a stable frame on its
+head run, so the construction stops at some $k$.
+\end{proof}
+
+\begin{theorem}\label{thm:teeth}
+Let $q_0\in\Ter$ have no hnf, and let $q_{n+1}\,w_n$ be the first stable frame on the head run of
+$q_n$, for all $n$. Then the sizes $\sz{w_n}$ are unbounded.
+\end{theorem}
+
+\begin{proof}
+Suppose $\sz{w_n}\le M$ for all $n$. Each $q_n$ reduces to $q_{n+1}\,w_n$. If $q_i=q_j$ ($i<j$),
+then $q_i$ reduces to a term of which it is a proper subterm, contradicting (C). So the $q_n$ are
+distinct, and only finitely many have size less than $2M$, since $\Ter$ has finitely many terms of
+each size.
+
+For $f=g\,u$ put $\|f\|=\sz g$. Consider the step from $f=q_n$ to $f'=q_{n+1}$ in the notation of
+Lemma~\ref{lem:moves}. If $g$ has no hnf, then $\|f'\|<\sz g=\|f\|$. Otherwise call $i\le k$
+\emph{literal} if no head step is taken to $S\,a_i\,b_i$: then $g=S\,a_0\,b_0$ if $i=0$, and
+$a_{i-1}=S\,a_i$ if $i\ge1$. If $i$ is not literal, then $\sz{a_i}<\sz{b_i}$, by
+Lemma~\ref{lem:frames}(a). If every $i\le k$ is literal, $a_k$ is a proper subterm of $g$, and
+$\|f'\|=\sz{a_k}<\|f\|$. If not, let $i$ be the last index that is not literal. The term $w_{k+1}$
+contains $b_i\,w_i$, so $\sz{a_k}\le\sz{a_i}<\sz{b_i}<M$. Also $\sz{w_k}<\sz{w_{k+1}}\le M$. So
+$\sz{f'}=\sz{a_k}+\sz{w_k}<2M$. The first two cases lower $\|q_n\|$ and the third gives
+$\sz{q_{n+1}}<2M$. Since $\|q_n\|$ cannot fall at every step from some $n$ on, the third case
+occurs for infinitely many $n$, so infinitely many of the distinct terms $q_n$ have size less than
+$2M$, a contradiction.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:left}]
+Let $p$ have no hnf and $p\conv p\,x_1\cdots x_k$. Let $q_n$, $w_n$ be as in
+Theorem~\ref{thm:teeth} with $q_0=p$, and $q'_n$, $w'_n$ with $q'_0=p\,x_1\cdots x_k$. For
+$i\ge1$ the term $p\,x_1\cdots x_i$ is a stable frame, since $p\,x_1\cdots x_{i-1}$ has no hnf by
+Lemma~\ref{lem:frames}(c); so $q'_n=p\,x_1\cdots x_{k-n}$ and
+$w'_n=x_{k-n}$ for $n<k$, and $q'_{k+n}=q_n$, $w'_{k+n}=w_n$ for all $n$. By (A) and induction,
+$q_n\conv q'_n$ and $w_n\conv w'_n$ for all $n$. So $w_n\conv x_{k-n}$ for $n<k$ and
+$w_{k+n}\conv w_n$: every $w_n$ is convertible with some $x_j$ and has at most the size of its
+normal form, against Theorem~\ref{thm:teeth}.
+\end{proof}
 
 \section{A closed walk in the model}
 
 Let $B=\{0,\dots,37\}$ with the table $\beta\colon B\times B\to B$ of~\citep{s1}, and $\bot=36$.
-The \emph{block} of a term is $\bl(S)=0$, $\bl(f\,x)=\beta(\bl(f),\bl(x))$. We use three
+The \emph{block} of a term is $\bl(S)=0$, $\bl(f\,x)=\beta(\bl(f),\bl(x))$; \emph{right
+multiplication} by $w\in B$ is the map $v\mapsto\beta(v,w)$. We use three
 facts~\citep[Lemmas~2, 3 and~8, Proposition~4, Theorem~9]{s1}.
 \begin{itemize}
 \item[(M1)] If $t\conv t'$, then $\bl(t)=\bl(t')$.
-\item[(M2)] A term $t$ has an hnf iff $\bl(t)\ne\bot$.
+\item[(M2)] A term $t$ has an hnf iff $\bl(t)\ne\bot$ (Theorem~9 of~\citep{s1} is stated for
+  reduction to an hnf; its proof shows that the head run reaches one).
 \item[(M3)] $\beta(\bot,w)=\bot$ and $\beta(v,w)\ne0$ for all $v,w\in B$. Hence $\bl(t)=0$ only for $t=S$.
 \end{itemize}
 
@@ -152,51 +276,71 @@ every $i$. So $v_0=12$, and every $Y_i$ is $S$ by (M3).
 Let $Q$ be the set of $p\in\Ter$ that have an hnf and satisfy $p\conv p\,Y_1\cdots Y_k$ for some
 $k\ge1$ and $Y_1,\dots,Y_k\in\Ter$. We show that every $p\in Q$ satisfies $p\hred S\,S\,p'$ for
 some $p'\in Q$. Then, if $Q$ had an element $q_0$, it would start a sequence with
-$q_n\hred S\,S\,q_{n+1}$ for all $n$. The teeth $S$ have size $1$, so the sizes are bounded,
-against (A).
+$q_n\hred S\,S\,q_{n+1}$ for all $n$, against Lemma~\ref{lem:ss}.
 
 Let $p\in Q$. By (M1) and (M2), $\bl(p\,Y_1\cdots Y_k)=\bl(p)\ne\bot$, so by Lemma~\ref{lem:walk}
-all $Y_i$ are $S$ and $\bl(p)=12$. Let $h$ be the hnf on the head run of $p$; then $\bl(h)=12$
+all $Y_i$ are $S$ and $\bl(p)=12$. Let $h$ be the hnf of $p$; then $\bl(h)=12$
 by (M1). Now $h\ne S$, since $\bl(S)=0$, and $h\ne S\,a$ by Lemma~\ref{lem:table}(ii). So
 $h=S\,a\,p'$ with $\beta(\beta(0,\bl(a)),\bl(p'))=12$. Hence $\bl(a)=0$ by
 Lemma~\ref{lem:table}(ii), and $a=S$ by (M3). So $p\hred S\,S\,p'$.
 
-Each term on the head run of $p$ before $h$ has at least three items, so the head run of
-$p\,S^k$ copies it, with $S^k$ appended, and reaches $S\,S\,p'\,S^k$. Each of the next $k$ head
+By Lemma~\ref{lem:frames}(c), applied $k$ times, the head run of $p\,S^k$ follows that of $p$,
+with $S^k$ appended, and reaches $S\,S\,p'\,S^k$. Each of the next $k$ head
 steps is $S\,S\,x\,S\to S\,S\,(x\,S)$, with the remaining arguments appended. So
-$p\,S^k\hred S\,S\,(p'\,S^k)$, which is an hnf. Since $p\conv p\,S^k$, (C) applied to $p\,S^k$ and $p$ gives an hnf
-$S\,u_1\,u_2$ on the head run of $p$ with $u_2\conv p'\,S^k$. The head run is deterministic and
-stops at its first hnf, so $S\,u_1\,u_2=h=S\,S\,p'$, and $p'\conv p'\,S^k$. As $S$ is normal, (B)
-then gives $p'$ an hnf. So $p'\in Q$.\qed
+$p\,S^k\hred S\,S\,(p'\,S^k)$, which is an hnf. By (A), applied to $p\,S^k$ and $p$, the hnf $S\,u_1\,u_2$ of $p$ has
+$u_2\conv p'\,S^k$. This hnf is $h=S\,S\,p'$, so
+$p'\conv p'\,S^k$. As $S$ is normal, Theorem~\ref{thm:left} then gives $p'$ an hnf. So
+$p'\in Q$.\qed
 
 \section{Closing}
 
-Lemma~\ref{lem:walk} does not give the theorem alone: the terms $q=S\,S\,(S\,(S\,S))$ and
-$q\,S$ both have block $12$. For $p$ without an hnf the walk stays at $\bot$ and says nothing.
-There, by~(B), a solution needs some $Y_i$ without a normal form.
+Lemma~\ref{lem:walk} does not give Theorem~\ref{thm:main} alone: the terms $q=S\,S\,(S\,(S\,S))$
+and $q\,S$ both have block $12$. For $p$ without an hnf the walk stays at $\bot$ and says nothing.
+By Theorem~\ref{thm:left}, a solution then needs some $Y_i$ without a normal form.
 
 \begin{conjecture}
 No $p,Y_1,\dots,Y_k\in\Ter$ with $k\ge1$ satisfy $p\conv p\,Y_1\cdots Y_k$.
 \end{conjecture}
 
-\noindent In the $\lambda$-calculus every equation $p\conv p\,x$ has a solution, by the fixed-point
-theorem. Statman conjectured that no fixed-point combinator $Y$ satisfies $Y\conv Y\,\delta$, where
+\noindent In the $\lambda$-calculus the fixed-point theorem solves $p\conv p\,x$ for every $x$. Statman conjectured that no fixed-point combinator $Y$ satisfies $Y\conv Y\,\delta$, where
 $\delta=\lambda yx.\,x\,(y\,x)$. Intrigila~\citep{intrigila} published a proof; Polonsky~\citep{polonsky}
-still states the claim as a conjecture. For $S$ alone, Corollary~\ref{cor:left} shows that
-$p\conv p\,x$ has no solution with $x$ normalizing.
+still states the claim as a conjecture. Among $S$-terms, Corollary~\ref{cor:all} shows that $p\conv p\,x$ has no solution when $x$ is
+normalizing. The conjecture is the case
+$E=[\,]\,Y_1\cdots Y_k$ of the question whether some $p\in\Ter$ satisfies $p\conv E[p]$ for a
+context $E\ne[\,]$ with a hole. The companion paper~\citep{s8} excludes the contexts of depth at
+most two that are built from holes and normalizing terms by $E'\mapsto S\,E'$ and
+$E',E''\mapsto S\,E'\,E''$.
 
 \section*{Data availability}
 \sloppy
-Every result of this paper is proved in the Lean~4~\citep{lean4} development
-\texttt{lean-ski}~\citep{leanski}, version 1.17.0: Theorem~\ref{thm:main}, its corollary and the
-lemmas in module \texttt{Ski/NcfpC.lean}, (A) and~(B) in \texttt{Ski/Ncfp.lean}, and (C) in
-\texttt{Ski/NcfpTheta.lean} and \texttt{Ski/Conv.lean}; (M1)--(M3) are \texttt{Ncfp.fold\_conv},
-\texttt{Conv.stable\_iff} and \texttt{Ncfp.fold\_eq\_zero}. The proofs use only the axioms
-\texttt{propext} and \texttt{Quot.sound}.
-Lemma~\ref{lem:table} is checked in the Lean kernel by \texttt{decide +kernel}. The Lean proof of
-Theorem~\ref{thm:main} uses (A) in its form for a set of terms closed under $p\mapsto p'$, so it
-chooses no sequence. The script \texttt{fig/graph.py} draws the figure and recomputes $r$ from the
-table of~\citep{s1}.
+The results are proved in the Lean~4~\citep{lean4} development \texttt{lean-ski}~\citep{leanski},
+version 1.17.0, using only the axioms \texttt{propext} and \texttt{Quot.sound}. Module
+\texttt{Ski/NcfpC.lean} holds Theorem~\ref{thm:main} (\texttt{Ncfp.thm\_NC\_hnf}),
+Corollary~\ref{cor:all} (\texttt{Ncfp.ncfp\_left\_comb}) and Lemmas~\ref{lem:table}
+and~\ref{lem:walk}. Module \texttt{Ski/Ncfp.lean} holds Theorem~\ref{thm:left}
+(\texttt{Ncfp.cor\_B1'}; \texttt{Ncfp.cor\_B1} takes $\bl(p)=\bot$), Theorem~\ref{thm:teeth} (\texttt{Ncfp.teeth\_unbounded\_seq}) and
+Lemmas~\ref{lem:frames} and~\ref{lem:moves} (Lemma~\ref{lem:frames}(c) is \texttt{Steps.left} in
+\texttt{Ski/Basic.lean}); \texttt{Ski/NcfpTheta.lean} holds the first sentence of
+Lemma~\ref{lem:ss} (\texttt{Ncfp.lemma\_SS\_sz}); its second follows from \texttt{Ncfp.ss\_bound}
+in \texttt{Ski/Ncfp.lean}, which bounds a chain from $q_0$ by $2\sz{q_0}$ links. (A) is \texttt{Ncfp.hnf2\_conv} in
+\texttt{Ski/NcfpTheta.lean} and \texttt{Ncfp.lemma\_T} in \texttt{Ski/Ncfp.lean}; (B) is
+\texttt{Conv.reach\_frame} in \texttt{Ski/Conv.lean}; (C) is \texttt{HeadRec.no\_ground\_loop} in
+\texttt{Ski/HeadRec.lean}. (M1) is \texttt{Ncfp.fold\_conv}; (M2) is \texttt{Conv.stable\_iff}, stated
+for reduction to an hnf, with \texttt{Phi.hasHnf\_iff\_head} for the head run; (M3) is
+\texttt{HnfSound.absorb}, \texttt{Ncfp.}$\beta$\texttt{\_ne\_zero} and
+\texttt{Ncfp.fold\_eq\_zero}.
+
+The Lean text differs from the paper in four places. Of Lemma~\ref{lem:moves}, Lean states the
+first case (\texttt{Ncfp.lemma\_A}) and, of the second, only the size bounds that the proof of
+Theorem~\ref{thm:teeth} uses (\texttt{Ncfp.bmove}). Lean proves
+Theorem~\ref{thm:main} not by Lemma~\ref{lem:ss} but by \texttt{Ncfp.right\_combs}, a theorem on
+right combs with teeth of bounded size that is stated for a set of terms and applied to $Q$; so
+the Lean proof chooses no sequence. The Lean kernel checks Lemma~\ref{lem:table} by
+\texttt{decide +kernel}, with $r$ given as a table. Lean's \texttt{HasHnf} is reduction to an hnf
+rather than the head run; \texttt{Phi.hasHnf\_iff\_head} identifies the two.
+
+The script \texttt{fig/graph.py} reads the table of~\citep{s1} from \texttt{fig/s1table.json},
+recomputes $r$ and draws Figure~\ref{fig:graph}.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

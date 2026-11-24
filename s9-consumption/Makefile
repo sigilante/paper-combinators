@@ -11,7 +11,7 @@ $(MAIN).pdf: $(SRC)
 	latexmk -pdf -interaction=nonstopmode -halt-on-error $(MAIN).tex
 
 # Figure (a second, under 100 MB; guarded at 1 GB).  Needs matplotlib and the S1 tables in
-# fig/s1table.json (the S1 table).  The script asserts the table facts of Lemma 3.
+# fig/s1table.json (the S1 table).  The script asserts the table facts of Lemma 8.
 figs:
 	cd fig && $(GUARD) python3 -I graph.py graph.pdf
 

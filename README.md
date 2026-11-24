@@ -35,6 +35,15 @@ This work was carried out in a centaur fashion, with high-level human direction 
 
   > Waldmann proved that no closed term built from the combinator $S$ reduces, in one or more steps, to a term that contains it. We give a constructive proof and mechanize it in Lean 4. We prove termination of a variant of Waldmann's labelled reduction by direct induction on accessibility instead of a recursive path order. The theorem follows by replaying a loop inside its own result. As a consequence, no closed $S$-term head-reduces to itself applied to arguments. More generally, if a term reaches $u$ without contracting an argument, for instance by head steps, then it reduces to no term $C[u]$ with $C\ne[\,]$ a context.
 
+* [No Conversion Fixed Points in Plain Contexts of the Combinator $S$](s8-plain-contexts/main.pdf)
+  **It shows that no $S$-term is convertible with a copy of itself placed in a plain context of depth at most two, which gives a new proof of Statman's theorem that $S$ defines no fixed-point combinator, and it reduces the general question to one conjecture, a strong form of the absence of ground loops.**
+
+  > We show that no closed term $p$ of the combinator $S$ is convertible with $E[p]$ when $E\ne[\,]$ is a plain context of depth at most two with a hole. A context is plain if it is built from holes and closed normalizing terms by $E'\mapsto S\,E'$ and $E',E''\mapsto S\,E'\,E''$. The proof rests on three theorems. An infinite right comb has teeth of unbounded size. No nonempty set of terms has these two properties: every member has a head normal form whose items lie in the set or are of bounded size, at least one of them in the set; and the last head step of a member duplicates a large item in two simple ways only. No nonempty set meets only finitely many conversion classes if every member has a head normal form with at least one item and all its items in the set; this settles every plain context without closed parts. The case $E=S\,[\,]$ gives Statman's theorem that $S$ defines no fixed-point combinator.
+* [No Closed $S$-Term Is Convertible with Itself Applied to Normalizing Arguments](s9-consumption/main.pdf)
+  **It shows, with a machine-checked proof, that an $S$-term never equals itself applied to arguments: for any arguments if the term has a head normal form, and for normalizing arguments in general, the $S$-only answer to the equation behind Statman's double fixed-point problem.**
+
+  > We show that no term $p$ built from the combinator $S$ is convertible with $p\,x_1\cdots x_k$ for $k\ge1$ and normalizing $S$-terms $x_1,\dots,x_k$; if $p$ has a head normal form, the $x_i$ may be arbitrary $S$-terms. In that case a 38-element model that detects head normal forms turns the conversion into a closed walk, and the walk leads to an infinite chain of terms, each of size two less than the last, which cannot exist. Otherwise the head run of $p$ splits off arguments of unbounded size, yet a conversion makes each convertible with some $x_j$, which bounds its size. The results are mechanized in Lean 4.
+
 ## Ancillary papers
 
 * [The $SKI$ Self-Interpreter, Mechanized](self-interpreter-mechanized/main.pdf)

@@ -28,11 +28,12 @@
 \newcommand{\Gc}{\mathcal G}
 \newcommand{\Kc}{\mathcal K}
 \newcommand{\Cc}{\mathcal C}
+\newcommand{\Zc}{\mathcal Z}
 \newcommand{\Self}{\mathrm{SELF}}
 \newcommand{\sqs}{\sqsubseteq}
 \newcommand{\psq}{\sqsubset}
 
-\title[Counter Runs Are Determined by Their Teeth]{Counter Runs of the Combinator $\bm{S}$ Are Determined by Their Teeth}
+\title[$S$-Terms with a Counter Run]{$\bm{S}$-Terms with a Counter Run Are Determined by Their Teeth Among Terms Without a Head Normal Form}
 \author{Claude Opus \& Fable with N.\ E.\ Davis}
 \address{ZeroAttest, Champaign, Illinois, USA}
 \email{NDavis@ZeroAttest.com}
@@ -44,13 +45,15 @@
 The head run of a closed term built from the combinator $S$, if it never reaches a head normal
 form, splits off an infinite sequence of arguments, its teeth. Convertible terms of this kind have
 convertible teeth, and the converse, CT, is open. We prove CT against every term $p$ whose run is
-a counter run: from some point on its states lie in an explicit grammar of counters, and its teeth
-normalize. Every term without a head normal form whose teeth are convertible with those of $p$ is
-then convertible with $p$. This covers the runs of $U_j\,U_m$ and of $X\,(S\,X\,c)$. The proof
-follows the two runs in normal form. In the grammar, moves that copy the whole heap into the stack
-recur, and opposite such a move a second run with the same teeth reaches the same state, at once
-or after a few pops. The proof is not mechanized, except for two finite facts about a 38-element
-model of head normal forms, which are checked by kernel evaluation in Lean~4.
+a counter run: from some point on its states are convertible with members of an explicit grammar
+of counters, and its teeth from then on normalize. Every term without a head normal form whose teeth are
+convertible with those of $p$ is then convertible with $p$. This covers the runs of $U_j\,U_m$, of
+$X\,X$, and of $X\,(S\,X\,c)$ for $c$ in an explicit set $\Kc$ of normal terms. The proof compares
+the two runs in normal form, where each state is a pair of normal terms. In the grammar, moves that
+copy the second term of the pair into the first recur. When the second run meets such a move, it
+reaches the same state at once or after finitely many further moves. The proof is not mechanized
+and case-splits on whether a term has a head normal form; finite facts about a 38-element model are
+checked by kernel evaluation in Lean~4.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, head normal form, normal form, convertibility}
@@ -58,43 +61,45 @@ model of head normal forms, which are checked by kernel evaluation in Lean~4.
 
 \section{Introduction}
 
+A closed $S$-term without a head normal form has an infinite sequence of teeth, defined below, and
+convertible terms of this kind have convertible teeth~\citep[Lemma~5]{s11}. We prove the converse,
+CT, when one of the two terms has a counter run (Theorem~\ref{thm:main}): a run whose states are,
+from some point on, convertible with members of an explicit grammar $\Gc$, and whose teeth from
+then on normalize. The companion paper~\citep{s11} proves CT for one explicit term.
+
 $\Ter$ is the set of closed terms built from $S$ by application, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at
 any position; $\red$ is the reflexive--transitive closure of $\to$, and $\conv$ is convertibility.
 The \emph{size} $\sz t$ is the number of occurrences of $S$ in $t$. A step raises the size by
-$\sz z-1\ge0$, so $t\red u$ implies $\sz t\le\sz u$; we cite this as (Size). A term
-\emph{normalizes} if it reduces to a normal form, which is then unique, $\nf(t)$, by
-Church--Rosser (CR)~\citep{terese}.
+$\sz z-1\ge0$, so $t\red u$ implies $\sz t\le\sz u$. A term \emph{normalizes} if it reduces to a
+normal form, which is then unique, $\nf(t)$, by Church--Rosser (CR)~\citep{terese}.
 
-We use the terminology of~\citep[\S\S1--2]{s11}. Every $t\in\Ter$ is $S\,u_1\cdots u_m$ for a
-unique $m\ge0$; the $u_i$ are its \emph{items}, and $t$ is a \emph{head normal form} (hnf) iff
-$m\le2$. For $m\ge3$ the \emph{head step} is $t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$; head steps
-give the \emph{head run} of $t$, whose terms are its \emph{frames}, and $\hred$ is their closure.
-The term $t$ \emph{has an hnf} if its head run reaches one, and $t$ is \emph{literal} if it is its
-own hnf. A frame $f\,w$ is \emph{stable} if $f$ has no hnf. If $t$ has no hnf, its head run
-reaches a first stable frame $f\,w$, and $\tau_1(t)=w$, $\rest(t)=f$; the \emph{teeth} of $t$ are
-$\tau_{n+1}(t)=\tau_1(\rest^n(t))$, and \emph{move} $n$ goes from $\rest^{n-1}(t)$ to $\rest^n(t)$
-and produces $\tau_n(t)$. Convertible terms without an hnf have convertible teeth
-\citep[Lemma~5]{s11}. The converse is open:
+We use the terminology of~\citep[\S\S1--2]{s11}, and cite its Lemmas~3 (head runs), 4 (moves),
+5 (convertible terms), 6 (finite meeting) and 7 (right suffixes) as L3--L7. Every $t\in\Ter$ is
+$S\,u_1\cdots u_m$ for a unique $m\ge0$; the $u_i$ are its \emph{items}, and $t$ is a \emph{head
+normal form} (hnf) iff $m\le2$. For $m\ge3$ the \emph{head step} is
+$t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$; head steps give the \emph{head run} of $t$, whose terms
+are its \emph{frames}, and $\hred$ is their closure. The term $t$ \emph{has an hnf} if its head run
+reaches one, and $t$ is \emph{literal} if it is its own hnf. A frame $f\,w$ is \emph{stable} if $f$
+has no hnf. If $t$ has no hnf, its head run reaches a first stable frame $f\,w$ (F2), and
+$\tau_1(t)=w$, $\rest(t)=f$; the \emph{teeth} of $t$ are $\tau_{n+1}(t)=\tau_1(\rest^n(t))$, and
+\emph{move} $n$ goes from $\rest^{n-1}(t)$ to $\rest^n(t)$ and produces $\tau_n(t)$. CT says: if
+$p,q\in\Ter$ have no hnf and $\tau_n(p)\conv\tau_n(q)$ for all $n\ge1$, then $p\conv q$. It is open.
 
-\begin{conjecture}[CT]
-If $p,q\in\Ter$ have no hnf and $\tau_n(p)\conv\tau_n(q)$ for all $n\ge1$, then $p\conv q$.
-\end{conjecture}
-
-\noindent The companion paper~\citep{s11} proves CT when $p$ is one explicit term. Here we prove it
-for every $p$ whose run reaches the following grammar and whose teeth normalize. Write
-$T=S\,S\,S$, $X=S\,T\,S$, $U=S\,T\,T$, $D(v)=S\,v\,(S\,v)$, and let $c_0=S$, $c_{j+1}=S\,c_j$ be
-the \emph{combs}, $\Cc=\{c_j:j\ge0\}$.
+Write $T=S\,S\,S$, $X=S\,T\,S$, $U=S\,T\,T$, $D(v)=S\,v\,(S\,v)$, and $S^m\,t=S\,(S\,(\cdots(S\,t)))$
+with $m$ copies of $S$. Let $\sigma_0=S$, $\sigma_{j+1}=S\,\sigma_j$ be the \emph{combs},
+$\Cc=\{\sigma_j:j\ge0\}$.
 
 \begin{definition}\label{def:grammar}
 $\Hc$ and $\Ic$ are the least sets of normal terms such that
 \begin{itemize}
-\item[(H0)] $X,U\in\Hc$; \quad (H1) $H\in\Hc\Rightarrow S\,H\in\Hc$;
+\item[(H0)] $X,U\in\Hc$;
+\item[(H1)] $H\in\Hc\Rightarrow S\,H\in\Hc$;
 \item[(H2)] $P\in\Hc$ has two items and $c$ is normal $\Rightarrow S\,P\,c\in\Hc$;
 \item[(H3)] $P\in\Hc$ has one item and $Q\in\Hc\cup\Ic\cup\{S\}\Rightarrow S\,P\,Q\in\Hc$;
-\item[(H4)] $P'\in\Hc$ has one item and $c\in\Cc\Rightarrow S\,(S\,P')\,c\in\Hc$;
-\item[(I)] $Q\in\Hc$ and $c\in\Cc\Rightarrow S\,c\,Q\in\Ic$.
+\item[(H4)] $P'\in\Hc$ has one item and $\sigma\in\Cc\Rightarrow S\,(S\,P')\,\sigma\in\Hc$;
+\item[(I)] $Q\in\Hc$ and $\sigma\in\Cc\Rightarrow S\,\sigma\,Q\in\Ic$.
 \end{itemize}
-$\Hc_2$ is the set of members of $\Hc$ with two items, and $\Gc=\Hc_2\times\Hc$.
+$\Zc$ is the set of members of $\Hc$ with two items, and $\Gc=\Zc\times\Hc$.
 \end{definition}
 
 \begin{theorem}\label{thm:main}
@@ -103,10 +108,9 @@ with $\rest^e(p)\conv Z\,W$ for some $e\ge0$ and $\tau_n(q)\conv\tau_n(p)$ for a
 $q\conv p$.
 \end{theorem}
 
-\noindent So CT holds against $Z\,W$, against its states, which are convertible with members of
-$\Gc$ (Corollary~\ref{cor:recur}), and against every $p$ whose run in normal form
-(Section~\ref{sec:pairs}) reaches $\Gc$ and has normalizing teeth; we call such runs
-\emph{counter runs}. Two families satisfy the hypothesis. Let
+\noindent Thus CT holds against every $p$ with a state $\rest^e(p)$ convertible with some $Z\,W$,
+$(Z,W)\in\Gc$, whose teeth normalize. We call the run of such a $p$ a \emph{counter run}. Two
+families fall under it. Let
 $U_0=U$, $U_{m+1}=D(U_m)$, and let $\Kc$ be the least set of normal terms that contains every
 normal term with at most one item and contains $S\,S\,b$ whenever it contains $b$.
 
@@ -116,45 +120,41 @@ such that $\rest^e(p)\conv U_j\,U_m$ for some $e\ge0$.
 \end{corollary}
 
 \begin{corollary}\label{cor:X}
-Let $Y=X$, or $Y=S\,X\,c$ with $c$ normal. Every tooth of $X\,Y$ normalizes iff $Y=X$ or $c\in\Kc$;
+Let $Y=X$, or $Y=S\,X\,c$ with $c$ normal. Every tooth of $X\,Y$ normalizes iff $Y=X$, or
+$Y=S\,X\,c$ with $c\in\Kc$;
 then CT holds against every $p$ without an hnf such that $\rest^e(p)\conv X\,Y$ for some $e\ge0$.
 \end{corollary}
 
-\emph{Idea.} We follow both runs in normal form: from some point on each state is
-convertible with $A\,W$, a \emph{normal pair} of a two-item normal stack $A$ and a normal heap $W$
-(Lemmas~\ref{lem:pair} and~\ref{lem:reach}). In $\Gc$ the run never leaves $\Gc$ (Theorem~\ref{thm:closure}), and
-infinitely often the stack $X$ or $U$ copies a two-item heap $W$ into the stack, with tooth
-$S\,W\,(S\,W)$ or $S\,W\,(S\,W\,(S\,W))$ (Corollary~\ref{cor:recur}). Opposite such a move the
-other run's move is pinned down by inverting normal forms (Lemmas~\ref{lem:fa} and~\ref{lem:tee}),
-and it either reaches the same state or stands where a later tooth must differ
-(Lemmas~\ref{lem:dh} and~\ref{lem:alpha}). Hnf-lessness of members applied to members comes from
-two finite facts about the block model of~\citep{s1} (Lemma~\ref{lem:tables}).
+\emph{Idea.} We follow both runs as pairs of normal terms, a stack and a heap
+(Section~\ref{sec:pairs}). A run in $\Gc$ stays in $\Gc$, and in it moves that copy the heap into
+the stack recur (Section~\ref{sec:grammar}). Inverting normal forms fixes the other run's move
+opposite such a move; that run then reaches the same state or has a later tooth that differs
+(Section~\ref{sec:proof}).
 
-\emph{Assumptions.} The proof uses (CR), standardization (Std) and the existence of stable frames
-(F2) through Lemmas~3--7 of~\citep{s11}, which states them and cites their proofs; the cited proof of
-(F2) uses the block model of~\citep{s1}. The block model enters otherwise only through
-Lemma~\ref{lem:tables}: the folds of $X$ and $U$, the characterization (M2) of hnf-less terms by
-their block, and two table facts, T16 and T17, checked by kernel evaluation in Lean. These facts and
-(CR), (Std), (F2) are mechanized; the proofs in this paper are not. The proof case-splits on whether a term has an hnf, in~\citep[Lemma~4]{s11} and in
-the normal-form computation of a move (Lemma~\ref{lem:pair}); (M2) decides that property. The
-other steps are inductions on sizes and depths and case distinctions on the number of items of
-normal terms; we have not audited them for other classical principles.
+\emph{Assumptions.} Through L3--L7 the proof uses (CR), standardization (Std) and (F2); the
+companion paper~\citep{s11} states them and cites their proofs. The cited proof of (F2)~\citep{s1,s3} uses the 38-element block
+model of~\citep{s1} and Waldmann's top-termination theorem~\citep[Theorem~3]{s3}. The block model
+enters otherwise only through Lemma~\ref{lem:tables}: the folds of $X$ and $U$, the
+characterization (M2) of terms without an hnf by their block, and two table facts, T16 and T17. The
+proof case-splits on whether a term has an hnf, in L4 and in the normal-form computation of a move
+(Lemma~\ref{lem:pair}); (M2) decides that property. The other steps are inductions on sizes and
+depths and case distinctions on the number of items of normal terms; we have not audited them for
+classical principles.
 
 \section{Normal pairs}\label{sec:pairs}
 
-We cite Lemmas~3 (head runs), 4 (moves), 5 (convertible terms), 6 (finite meeting) and 7 (right
-suffixes) of~\citep{s11} as L3--L7. By L4, a move of $f=f^-\,u$ without an hnf is of kind (A),
+By L4, a move of $f=f^-\,u$ without an hnf is of kind (A),
 where $f^-$ has no hnf, $\tau_1(f)=u$ and $\rest(f)=f^-$; or of kind (B): $f^-\hred S\,a_0\,b_0$,
 $w_0=u$, $w_{i+1}=b_i\,w_i$, $a_i\,w_i\hred S\,a_{i+1}\,b_{i+1}$ for $i<k$, $a_k\,w_k$ has no hnf,
-$\tau_1(f)=b_k\,w_k$ and $\rest(f)=a_k\,w_k$. \emph{Entry} $i$ is \emph{literal} if
-$S\,a_i\,b_i$ is reached in no head step, that is, $f^-=S\,a_0\,b_0$ ($i=0$) or
+$\tau_1(f)=b_k\,w_k$ and $\rest(f)=a_k\,w_k$. \emph{Entry} $i$ is \emph{literal} if no head step
+reaches $S\,a_i\,b_i$, that is, $f^-=S\,a_0\,b_0$ ($i=0$) or
 $a_{i-1}\,w_{i-1}=S\,a_i\,b_i$ ($i\ge1$). If it is not, the last frame before $S\,a_i\,b_i$ is
 $S\,S\,y\,a_i$ and $b_i=y\,a_i$ for a term $y$ (L3(a)).
 
 A right context of depth $d$ is $x_1\,(x_2\,(\cdots(x_d\,[\,])\cdots))$; $e$ is a right suffix of $t$
 at depth $d$ if $t$ is such a context filled with $e$. We write $e\sqs t$, and $e\psq t$ if
-$d\ge1$. Right suffixes of $t$ at different depths have different sizes, and $\sqs$ is
-transitive. Since a subterm of a normal term is normal, L7(a), applied to $t\red\nf(t)$, gives:
+$d\ge1$. Right suffixes of $t$ at different depths have different sizes, so this $d$ is unique, the
+\emph{depth of $e$ in $t$}; and $\sqs$ is transitive. Since a subterm of a normal term is normal, L7(a), applied to $t\red\nf(t)$, gives:
 \begin{itemize}
 \item[(RS)] if $e\psq t$ and $t$ normalizes, then $e$ normalizes and $\nf(e)\psq\nf(t)$.
 \end{itemize}
@@ -172,8 +172,8 @@ $u$ is $S$, $S\,x$ or $S\,x\,y$, which normalize since $x$ and $y$ do. A normal 
 items, so $t$ reduces to an hnf and has one by L3(c).
 \end{proof}
 
-So a term with a subterm without an hnf does not normalize, nor does any term that reduces to one
-(CR). A \emph{normal pair} $(A,W)$ consists of normal terms such that $A\,W$ has no hnf; then $A$
+A term with a subterm without an hnf does not normalize, and neither does any term that reduces
+to such a term (CR). A \emph{normal pair} $(A,W)$ consists of normal terms such that $A\,W$ has no hnf; then $A$
 has two items, $A=S\,A^0\,B^0$, since otherwise $A\,W$ would be an hnf. The teeth and moves of
 $(A,W)$ are those of $A\,W$; $A$ is its \emph{stack} and $W$ its \emph{heap}.
 
@@ -181,12 +181,13 @@ $(A,W)$ are those of $A\,W$; $A$ is its \emph{stack} and $W$ its \emph{heap}.
 Let $(A,W)$ be a normal pair whose first tooth normalizes. Its move is of kind \textup{(B)}, with
 $a_0=A^0$, $b_0=B^0$, $w_0=W$, entry $0$ literal, and all $a_i$, $b_i$, $w_i$ \textup{(}$i\le k$\textup{)}
 normalize. With $A^i=\nf(a_i)$, $B^i=\nf(b_i)$, $W^i=\nf(w_i)$: $A^i\,W^i$ has an hnf iff $i<k$, and
-then $\nf(A^i\,W^i)=S\,A^{i+1}\,B^{i+1}$ and $W^{i+1}=\nf(B^i\,W^i)$. The pair $(A^k,W^k)$ is a normal
-pair, $\rest(A\,W)\conv A^k\,W^k$, and the tooth has the normal form $N=\nf(B^k\,W^k)$. Moreover:
+then $\nf(A^i\,W^i)=S\,A^{i+1}\,B^{i+1}$ and $W^{i+1}=\nf(B^i\,W^i)$. The \emph{new state}
+$(A^k,W^k)$ is a normal pair, $\rest(A\,W)\conv A^k\,W^k$, and the tooth has the normal form
+$N=\nf(B^k\,W^k)$.
 \begin{itemize}
 \item[(a)] $W^i\psq W^{i+1}$ for $i<k$, and $W^k\psq N$;
 \item[(b)] if entry $i\ge1$ is literal, $B^i=W^{i-1}$; if it is not, $B^i\ne S$;
-\item[(c)] if $k=0$, the new state is $(A^0,W)$, and $A^0$ is a proper subterm of $A$.
+\item[(c)] if entry $i\ge1$ is not literal, then $w_{i-1}\psq b_i$.
 \end{itemize}
 \end{lemma}
 
@@ -201,28 +202,22 @@ $a_i\,w_i\conv A^i\,W^i$, the two have an hnf together (L5), and (CR) gives
 $\nf(A^i\,W^i)=S\,A^{i+1}\,B^{i+1}$ and $\nf(b_i\,w_i)=\nf(B^i\,W^i)$ for $i<k$. Also
 $a_k\,w_k\conv A^k\,W^k$ and $b_k\,w_k\conv B^k\,W^k$. (a) $W^i\psq B^i\,W^i$ and (RS). (b) At a
 literal entry $a_{i-1}\,w_{i-1}=S\,a_i\,b_i$, so $b_i=w_{i-1}$; otherwise $b_i=y\,a_i$ is an
-application, so all its reducts are (L3(e)). (c) $A^0=a_0$, $W^0=W$.
+application, so all its reducts are (L3(e)).
+(c) The head run from $a_{i-1}\,w_{i-1}$ to $S\,a_i\,b_i$ has at least one step, and its frames before
+$S\,a_i\,b_i$ have at least three items. The last item of $a_{i-1}\,w_{i-1}$ is $w_{i-1}$. A head step
+from $S\,u_1\cdots u_m$ keeps the last item if $m\ge4$ and replaces it by $u_2\,u_3$ if $m=3$. So the
+last item of each of these frames is $E[w_{i-1}]$ for a right context $E$, and in the frame
+$S\,S\,y\,a_i$ before $S\,a_i\,b_i$ it is $a_i$. Hence $b_i=y\,E[w_{i-1}]$.
 \end{proof}
 
 So the move of a normal pair, with $k$, the new state and $N$, is computed from the pair by the
 recursion above. The \emph{run} of $(A,W)$ is the sequence of states $(A_n,W_n)$ with tooth normal
 forms $N_n$; by L5, $\rest^n(A\,W)\conv A_n\,W_n$ and the teeth of $(A_n,W_n)$ are convertible with
 those of $A\,W$ from $n+1$ on. A move is a \emph{pop} if $k=0$ and \emph{raising} if $k\ge1$. A pop
-keeps the heap and replaces the stack by a proper subterm; so raising moves recur. A raising move
-replaces $W$ by $W^k$ with $W\psq W^k$. After two raising moves the heap has two proper right
-suffixes, so it is neither $S$ nor $T$; after one it is not $S$.
-
-\begin{lemma}\label{lem:last}
-In a move of kind \textup{(B)}, if entry $i\ge1$ is not literal, then $w_{i-1}\psq b_i$.
-\end{lemma}
-
-\begin{proof}
-The head run from $a_{i-1}\,w_{i-1}$ to $S\,a_i\,b_i$ has at least one step, and its frames before
-$S\,a_i\,b_i$ have at least three items. The last item of $a_{i-1}\,w_{i-1}$ is $w_{i-1}$. A head step
-from $S\,u_1\cdots u_m$ keeps the last item if $m\ge4$ and replaces it by $u_2\,u_3$ if $m=3$. So the
-last item of each of these frames is $E[w_{i-1}]$ for a right context $E$, and in the frame
-$S\,S\,y\,a_i$ before $S\,a_i\,b_i$ it is $a_i$. Hence $b_i=y\,E[w_{i-1}]$.
-\end{proof}
+leads to $(A^0,W)$: it keeps the heap and replaces the stack by a proper subterm. Since stacks
+cannot shrink forever, raising moves recur. A raising move replaces $W$ by $W^k$ with
+$W\psq W^k$. After two raising moves the heap has two proper right suffixes, so it is neither $S$
+nor $T$; after one it is not $S$.
 
 \begin{lemma}\label{lem:reach}
 Let $p\in\Ter$ have no hnf and only normalizing teeth. For some $n$, $\rest^n(p)\conv A\,W$ for a
@@ -260,10 +255,12 @@ $\nf(x\,y)=S\,n_1\,n_2$ with $y\sqs n_1$, and $n_1=y$ iff $x_1=S$.
 
 \begin{proof}
 $x\,y\to(x_1\,y)\,(x_2\,y)$, so $g=\nf(x_1\,y)$ and $h=\nf(x_2\,y)$ exist (Lemma~\ref{lem:sub}),
-$N=\nf(x\,y)=\nf(g\,h)$, $y\psq h$ and $h\psq N$ (RS); $g\ne S$ (L3(e)). Induction on the depth of
-$y$ in $N$. If $g$ has one item, then $x_1=S$, $g=S\,y$ (Lemma~\ref{lem:h2}) and $N=S\,y\,h$. If $g$
-has two items, then $x_1\ne S$, $h$ lies at a smaller depth in $N$ than $y$, and the induction
-hypothesis for $(g,h)$ gives $N=S\,n_1\,n_2$ with $h\sqs n_1$; so $y\psq n_1$.
+$N=\nf(x\,y)=\nf(g\,h)$, $y\psq h$ and $h\psq N$ (RS); $g\ne S$ (L3(e)). So $y\psq N$, and we
+argue by induction on the depth of $y$ in $N$, over all $x$, $y$ as in the lemma. If $g$ has one
+item, then $x_1=S$, $g=S\,y$ (Lemma~\ref{lem:h2}) and $N=S\,y\,h$. If $g$ has two items, then
+$x_1\ne S$, and $(g,h)$ satisfies the hypotheses, with $\nf(g\,h)=N$; as $y\psq h$, the depth of $h$
+in $N$ is smaller than that of $y$. The induction hypothesis for $(g,h)$ gives $N=S\,n_1\,n_2$ with
+$h\sqs n_1$; so $y\psq n_1$.
 \end{proof}
 
 \begin{lemma}\label{lem:tee}
@@ -273,16 +270,18 @@ Let $x$ be normal with two items, $y$ normal and $x\,y$ normalizing.
 \end{lemma}
 
 \begin{proof}
-Let $x=S\,x_1\,x_2$, and $g$, $h$, $N$ as in the proof of Lemma~\ref{lem:fa}; induction on the
-depth of $y$ in $N$. (a) Let $y\ne S$. If $g$ has one item, $x_1=S$ and $N=S\,y\,h$, so $c=y$ and
-$h=\nf(x_2\,y)=S\,y$, whence $x_2=S$ (Lemma~\ref{lem:h2}) and $x=T$. If $g$ has two items, $h\ne S$
-lies at a smaller depth, so by induction $g=T$. But $x_1=S$ makes $g$ one-item, $x_1=S\,e$ gives
-$S\,e\,y=T$ and $y=S$, and a two-item $x_1$ gives $y\sqs S$ (Lemma~\ref{lem:fa}); each is excluded.
+Let $x=S\,x_1\,x_2$, and $g$, $h$, $N$ as in the proof of Lemma~\ref{lem:fa}. For each of (a), (b)
+we argue by induction on the depth of $y$ in $N$, over all $x$, $y$ as in the lemma; when $g$ has
+two items, the induction hypothesis applies to $(g,h)$, as there. (a) Let $y\ne S$. If $g$ has one
+item, $x_1=S$ and $N=S\,y\,h$, so $c=y$ and $h=\nf(x_2\,y)=S\,y$, whence $x_2=S$
+(Lemma~\ref{lem:h2}) and $x=T$. If $g$ has two items, then $h\ne S$, as $y\psq h$; so by induction
+$g=T$. Now $x_1=S$ would make $g=S\,y$ one-item; $x_1=S\,e$ would give $S\,e\,y=T$, so $y=S$; and a
+two-item $x_1$ would give $y\sqs S$ (Lemma~\ref{lem:fa}), so $y=S$. Each contradicts an assumption.
 (b) Let $y\notin\{S,T\}$. If $g$ has one item, then $x_1=S$, $c=y$ and $h=\nf(x_2\,y)=S\,y\,(S\,y)$.
 Here $x_2$ has two items, since $S\,y$ and $S\,e\,y$ differ from $S\,y\,(S\,y)$; so $x_2=T$ by (a),
 and $x=S\,S\,T$. If $g$ has two items, then $h\notin\{S,T\}$, as $y\psq h$ and $S$ is the only
 proper right suffix of $T$; by induction $g=S\,S\,T$. Now $x_1=S$, $x_1=S\,e$ and a two-item $x_1$
-give a one-item $g$, $y=T$, and $y\sqs S$ respectively.
+would give a one-item $g$, $y=T$, and $y\sqs S$ respectively; each contradicts an assumption.
 \end{proof}
 
 A closed term $W$ is \emph{self-dead} if $W\,(t\,W)$ has no hnf for every closed $t$.
@@ -290,22 +289,21 @@ A closed term $W$ is \emph{self-dead} if $W\,(t\,W)$ has no hnf for every closed
 \begin{lemma}\label{lem:K}
 \textup{(a)} For $c\in\Kc$ and normal $V$, $c\,V$ normalizes: $\nf(c\,V)=c\,V$ if $c$ has at most
 one item, and $\nf(S\,S\,b\,V)=S\,V\,\nf(b\,V)$.
-\textup{(b)} Let $d$ be closed and $\mathcal X$ a set of closed terms such that $d\,x$ has no hnf
-for $x\in\mathcal X$ and $t\,d\in\mathcal X$ for every closed $t$. If $\alpha$ is normal,
-$x_1,\dots,x_r\in\mathcal X$ and $\alpha\,d\,x_1\cdots x_r$ normalizes, then $r=0$ and $\alpha\in\Kc$,
-or $r=1$ and $\alpha=S$.
-\textup{(c)} If $W$ is self-dead, $c$ is normal and $c\,W$ normalizes, then $c\in\Kc$.
+\textup{(b)} Let $W$ be self-dead, $\alpha$ normal, and $x_1,\dots,x_r$ terms $t_i\,W$ with closed
+$t_i$. If $\alpha\,W\,x_1\cdots x_r$ normalizes, then $r=0$ and $\alpha\in\Kc$, or $r=1$ and
+$\alpha=S$. In particular \textup{(}$r=0$\textup{)}, if $c$ is normal and $c\,W$ normalizes, then
+$c\in\Kc$.
 \end{lemma}
 
 \begin{proof}
 (a) $S\,S\,b\,V\to S\,V\,(b\,V)$; induction. (b) Induction on $\sz\alpha$. If $\alpha=S$ and $r\ge2$,
-$S\,d\,x_1\,x_2\cdots\to d\,x_2\,(x_1\,x_2)\cdots$, which has no hnf (L3(d)). If $\alpha=S\,\alpha'$
-and $r\ge1$, the head step gives $\alpha'\,x_1\,(d\,x_1)\cdots$, with a subterm without an hnf; so
+$S\,W\,x_1\,x_2\cdots\to W\,x_2\,(x_1\,x_2)\cdots$, which has no hnf (L3(d)). If $\alpha=S\,\alpha'$
+and $r\ge1$, the head step gives $\alpha'\,x_1\,(W\,x_1)\cdots$, with a subterm without an hnf; so
 $r=0$ and $\alpha\in\Kc$. If
-$\alpha=S\,\alpha'\,\alpha''$, the head step gives $\alpha'\,d\,(\alpha''\,d)\,x_1\cdots x_r$, which
-normalizes and has $r+1$ arguments from $\mathcal X$ after $d$; by induction $r=0$ and
-$\alpha'=S$, so $S\,d\,(\alpha''\,d)$ normalizes, $\alpha''\,d$ does, $\alpha''\in\Kc$ by induction,
-and $\alpha=S\,S\,\alpha''\in\Kc$. (c) Take $d=W$, $\mathcal X=\{t\,W\}$, $r=0$.
+$\alpha=S\,\alpha'\,\alpha''$, the head step gives $\alpha'\,W\,(\alpha''\,W)\,x_1\cdots x_r$, which
+normalizes and has $r+1$ arguments of the form $t\,W$ after $W$; by induction $r=0$ and
+$\alpha'=S$, so $S\,W\,(\alpha''\,W)$ normalizes, $\alpha''\,W$ does, $\alpha''\in\Kc$ by induction,
+and $\alpha=S\,S\,\alpha''\in\Kc$.
 \end{proof}
 
 \section{Moves over a self-dead heap}
@@ -315,15 +313,16 @@ Let $W$ be normal and self-dead.
 \textup{(a)} If $(A,W)$ is a normal pair whose first tooth normalizes, then $B^0\in\Kc$, and either
 the move is a pop, or $A^0=T$, $k=1$, the new state is $(W,\nf(B^0\,W))$ and
 $N=S\,W\,\nf(B^0\,W)$.
-\textup{(b)} \textup{(Landing.)} If $(C,H)$ is a normal pair with $H\ne S$ and first tooth
+\textup{(b)} If $(C,H)$ is a normal pair with $H\ne S$ and first tooth
 normalizing, whose move is raising with new heap $S\,W$, then its new state is $(W,S\,W)$.
 \end{lemma}
 
 \begin{proof}
 (a) $B^0\,W$ normalizes (its normal form is $N$ if $k=0$ and $W^1$ otherwise), so $B^0\in\Kc$
-(Lemma~\ref{lem:K}(c)). Let $k\ge1$. Then $W^1=\nf(B^0\,W)$ exists and $W\,W^1$ has no hnf, as
+(Lemma~\ref{lem:K}(b)). Let $k\ge1$. Then $W^1=\nf(B^0\,W)$ exists and $W\,W^1$ has no hnf, as
 $W\,(B^0\,W)$ has none and reduces to it (L3(d)). Also $A^0\,W$ normalizes
-(Lemma~\ref{lem:pair}), so $A^0\in\Kc$, and $A^0\ne S$, since $S\,S\,B^0\,W\to S\,W\,(B^0\,W)$.
+(Lemma~\ref{lem:pair}), so $A^0\in\Kc$; and $A^0\ne S$, since otherwise
+$A\,W=S\,S\,B^0\,W\to S\,W\,(B^0\,W)$, an hnf, whereas $A\,W$ has none.
 If $A^0=S\,A^1$ has one item, then $B^1=W$, and $B^1\,W^1=W\,W^1$, whose normal form is $N$ or
 $W^2$, has no hnf. So $A^0=S\,S\,b$ with $b\in\Kc$, and $\nf(A^0\,W)=S\,W\,\nf(b\,W)$: $A^1=W$,
 $B^1=\nf(b\,W)$. As $A^1\,W^1=W\,W^1$ has no hnf, $k=1$. If $b=S\,b'$ or $b=S\,S\,b''$, then
@@ -342,36 +341,41 @@ $\omega\psq V$. Their first teeth do not normalize to the same normal form.
 \end{lemma}
 
 \begin{proof}
-Suppose both normalize to $N$. By Lemma~\ref{lem:dh}(a), $(C,\omega)$ pops some $B\in\Kc$ with
-$N=\nf(B\,\omega)$, or makes the move (a) with $N=S\,\omega\,\nf(B\,\omega)$, $B\in\Kc$. In the
-move of $(\omega,V)$ let $k$, $B^k$ and $W'=W^k$ be as in Lemma~\ref{lem:pair}; then $V\sqs W'\psq N$,
-so $\omega\psq W'$ and $\sz{W'}>\sz\omega$. If $C$ pops a $B$ with at most one item, the proper right
-suffixes of $N=B\,\omega$ are $\omega$ and its right suffixes, all smaller than $W'$. So
-$N=S\,\omega\,V'$ with $V'=\nf(b\,\omega)$ for some $b\in\Kc$: $b=B$ in the second case, and if $C$
-pops a two-item $B\in\Kc$, then $B=S\,S\,b$ and Lemma~\ref{lem:K}(a) applies. If $B^k$ had two items, Lemma~\ref{lem:fa} would give $W'\sqs\omega$; so
-$B^k\,W'=N$, $B^k=S\,\omega$ and $W'=V'$. Let $\omega=S\,A^0\,B^0$.
+Suppose both normalize to $N$. In the move of $(\omega,V)$ let $k$, $B^k$ and $W'=W^k$ be as in
+Lemma~\ref{lem:pair}; then $V\sqs W'\psq N$, so $\omega\psq W'$ and $\sz{W'}>\sz\omega$.
 
-If $k=0$, $B^k=B^0$ is smaller than $S\,\omega$. If $k\ge1$ and entry $k$ is not literal, then
-$w_{k-1}\psq b_k$ (Lemma~\ref{lem:last}) and $W^{k-1}\psq B^k=S\,\omega$ by (RS), so
+By Lemma~\ref{lem:dh}(a), $(C,\omega)$ either pops some $B\in\Kc$, with $N=\nf(B\,\omega)$, or is
+raising with $N=S\,\omega\,\nf(B\,\omega)$ and $B\in\Kc$. A pop of a $B$ with at most one item gives
+$N=B\,\omega$, whose proper right suffixes are $\omega$ and its right suffixes, all smaller than
+$W'$; this contradicts $W'\psq N$. A pop of a two-item $B\in\Kc$ has $B=S\,S\,b$ with $b\in\Kc$, and
+$N=S\,\omega\,\nf(b\,\omega)$ (Lemma~\ref{lem:K}(a)). So $N=S\,\omega\,V'$ with $V'=\nf(b\,\omega)$ for
+some $b\in\Kc$ ($b=B$ if the move is raising).
+
+If $B^k$ had two items, Lemma~\ref{lem:fa} would give $W'\sqs\omega$, against $\sz{W'}>\sz\omega$; so
+$B^k$ has at most one item and $B^k\,W'=N$. As $S\,W'$ has one item and $N$ two, $B^k\ne S$; so
+$B^k=S\,\omega$ and $W'=V'$. Let $\omega=S\,A^0\,B^0$.
+
+If $k=0$, then $B^k=B^0\ne S\,\omega$, since $B^0$ is a proper subterm of $\omega$, so smaller than
+$S\,\omega$. If $k\ge1$ and entry $k$ is not literal, then
+$w_{k-1}\psq b_k$ (Lemma~\ref{lem:pair}(c)) and $W^{k-1}\psq B^k=S\,\omega$ by (RS), so
 $V=W^0\sqs W^{k-1}\sqs\omega$, against $\sz V>\sz\omega$. If $k\ge1$ and entry $k$ is literal,
 $W^{k-1}=B^k=S\,\omega$, and $V\sqs S\,\omega$ with $\sz V>\sz\omega$ gives $V=S\,\omega=W^{k-1}$;
 as $W^0\psq W^1\psq\cdots$, $k=1$ and $V'=W^1=\nf(B^0\,(S\,\omega))$, with $S\,\omega\psq V'$. By
 Lemma~\ref{lem:K}(a), $V'=S\,\omega\,(\cdots(S\,\omega\,(c\,\omega)))$ with $u\ge0$ factors
 $S\,\omega$ and $c$ of at most one item; its right suffixes larger than $\omega$ are the $u+1$
 terms obtained by deleting factors, and the one-item term $S\,\omega$ is one of them only if $c=S$
-and $u\ge1$. So $V'=S\,\omega\,R$ for some $R$. If $B^0$ has at most one item, $B^0\,(S\,\omega)=V'$
-and $B^0=S\,\omega$, larger than the subterm $B^0$ of $\omega$ can be. If $B^0$ has two items,
+and $u\ge1$. So $V'=S\,\omega\,R$ for some $R$. If $B^0$ has at most one item, $B^0\,(S\,\omega)=V'$;
+$B^0=S$ would give the one-item $S\,(S\,\omega)$, so $B^0=S\,\omega$, larger than the subterm $B^0$
+of $\omega$ can be. If $B^0$ has two items,
 Lemma~\ref{lem:fa} gives $S\,\omega\sqs\omega$. All cases are contradictory.
 \end{proof}
 
 \section{The counter grammar}\label{sec:grammar}
 
-Let $B=\{0,\dots,37\}$ with the table $\beta\colon B\times B\to B$ of~\citep{s1}; the \emph{block}
-of a term is $\fold(S)=0$, $\fold(t\,u)=\beta(\fold t,\fold u)$. We use
-\begin{itemize}
-\item[(M2)] \citep[Proposition~4 and Theorem~9]{s1}, with L3(c): $t$ has no hnf iff $\fold(t)=36$.
-\end{itemize}
-Let $\Self=\{w\in B:\beta(w,\beta(\kappa,w))=36\text{ for all }\kappa\in B\}$. If
+Let $\mathbb M=\{0,\dots,37\}$ with the table $\beta\colon\mathbb M\times\mathbb M\to\mathbb M$
+of~\citep{s1}; the \emph{block} of a term is $\fold(S)=0$, $\fold(t\,u)=\beta(\fold t,\fold u)$. We
+use (M2)~\citep[Proposition~4 and Theorem~9]{s1}, with L3(c): $t$ has no hnf iff $\fold(t)=36$.
+Let $\Self=\{w\in\mathbb M:\beta(w,\beta(\kappa,w))=36\text{ for all }\kappa\in\mathbb M\}$. If
 $\fold(W)\in\Self$, then $W$ is self-dead, since $\fold(W\,(t\,W))=36$. Put $\Theta_1=\{18,20,27\}$,
 $\Theta_2=\{16,31,33,34\}$, $\Theta=\Theta_1\cup\Theta_2$, $CB=\{0,1,2,4,8,17\}$ and
 $IB=\{12,22,30\}$.
@@ -380,13 +384,13 @@ $IB=\{12,22,30\}$.
 $\fold(X)=16$ and $\fold(U)=33$. Moreover:
 \begin{itemize}
 \item[T16] \textup{(a)} $\beta(0,\theta)\in\Theta_1$ for $\theta\in\Theta$;
-  $\beta(\beta(0,\rho),\kappa)\in\Theta_2$ for $\rho\in\Theta_2$, $\kappa\in B$;
-  $\beta(\beta(0,\rho),\kappa)\in\Theta_2$ for $\rho\in\Theta_1$, $\kappa\in\Theta\cup\{0\}$.
+  $\beta(\beta(0,\rho),\kappa)\in\Theta_2$ for $\rho\in\Theta_2$, $\kappa\in\mathbb M$, and for
+  $\rho\in\Theta_1$, $\kappa\in\Theta\cup\{0\}$.
   \textup{(b)} $\beta(\rho,\kappa)=36$ for $\rho\in\Theta_2$, $\kappa\in\Theta$.
   \textup{(c)} $\Theta_2\subseteq\Self$.
 \item[T17] \textup{(a)} $\beta(0,\gamma)\in CB$ for $\gamma\in CB$;
   $\beta(\beta(0,\gamma),\kappa)\in IB$ for $\gamma\in CB$, $\kappa\in\Theta$.
-  \textup{(b)} $\beta(\beta(0,\rho),\kappa)\in\Theta_2$ for $\rho\in\Theta_1$, $\kappa\in CB\cup IB$.
+  \textup{(b)} The same for $\rho\in\Theta_1$, $\kappa\in CB\cup IB$.
   \textup{(c)} $\beta(\rho,\kappa)=36$ for $\rho\in\Theta_2$, $\kappa\in IB$.
 \end{itemize}
 \end{lemma}
@@ -396,34 +400,32 @@ Finite computations on the table, checked by kernel evaluation in Lean (Data ava
 \end{proof}
 
 All members of $\Hc$ and $\Ic$ are normal, since each rule applies $S$ to at most two normal terms.
-Examples: $U_m\in\Hc_2$ by (H2); for $Y=X$ or $Y=S\,X\,c$ with $c$ normal, $Y\in\Hc_2$, $S\,Y$ and
-$S\,(S\,Y)$ are in $\Hc$, and so are the terms $G_e$, $J_e$ of Section~\ref{sec:families}.
 
 \begin{lemma}\label{lem:ch}
 \textup{(a)} $S$, $T$, the combs and the members of $\Ic$ are not in $\Hc$. The one-item members
 of $\Hc$ are the terms $S\,H$ with $H\in\Hc$.
-\textup{(b)} Let $Z=S\,Z^0\,B^0\in\Hc_2\setminus\{X,U\}$. Then $Z^0\in\Hc$. If $Z^0$ has one item,
+\textup{(b)} Let $Z=S\,Z^0\,B^0\in\Zc\setminus\{X,U\}$. Then $Z^0\in\Hc$. If $Z^0$ has one item,
 then $B^0\in\Hc\cup\Ic\cup\Cc$, and $B^0\in\Cc\setminus\{S\}$ only if $Z^0=S\,(S\,H)$ with
-$H\in\Hc$. In any case $Z^0=S^m\,P_0$ for some $m\ge0$ and $P_0\in\Hc_2$; put $\pop(Z)=P_0$.
+$H\in\Hc$. Further, $Z^0=S^m\,P_0$ for some $m\ge0$ and $P_0\in\Zc$; put $\pop(Z)=P_0$.
 \end{lemma}
 
 \begin{proof}
 (H1) makes one-item terms $S\,H$, the other rules make $X$, $U$ (first item $T$) and two-item
 terms $S\,P\,Q$ with $P\in\Hc$ (from (H2)--(H4); $P$ has one item exactly in (H3), (H4)), and a term
 determines its items. No rule makes $S$. So $T$, whose first item is $S$, is not in $\Hc$;
-$c_{j+1}=S\,c_j\in\Hc$ only if $c_j\in\Hc$, so no comb is; and the first item of $S\,c\,Q\in\Ic$ is a
+$\sigma_{j+1}=S\,\sigma_j\in\Hc$ only if $\sigma_j\in\Hc$, so no comb is; and the first item of $S\,\sigma\,Q\in\Ic$ is a
 comb, neither $T$ nor a member. This gives (a) and the first claims of (b); for the clause on
-$\Cc\setminus\{S\}$, note that these combs have one item, so they are neither in $\Hc$ nor in $\Ic$,
-whose members have two, and only (H4) admits them. Stripping the leading $S$'s from $Z^0$ by (a)
+$\Cc\setminus\{S\}$, note that these combs have one item. They are not in $\Hc$ by (a), and not in $\Ic$, whose
+members have two items; so only (H4) admits them. Stripping the leading $S$'s from $Z^0$ by (a)
 stays in $\Hc$, never reaches $S$, and ends at a two-item member.
 \end{proof}
 
 \begin{lemma}\label{lem:dead}
-\textup{(a)} $\fold(t)\in\Theta_1$ for one-item $t\in\Hc$, $\in\Theta_2$ for $t\in\Hc_2$, $\in IB$
+\textup{(a)} $\fold(t)\in\Theta_1$ for one-item $t\in\Hc$, $\in\Theta_2$ for $t\in\Zc$, $\in IB$
 for $t\in\Ic$, and $\in CB$ for $t\in\Cc$.
-\textup{(b)} $Z\,t$ has no hnf for $Z\in\Hc_2$ and $t\in\Hc\cup\Ic$; so every member of $\Gc$ is a
+\textup{(b)} $Z\,t$ has no hnf for $Z\in\Zc$ and $t\in\Hc\cup\Ic$; so every member of $\Gc$ is a
 normal pair.
-\textup{(c)} Every $Z\in\Hc_2$ is self-dead.
+\textup{(c)} Every $Z\in\Zc$ is self-dead.
 \end{lemma}
 
 \begin{proof}
@@ -433,19 +435,19 @@ $S\,P'$ is a one-item member; (I) and the combs by T17(a). (b) T16(b), T17(c) an
 \end{proof}
 
 \begin{lemma}\label{lem:inert}
-Let $I=S\,c_j\,Q\in\Ic$ and $y\in\Hc$ with $I\,y$ normalizing. Then $Q=S\,Q'$, and with
-$u=S\,Q'\,y$, either $j=0$ and $\nf(I\,y)=S\,y\,u$, or $j=1$, $y=S\,y'$ and
-$\nf(I\,y)=S\,u\,(S\,y'\,u)$. In both cases $\nf(I\,y)\in\Hc_2$.
+Let $\iota=S\,\sigma_j\,Q\in\Ic$ and $y\in\Hc$ with $\iota\,y$ normalizing. Then $Q=S\,Q'$, and with
+$u=S\,Q'\,y$, either $j=0$ and $\nf(\iota\,y)=S\,y\,u$, or $j=1$, $y=S\,y'$ and
+$\nf(\iota\,y)=S\,u\,(S\,y'\,u)$. In both cases $\nf(\iota\,y)\in\Zc$.
 \end{lemma}
 
 \begin{proof}
-$I\,y\to c_j\,y\,(Q\,y)$. If $Q$ has two items, $Q\,y$ has no hnf (Lemma~\ref{lem:dead}(b)), and
-$I\,y$ does not normalize. So
-$Q=S\,Q'$ with $Q'\in\Hc$, and $u=Q\,y$ is normal and in $\Hc_2$ by (H2) or (H3). If $j=0$,
-$S\,y\,u$ is normal and in $\Hc_2$ by (H2) or (H3). If $j\ge1$, $c_j\,y\,u\to c_{j-1}\,u\,(y\,u)$, and
-$y\,u$ has no hnf unless $y=S\,y'$; then $y\,u=S\,y'\,u\in\Hc_2$. For $j=1$ the term
-$S\,u\,(S\,y'\,u)$ is normal and in $\Hc_2$ by (H2). For $j\ge2$,
-$c_{j-1}\,u\,(y\,u)\to c_{j-2}\,(y\,u)\,(u\,(y\,u))$ contains $u\,(y\,u)$, which has no hnf.
+$\iota\,y\to\sigma_j\,y\,(Q\,y)$. If $Q$ has two items, $Q\,y$ has no hnf (Lemma~\ref{lem:dead}(b)), and
+$\iota\,y$ does not normalize. So
+$Q=S\,Q'$ with $Q'\in\Hc$, and $u=Q\,y$ is normal and in $\Zc$ by (H2) or (H3). If $j=0$,
+$S\,y\,u$ is normal and in $\Zc$ by (H2) or (H3). If $j\ge1$, $\sigma_j\,y\,u\to \sigma_{j-1}\,u\,(y\,u)$, and
+$y\,u$ has no hnf unless $y=S\,y'$; then $y\,u=S\,y'\,u\in\Zc$. For $j=1$ the term
+$S\,u\,(S\,y'\,u)$ is normal and in $\Zc$ by (H2). For $j\ge2$,
+$\sigma_{j-1}\,u\,(y\,u)\to \sigma_{j-2}\,(y\,u)\,(u\,(y\,u))$ contains $u\,(y\,u)$, which has no hnf.
 \end{proof}
 
 \begin{theorem}\label{thm:closure}
@@ -464,23 +466,23 @@ new state is in $\Gc$:
 We use Lemma~\ref{lem:pair} throughout. First, for $x\in\Hc\cup\Ic\cup\Cc$ and $y\in\Hc\cup\Ic$ with
 $x\,y$ normalizing:
 \begin{itemize}
-\item[($*$)] $x\notin\Hc_2$ (Lemma~\ref{lem:dead}(b)); if $x=S\,x'\in\Hc$, then $\nf(x\,y)=S\,x'\,y\in\Hc_2$
-  by (H2) or (H3); if $x\in\Ic$ and $y\in\Hc$, then $\nf(x\,y)\in\Hc_2$ (Lemma~\ref{lem:inert}); if
-  $x=c_j$ and $y\in\Hc$, then $x\,y$ is $S\,y\in\Hc$ or $S\,c_{j-1}\,y\in\Ic$.
+\item[($*$)] $x\notin\Zc$ (Lemma~\ref{lem:dead}(b)); if $x=S\,x'\in\Hc$, then $\nf(x\,y)=S\,x'\,y\in\Zc$
+  by (H2) or (H3); if $x\in\Ic$ and $y\in\Hc$, then $\nf(x\,y)\in\Zc$ (Lemma~\ref{lem:inert}); if
+  $x=\sigma_j$ and $y\in\Hc$, then $x\,y$ is $S\,y\in\Hc$ or $S\,\sigma_{j-1}\,y\in\Ic$.
 \end{itemize}
 (i) Let $Z^0=S^m\,P_0$ with $P_0=\pop(Z)$ (Lemma~\ref{lem:ch}). For $i<m$, $A^i=S^{m-i}\,P_0$ and
 $A^i\,W^i$ is normal with two items, so $A^{i+1}=S^{m-i-1}\,P_0$ and $B^{i+1}=W^i$. Hence $k\ge m$,
 $W^1=\nf(B^0\,W)$ and $W^{i+1}=\nf(W^{i-1}\,W^i)$ for $1\le i<m$, and these exist. We show
 $W^i\in\Hc\cup\Ic$ for $i\le m$, with $W^i\in\Ic$ only if $i=1$ and $m\ge2$. If $m\ge1$, then
-$B^0\in\Hc\cup\Ic\cup\Cc$, and by ($*$) $W^1\in\Hc\cup\Ic$, inert only if $B^0\in\Cc\setminus\{S\}$,
+$B^0\in\Hc\cup\Ic\cup\Cc$, and by ($*$) $W^1\in\Hc\cup\Ic$, in $\Ic$ only if $B^0\in\Cc\setminus\{S\}$,
 which forces $m\ge2$ (Lemma~\ref{lem:ch}(b)). For $1\le i<m$, $W^{i-1}$ is not $S$ (it is $W\in\Hc$
-or the normal form of an application) and not in $\Hc_2$, since $\nf(W^{i-1}\,W^i)$ exists; if it
-is inert, $i-1=1$ and $W^i=W^2\in\Hc$. By ($*$), $W^{i+1}\in\Hc_2$. So $W^m\in\Hc$, $P_0\,W^m$ has
+or the normal form of an application) and not in $\Zc$, since $\nf(W^{i-1}\,W^i)$ exists; if it
+is in $\Ic$, then $i-1=1$ and $W^i=W^2\in\Hc$. By ($*$), $W^{i+1}\in\Zc$. So $W^m\in\Hc$, $P_0\,W^m$ has
 no hnf (Lemma~\ref{lem:dead}(b)), $k=m$, and the new state is in $\Gc$. If $W$ has two items and
 $m\ge1$, the normal form of $W\,W^1$ is the tooth or $W^2$, but $W\,W^1$ has no hnf; so $m=0$.
 
 (ii), (iii) $Z=S\,T\,b$ with $b=S$ resp.\ $T$. As $T\,W\to S\,W\,(S\,W)$, normal, we get $A^1=W$,
-$B^1=S\,W$, $W^1=\nf(b\,W)$, which is $S\,W\in\Hc$ resp.\ $D(W)\in\Hc_2$ (H1, H2). $W$ is self-dead
+$B^1=S\,W$, $W^1=\nf(b\,W)$, which is $S\,W\in\Hc$ resp.\ $D(W)\in\Zc$ (H1, H2). $W$ is self-dead
 (Lemma~\ref{lem:dead}(c)), so $A^1\,W^1$ has no hnf, $k=1$, and $N=\nf(S\,W\,W^1)=S\,W\,W^1$.
 
 (iv) $\nf(T\,(S\,V))=S\,(S\,V)\,(S\,(S\,V))$, so $A^1=S\,V$, $B^1=W^1=S\,(S\,V)$. $A^1\,W^1$ is normal,
@@ -490,14 +492,14 @@ so $k=2$.
 Finally $Z=X$ over $W=S\,W'$ with $W'=S\,V'$, and $Z=U$ over a one-item $W=S\,V$, do not occur.
 In the first, as in (ii), $A^1=W$, $B^1=W^1=S\,W$; then $A^2=W'$, $B^2=S\,W$, $W^2=D(W)$; then
 $A^3=V'$, $B^3=D(W)$, $W^3=S\,W\,D(W)$, and $\nf(B^3\,W^3)$, the tooth or $W^4$, would be the normal
-form of $D(W)\,(S\,W\,D(W))$, a member of $\Hc_2$ applied to a member of $\Hc$ (H3). In the second,
+form of $D(W)\in\Zc$ applied to $S\,W\,D(W)\in\Hc$ (H3). In the second,
 $A^1=W$, $B^1=S\,W$, $W^1=D(W)$; $A^2=V$, $B^2=D(W)$, $W^2=S\,W\,D(W)$, and $\nf(B^2\,W^2)$ fails
 in the same way.
 \end{proof}
 
 \begin{corollary}\label{cor:recur}
 Let $(Z,W)\in\Gc$ have only normalizing teeth, and let $(A_n,W_n)$ be its run. Every
-$(A_n,W_n)$ is in $\Gc$, and for every $n_0$ there is $n>n_0$ with $A_{n-1}\in\{X,U\}$ and $W_{n-1}\in\Hc_2$, so that move $n$
+$(A_n,W_n)$ is in $\Gc$, and for every $n_0$ there is $n>n_0$ with $A_{n-1}\in\{X,U\}$ and $W_{n-1}\in\Zc$, so that move $n$
 is \textup{(ii)} or \textup{(iii)}.
 \end{corollary}
 
@@ -507,22 +509,23 @@ By Theorem~\ref{thm:closure}. Moves (i) make the stack smaller, so moves (ii)--(
 other than (i) is (ii) or (iii).
 \end{proof}
 
-\section{Proof of Theorem~\ref{thm:main}}
+\section{Proof of Theorem~\ref{thm:main}}\label{sec:proof}
 
 \begin{proposition}\label{prop:meet}
-Let $P_0\in\Gc$ and $Q_0$ be normal pairs whose teeth all normalize, with the same normal forms
-$N_n$. Their runs reach equal states at some index.
+Let $\pi\in\Gc$ and $\pi^\circ$ be normal pairs whose teeth all normalize, with the same normal
+forms $N_n$. Their runs reach equal states at some index.
 \end{proposition}
 
 \begin{proof}
-Let $(A_n,W_n)$ and $(A^\circ_n,W^\circ_n)$ be the runs of $P_0$ and $Q_0$. Choose $n_0$ such that
-two of the moves $1,\dots,n_0$ of $Q_0$ are raising. Then $W^\circ_i\notin\{S,T\}$ for $i\ge n_0$, and from the second raising move of $Q_0$ on, the
+Let $(A_n,W_n)$ and $(A^\circ_n,W^\circ_n)$ be the runs of $\pi$ and $\pi^\circ$. Choose $n_0$ such
+that two of the moves $1,\dots,n_0$ of $\pi^\circ$ are raising. Then $W^\circ_i\notin\{S,T\}$ for $i\ge n_0$, and from the second raising move of $\pi^\circ$ on, the
 heap before each move is not $S$.
-By Corollary~\ref{cor:recur} take $n>n_0$ such that move $n$ of $P_0$ is (ii) or (iii): with
-$W=W_{n-1}\in\Hc_2$, $(A_n,W_n)=(W,V)$ with $V=S\,W$ resp.\ $V=D(W)$, and $N_n=S\,W\,V$. $W$ is
-self-dead (Lemma~\ref{lem:dead}(c)), and so is $D(W)\in\Hc_2$ (H2). In move $n$ of $Q_0$ let $k$,
+By Corollary~\ref{cor:recur} take $n>n_0$ such that move $n$ of $\pi$ is (ii) or (iii): with
+$W=W_{n-1}\in\Zc$, $(A_n,W_n)=(W,V)$ with $V=S\,W$ resp.\ $V=D(W)$, and $N_n=S\,W\,V$. $W$ is
+self-dead (Lemma~\ref{lem:dead}(c)), and so is $D(W)\in\Zc$ (H2). In move $n$ of $\pi^\circ$ let $k$,
 $B=B^k$, $(A_q,W_q)=(A^\circ_n,W^\circ_n)$ be as in Lemma~\ref{lem:pair}, so $N_n=\nf(B\,W_q)$. If
-$B$ has at most one item, $B\,W_q=S\,W\,V$, so $B=S\,W$ and $W_q=V$. If $B$ has two items,
+$B$ has at most one item, $B\,W_q=S\,W\,V$; as $S\,W_q$ has one item, $B\ne S$, so $B=S\,W$ and
+$W_q=V$. If $B$ has two items,
 Lemma~\ref{lem:fa} gives $W_q\sqs W$. Four cases remain.
 
 \emph{$W_q=W$.} $(W,V)$ and $(A_q,W)$ are normal pairs with $W\psq V$, and their first teeth both
@@ -532,14 +535,14 @@ normalize to $N_{n+1}$, against Lemma~\ref{lem:alpha}.
 $N_n=S\,W\,(S\,W)$ resp.\ $S\,W\,(S\,W\,(S\,W))$, $W_q\in\{S,T\}$ or $W_q=W$: both are excluded.
 
 \emph{$W_q=V=S\,W$.} If $k\ge1$, Lemma~\ref{lem:dh}(b), with $H=W^\circ_{n-1}\ne S$, gives
-$(A_q,W_q)=(W,S\,W)=(A_n,W_n)$. If $k=0$, $Q_0$ pops $B=S\,W$ over $W^\circ_{n-1}=S\,W$, so
-$A^\circ_{n-1}=S\,A_q\,(S\,W)$. Let $j<n$ be the last raising move of $Q_0$. Its new heap is
+$(A_q,W_q)=(W,S\,W)=(A_n,W_n)$. If $k=0$, $\pi^\circ$ pops $B=S\,W$ over $W^\circ_{n-1}=S\,W$, so
+$A^\circ_{n-1}=S\,A_q\,(S\,W)$. Let $j<n$ be the last raising move of $\pi^\circ$. Its new heap is
 $W^\circ_j=W^\circ_{n-1}=S\,W$, and the heap before it is not $S$, so $A^\circ_j=W$ by
 Lemma~\ref{lem:dh}(b). The pops $j+1,\dots,n-1$ take proper subterms, so $A^\circ_{n-1}$ is a
 subterm of $W$; but it is larger than $W$.
 
 \emph{$W_q=V=D(W)$.} Both runs now stand on the self-dead heap $V$. Let $m>n$ be least such that
-move $m$ of $P_0$ or of $Q_0$ is raising; it exists, since raising moves recur. Before $m$ both runs
+move $m$ of $\pi$ or of $\pi^\circ$ is raising; it exists, since raising moves recur. Before $m$ both runs
 pop and keep the heap $V$. By Lemma~\ref{lem:dh}(a) a raising move at $m$ leads to $(V,V')$ with
 $V'=\nf(b\,V)$ and tooth $N_m=S\,V\,V'$. If both runs raise, their new heaps are both the second
 item of $N_m$, and the states are equal. If one raises and the other pops, they stand at $(V,V')$
@@ -548,19 +551,19 @@ Lemma~\ref{lem:alpha}.
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:main}]
-By L5, $\rest^e(q)$ has no hnf and its teeth are convertible with $\tau_{e+i}(p)$ and with the teeth
-of $Z\,W$, so they normalize. By Lemma~\ref{lem:reach}, $\rest^{e+d}(q)\conv Q_0$ for some $d$ and
-some normal pair $Q_0$. Let $P_0$ be the state of the run of $(Z,W)$ at index $d$; it is in $\Gc$
-(Corollary~\ref{cor:recur}) and $\rest^{e+d}(p)\conv P_0$. The teeth of $P_0$ and $Q_0$ are
+By the definition of $\rest$, $\rest^e(q)$ has no hnf; by L5 its teeth are convertible with
+$\tau_{e+i}(p)$ and with the teeth of $Z\,W$, so they normalize. By Lemma~\ref{lem:reach}, $\rest^{e+d}(q)\conv\pi^\circ$ for some $d$ and
+some normal pair $\pi^\circ$. Let $\pi$ be the state of the run of $(Z,W)$ at index $d$; it is in $\Gc$
+(Corollary~\ref{cor:recur}) and $\rest^{e+d}(p)\conv\pi$. The teeth of $\pi$ and $\pi^\circ$ are
 convertible with $\tau_{e+d+i}(p)\conv\tau_{e+d+i}(q)$, so they have the same normal forms (CR). By
-Proposition~\ref{prop:meet} the runs of $P_0$ and $Q_0$ reach equal states at some index $n$, so
+Proposition~\ref{prop:meet} the runs of $\pi$ and $\pi^\circ$ reach equal states at some index $n$, so
 $\rest^{e+d+n}(p)\conv\rest^{e+d+n}(q)$ (L5), and L6 gives $p\conv q$.
 \end{proof}
 
 \section{The two families}\label{sec:families}
 
 \begin{lemma}\label{lem:four}
-Let $a,b,c,w,W$ be closed.
+Let $a,b,c,w,W$ be closed. In each case below the term has no hnf.
 \textup{(a)} If $a\,w$ has no hnf, the move of $S\,a\,c\,w$ has tooth $c\,w$ and rest $a\,w$.
 \textup{(b)} If $W\,(b\,W)$ has no hnf, the move of $S\,T\,b\,W$ has tooth $S\,W\,(b\,W)$ and rest
 $W\,(b\,W)$.
@@ -568,7 +571,6 @@ $W\,(b\,W)$.
 $a\,(c\,w)$.
 \textup{(d)} If $a\,D(S\,a)$ has no hnf, the move of $X\,(S\,a)$ has tooth $S\,(S\,a)\,D(S\,a)$ and rest
 $a\,D(S\,a)$.
-In each case the term has no hnf.
 \end{lemma}
 
 \begin{proof}
@@ -588,19 +590,19 @@ is literal, so $a_2=a$, $b_2=S\,v$, $w_2=D(v)$; $k=2$.
 \end{proof}
 
 \begin{proof}[Proof of Corollary~\ref{cor:U}]
-$(U_j,U_m)\in\Gc$, and $U_j\,U_m$ has no hnf (Lemma~\ref{lem:dead}(b)). For $j\ge1$,
+$(U_j,U_m)\in\Gc$ by (H0), (H2), and $U_j\,U_m$ has no hnf (Lemma~\ref{lem:dead}(b)). For $j\ge1$,
 $U_j=S\,U_{j-1}\,(S\,U_{j-1})$, and Lemma~\ref{lem:four}(a) gives the normal tooth
 $S\,U_{j-1}\,U_m$ and the rest $U_{j-1}\,U_m$. For $j=0$, Lemma~\ref{lem:four}(b) with $b=T$
 ($U_m$ is self-dead) gives the tooth $S\,U_m\,(T\,U_m)\red S\,U_m\,U_{m+1}$ and the rest
-$U_m\,(T\,U_m)\conv U_m\,U_{m+1}$. By induction and L5 every tooth normalizes. Apply
+$U_m\,(T\,U_m)\conv U_m\,U_{m+1}$. So every state is convertible with some $U_{j'}\,U_{m'}$, every
+move is one of these two, and each tooth normalizes (L5). Apply
 Theorem~\ref{thm:main}.
 \end{proof}
 
 For the second family let $G_0=D(S\,Y)$, $J_{e+1}=S\,(S\,Y)\,(S\,G_e)$ and
-$G_{e+1}=S\,G_e\,(S\,J_{e+1})$. By (H1)--(H3), $Y$, $G_e$, $J_e\in\Hc_2$ and $S\,Y$, $S\,G_e$,
-$S\,J_e\in\Hc$. The run of $X\,Y$ is literally the following, each line by
-Lemma~\ref{lem:four}; the lines marked $\ell$ occur only for $Y\ne X$, and for $Y=X$ the term
-$Y\,V$ in the other lines reads $X\,V$.
+$G_{e+1}=S\,G_e\,(S\,J_{e+1})$. By (H0)--(H3), $Y$, $G_e$, $J_e\in\Zc$ and $S\,Y$, $S\,G_e$,
+$S\,J_e\in\Hc$. The run of $X\,Y$ is the following, each line by
+Lemma~\ref{lem:four}; the lines marked $\ell$ occur only for $Y\ne X$.
 \begin{center}\small
 $\begin{array}{@{}llll@{}}
 \text{move} & \text{term}\to\text{rest} & \text{tooth} & \text{by}\\[2pt]
@@ -619,44 +621,45 @@ $\begin{array}{@{}llll@{}}
 After (2) comes phase $0$; phase $e\ge0$ is $(\ell_e)$, $(\alpha_e)$, $(\beta_{e,e}),\dots,(\beta_{e,1})$,
 $(\gamma_e)$, $(\ell'_e)$, $(\delta_e)$, $(\varepsilon_e)$, followed by phase $e+1$. In $(\gamma_e)$,
 $G_0=S\,(S\,Y)\,(S\,(S\,Y))$ and $S\,(S\,Y)\,(S\,G_e)=J_{e+1}$; in $(\varepsilon_e)$,
-$S\,G_e\,(S\,J_{e+1})=G_{e+1}$. Every hypothesis of Lemma~\ref{lem:four} used is that a member of
-$\Hc_2$ applied to a member of $\Hc$ has no hnf (Lemma~\ref{lem:dead}(b)); in (b), $W\,(S\,W)$ with
-$W\in\{Y,G_e,J_{e+1}\}$.
+$S\,G_e\,(S\,J_{e+1})=G_{e+1}$. Each hypothesis of Lemma~\ref{lem:four} says that a member of
+$\Zc$ applied to a member of $\Hc$ has no hnf (Lemma~\ref{lem:dead}(b)); in (b) it reads
+$W\,(S\,W)$ with $W\in\{Y,G_e,J_{e+1}\}$.
 
 \begin{proof}[Proof of Corollary~\ref{cor:X}]
 $(X,Y)\in\Gc$. Every tooth in the table is normal except the teeth $c\,V$ of the lines $\ell$. If
 $c\in\Kc$ they normalize (Lemma~\ref{lem:K}(a)), and Theorem~\ref{thm:main} applies. If $c\notin\Kc$,
-the tooth $c\,G_0$ of $(\ell_0)$ does not normalize, since $G_0\in\Hc_2$ is self-dead
-(Lemmas~\ref{lem:dead}(c) and~\ref{lem:K}(c)).
+the tooth $c\,G_0$ of $(\ell_0)$ does not normalize, since $G_0\in\Zc$ is self-dead
+(Lemmas~\ref{lem:dead}(c) and~\ref{lem:K}(b)).
 \end{proof}
 
-\section{An open question}
+\section{An open question}\label{sec:open}
 
-Call a move of a normal pair a \emph{refill} if some entry is not literal. An all-literal move
-replaces the stack $A=S\,A^0\,B^0$ by $A^k$ with $A^0=S^k\,A^k$, a proper subterm; so refills recur.
-
-\begin{conjecture}\label{conj:entry}
-The run of every normal pair whose teeth all normalize reaches $\Gc$; more sharply, its state after
-its second refill is in $\Gc$.
+\begin{conjecture}[CT]
+If $p,q\in\Ter$ have no hnf and $\tau_n(p)\conv\tau_n(q)$ for all $n\ge1$, then $p\conv q$.
 \end{conjecture}
 
-\noindent Since refills recur, the sharper form implies the first. With Lemma~\ref{lem:reach} and
-Theorem~\ref{thm:main}, the first gives CT against every $p$ whose teeth normalize. A proof must
-control what the first refills do to arbitrary initial stacks and heaps, before the run is a
-counter.
+\noindent Call a move of a normal pair a \emph{refill} if some entry is not literal. An all-literal
+move replaces the stack $A=S\,A^0\,B^0$ by $A^k$ with $A^0=S^k\,A^k$, a proper subterm; so refills
+recur.
+
+\begin{conjecture}\label{conj:entry}
+In the run of every normal pair whose teeth all normalize, the state after the second refill is
+in $\Gc$.
+\end{conjecture}
+
+\noindent Since refills recur, it implies the weaker form, that every such run reaches $\Gc$, which
+with Lemma~\ref{lem:reach} and Theorem~\ref{thm:main} gives CT against every $p$ whose teeth
+normalize.
 
 \section*{Data availability}
 \sloppy
-The proofs in this paper are not mechanized. Lemma~\ref{lem:tables} and (M2) are. In
-\texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), version 1.20.0 (merge commit
-\texttt{20d8271}), module \texttt{Ski/Lock1Tables.lean}, with only \texttt{propext} and
-\texttt{Quot.sound}: T16 and T17 are \texttt{Lock1Tables.T16} and \texttt{Lock1Tables.T17}, proved by
-\texttt{decide +kernel} ($\Theta_1$, $\Theta_2$, $CB$, $IB$ are \texttt{TH1}, \texttt{TH2},
-\texttt{CB}, \texttt{IB}), with the term forms \texttt{T16\_dead} and \texttt{T17\_dead}; the folds of
-$X$ and $U$ are \texttt{fold\_X} and \texttt{fold\_U}; (M2) is \texttt{hnfless\_iff}, from
-\texttt{HnfSound.sound} and \texttt{HnfS.no\_hnf\_of\_bot}; $\Self$ and the self-deadness of terms
-with block in $\Self$ are \texttt{mem\_SELF} and \texttt{self\_dead}. (CR), (Std) and (F2) are as
-in~\citep{s11}: \texttt{church\_rosser}, \texttt{wsteps\_split} and \texttt{Full.run\_total}.
+The proofs in this paper are not mechanized; Lemma~\ref{lem:tables} and (M2) are. In
+\texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), module \texttt{Ski/Lock1Tables.lean}, with
+only \texttt{propext} and \texttt{Quot.sound}: \texttt{fold\_X}, \texttt{fold\_U}, \texttt{T16},
+\texttt{T17} (by \texttt{decide +kernel}), \texttt{T16\_dead}, \texttt{T17\_dead},
+\texttt{hnfless\_iff} (M2), \texttt{mem\_SELF} and \texttt{self\_dead}. \texttt{lean-ski} also
+mechanizes (CR), (Std) and (F2) as \texttt{church\_rosser}, \texttt{wsteps\_split} and
+\texttt{Full.run\_total}.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

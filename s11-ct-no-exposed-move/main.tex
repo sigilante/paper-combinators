@@ -41,8 +41,8 @@ $p_K$. The same holds, with the teeth shifted, for every state of $p_K$'s run. N
 exposes the state that produced it, so the proof cannot read the state from one tooth. Instead we
 show that a second run with the same teeth satisfies the spine equations of $p_K$, and that among
 the reducts of an explicit set of terms these equations have, up to convertibility, only the
-solutions given by $p_K$'s run. The proof is not mechanized and case-splits on whether a term has a
-head normal form.
+solutions given by $p_K$'s run. The proof is mechanized in Lean~4, and its only axioms are
+propositional extensionality and quotient soundness.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, head normal form, convertibility, standardization}
@@ -99,11 +99,14 @@ $i\ge1$ satisfies $q\conv\rest^n(\pK)$.
 
 \emph{Assumptions.} The proof uses Church--Rosser (CR), standardization (Std) and (F2), all stated
 in Section~\ref{sec:head}. The cited proof of (F2)~\citep{s1,s3} uses the 38-element block model
-of~\citep{s1} and Waldmann's top-termination theorem~\citep[Theorem~3]{s3}; no proof below uses the
-block model otherwise. The proof case-splits on whether a term has a head normal form, in
-Lemma~\ref{lem:moves} and wherever a term's hnf is taken or its absence assumed. The block model
-gives a decision procedure for that property~\citep[Proposition~4 and Theorem~9]{s1}; we have not
-audited the argument for other classical principles.
+of~\citep{s1} and Waldmann's top-termination theorem~\citep[Theorem~3]{s3}. The proof splits on
+whether a term has an hnf, in Lemma~\ref{lem:moves} and wherever a term's hnf is taken or its
+absence is assumed. The block model decides that property~\citep[Proposition~4 and
+Theorem~9]{s1}, and the mechanization splits by that decision, without \texttt{Classical.choice}.
+The mechanization also uses the block model to define stable frames, hence $\rest$ and $\tau_i$;
+to show that a term without an hnf has none after application or reduction; to prove
+Lemma~\ref{lem:inv}; and to check, by kernel evaluation, finite table facts about the terms of $\B$
+(Section~\ref{sec:world}) and about two blocks that absorb every block on their right.
 
 \section{Head runs}\label{sec:head}
 
@@ -563,10 +566,14 @@ set like $\B$.
 
 \section*{Data availability}
 \sloppy
-The proof is not mechanized. In \texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), with only
-\texttt{propext} and \texttt{Quot.sound}: (CR) and (Std) are \texttt{church\_rosser} and
-\texttt{wsteps\_split} for $SKI$-terms, hence for $S$-terms; (F2) is \texttt{Full.run\_total}, through
-mechanized top-termination.
+The proof is mechanized in \texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}) and uses only
+the axioms \texttt{propext} and \texttt{Quot.sound}. Theorem~\ref{thm:main} is \texttt{S11.ct\_pK},
+and Corollary~\ref{cor:rests} is \texttt{S11.ct\_pK\_rest}. The gate \texttt{Ski/S11Audit.lean}
+checks the axioms of every declaration of the mechanization. There, convertibility is weak
+convertibility over $SKI$; since $S$-terms reduce only to $S$-terms, by (CR) it agrees with $\conv$
+on $S$-terms (\texttt{Conv.conv\_iff\_join}). (CR) and (Std) are \texttt{church\_rosser} and
+\texttt{wsteps\_split}; (F2) is \texttt{Full.run\_total}, which is proved from mechanized
+top-termination (\texttt{TopTerm.reach\_all}).
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

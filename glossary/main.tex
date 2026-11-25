@@ -1,0 +1,2280 @@
+%% A living glossary for the combinator-S series, S1--S12 (no S10 yet) and the ancillary SIM paper, with
+%% the working labels of the unpublished Lock 1 notes in a separate part.  Started 2026-11-26.
+%% Build: `make` (latexmk); read main.log for undefined references and overfull boxes.
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bm}
+
+\raggedbottom
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\red}{\twoheadrightarrow}
+\newcommand{\hred}{\twoheadrightarrow_h}
+\newcommand{\conv}{=_\beta}
+\newcommand{\sz}[1]{\lvert#1\rvert}
+\newcommand{\rest}{\mathrm{rest}}
+\newcommand{\nf}{\mathrm{nf}}
+\newcommand{\fold}{\mathrm{fold}}
+\newcommand{\pop}{\mathrm{pop}}
+\newcommand{\Hc}{\mathcal H}
+\newcommand{\Ic}{\mathcal I}
+\newcommand{\Gc}{\mathcal G}
+\newcommand{\Kc}{\mathcal K}
+\newcommand{\Cc}{\mathcal C}
+\newcommand{\Zc}{\mathcal Z}
+\newcommand{\Self}{\mathrm{SELF}}
+\newcommand{\Bk}{\mathfrak B}
+\newcommand{\sqs}{\sqsubseteq}
+\newcommand{\psq}{\sqsubset}
+
+%% ---------------------------------------------------------------------------------------------
+%% HOW TO ADD AN ENTRY
+%%
+%%   \begin{entry}{g:slug}{Headword}{YYYY-MM-DD}
+%%   \src{S12, \S1}
+%%   \lean{\texttt{Module.name}}
+%%   One to three sentences, paraphrased from the source.  \see{g:other}
+%%   \end{entry}
+%%
+%% Placement.  Entries are alphabetical by headword within each part.  Headwords that start with a
+%% numeral come first.  A symbol sorts by the name of its letter ($\beta$ under "beta", $\Hc$ under "H").
+%% Slugs: g:<word> for terms, g:sym-<letter> for symbol entries, g:wl-<label> for Part II.
+%%
+%% Slots, in this order, each on its own line: \src{...}; in Part II \status{...} and, if a paper
+%% uses the label, \appears{...}; then \lean{...} (optional, only for a declaration that exists in
+%% lean-ski); then the text.  \see{g:slug} (optional) cross-references another entry.
+%% Location labels: "S6, Def.~3" or "S11, \S2"; copy the number from the paper's main.aux.  For notes:
+%% "LOCK1-CT \S24".  A new paper: add its bib entry to refs.bib and a line to the list in the
+%% subsection "The papers".
+%%
+%% Several meanings: replace \src by one \sense{S6, Def.~3} per meaning; put \lean at the end of its
+%% sense.  For an overloaded symbol, write "Overloaded." as the first line of the entry.
+%%
+%% Status grammar (Part II only): \status{<state> [tag]; <conditions>}, where <state> is one of
+%% proved, conditional, open, refuted, computed, and <tag> is [P], [C], [K] or [Conj] (see the entry
+%% "status tags").  Conditions name their inputs, e.g. "given (S1), T10 [K], T20 [C]".  A pure
+%% definition has no \status.  Repair codes such as W26.3 name repair lines of a review in the notes.
+%%
+%% Style.  A term entry opens with its genus ("A <kind> that ..."); a result entry opens with the
+%% result word ("Lemma.", "Theorem.", "Conjecture.").  Present tense, active voice, one to three
+%% sentences (per sense in a multi-sense entry).  Write a name or a count instead of "some",
+%% "several", "certain" or "the data".  Make no claim about the current state of another file.
+%%
+%% Dates.  The date is the day the entry was added or its content last changed; a typo fix does not
+%% move it.
+%%
+%% Notation.  A symbol also gets a row \sym{symbol}{meaning}{source}{g:slug} in the notation table:
+%% the symbol in math mode, a meaning of at most eight words, the source label, and the slug of the
+%% explaining entry.  Rows for Part II labels go below the "Working labels" line.
+%% ---------------------------------------------------------------------------------------------
+\makeatletter
+\newcounter{sense}
+\newenvironment{entry}[3]{%
+  \par\addvspace{\medskipamount}\noindent\phantomsection
+  \def\@currentlabel{#2}\label{#1}\setcounter{sense}{0}\raggedright\emergencystretch=3em%
+  \textbf{#2}\hfill{\footnotesize\textsf{#3}}\par\nopagebreak\noindent\ignorespaces}%
+  {\par}
+\makeatother
+\newcommand{\src}[1]{\textsf{Source:} #1.\enskip}
+\newcommand{\lean}[1]{\textsf{Lean:} #1.\enskip}
+\newcommand{\status}[1]{\textsf{Status:} #1.\enskip}
+\newcommand{\appears}[1]{\textsf{In papers:} #1.\enskip}
+\newcommand{\sense}[1]{\par\noindent\stepcounter{sense}(\arabic{sense})~[#1]\enskip}
+\renewcommand{\see}[1]{$\rightarrow$\,\emph{\ref{#1}}}
+\newcommand{\sym}[4]{#1 & #2 & #3 & \pageref{#4}\\}
+
+\title[A Glossary for the Combinator $S$ Series]{A Glossary for the Combinator $\bm{S}$ Series}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+This glossary lists the terms, symbols, named results and conjectures of the papers on the
+combinator $S$. Each entry names the paper and the definition or section that introduces the item,
+gives a short definition, and cites the Lean declaration, if one exists. Part~II records the working
+labels of the unpublished Lock~1 notes and the current status of each. The glossary grows with the
+series.
+\end{abstract}
+\maketitle
+
+\section*{About this glossary}
+
+\subsection*{Purpose}
+This glossary fixes the vocabulary of the series. The papers reuse one another's terms, and some
+words and letters mean different things in different papers. Each entry names the paper that
+defines a term, gives the definition or section number, and paraphrases the definition in one or two
+sentences. An entry does not replace the paper. When a word has several meanings, its entry lists
+them as numbered senses; when a symbol is overloaded, the entry says so.
+
+\subsection*{How to cite an entry}
+For the mathematics, cite the paper that defines the term, not the glossary. To cite the glossary
+itself, give the headword and the date at the right of the entry, for example ``Glossary, entry
+\emph{stable frame} (2026-11-26)''.
+
+\subsection*{Dating}
+Entries are added over time. The date at the right of an entry is the day it was added or last
+changed; any change of content moves the date. A status in Part~II holds on that date only and may
+have changed since.
+
+\subsection*{Labels}
+``S6, Def.~3'' names a numbered environment of that paper; all theorem-like environments of a paper
+share one counter. ``S11, \S2'' names a section. ``Lean'' names a declaration of
+\texttt{lean-ski}~\citep{leanski}, written in Lean~4~\citep{lean4}.
+
+\subsection*{The papers}
+S1~\citep{s1} head normal forms; S2~\citep{s2} productive terms; S3~\citep{s3} infinitary normal
+forms; S4~\citep{s4} join bounds and the word problem; S5~\citep{s5} depth-two prefixes;
+S6~\citep{s6} prefix regularity; S7~\citep{s7} no ground loops; S8~\citep{s8} plain contexts;
+S9~\citep{s9} consumption; S11~\citep{s11} one term determined by its teeth; S12~\citep{s12} counter
+runs; and the ancillary SIM~\citep{simech}, which mechanizes the self-interpreter of~\citep{davis-si}.
+There is no S10. Where its usage differs, an entry cites an earlier draft of S8 on combs as
+``s8-combs (draft)''. The background sources are \emph{Dance of the Starlings}~\citep{dots},
+Waldmann's work~\citep{waldmann-thesis,waldmann-ic}, and the standard
+references~\citep{barendregt,terese}.
+
+{\raggedright Part~II cites the notes by file name: LOCK1-CT, LOCK1-CTB, LOCK1-structure,
+LOCK1-NTD-probe, LOCK1-INJ, A1-lock1-S3 and OPEN-QUESTIONS. It marks status with the tags explained
+in the entry \emph{status tags}. The notes are unpublished; a label from them is a working name, not
+a published result.\par}
+
+\section*{Notation}
+
+Each row gives a symbol, a short meaning, the defining paper or note, and the page of the entry that
+explains it. Overloaded letters have several rows or a list of papers.
+
+\begingroup\small
+\begin{longtable}{@{}>{\raggedright}p{0.2\textwidth}>{\raggedright}p{0.4\textwidth}%
+>{\raggedright}p{0.24\textwidth}l@{}}
+Symbol & Meaning & Source & Page\\ \hline\endhead
+\sym{$\Ter$}{closed terms built from $S$}{S1, \S2}{g:closed-s-terms}
+\sym{$\Ter^{\infty}$}{finite and infinite $S$-trees}{S3, \S2}{g:closed-s-terms}
+\sym{$\to$, $\red$}{weak reduction, its closure}{S1, \S2}{g:weak-reduction}
+\sym{$\to_h$, $\hred$}{head step, head reduction}{S2, \S2; S11, \S1}{g:head-step}
+\sym{$\conv$}{convertibility}{S4, \S1}{g:conv}
+\sym{$\sz{t}$}{number of occurrences of $S$}{S2, \S2}{g:size}
+\sym{$\nf(t)$}{normal form of $t$}{S12, \S1}{g:normalizes}
+\sym{$h(t)$}{hnf reached by head reduction}{S2, \S2}{g:sym-h}
+\sym{$\operatorname{fr}(t)$}{spine (list of items) of $t$}{S1, \S2}{g:spine}
+\sym{$[u_1,\dots,u_m]$}{the frame $S\,u_1\cdots u_m$}{S8, \S1}{g:frame}
+\sym{$S^m\,t$}{$m$ nested copies of $S$}{S12, \S1}{g:sym-Sm}
+\sym{$\tau_n(t)$}{$n$-th tooth}{S11, \S1}{g:tooth}
+\sym{$\rest(t)$}{function part of first stable frame}{S11, \S1}{g:rest}
+\sym{$\sqsubseteq$, $\sqsubset$}{right suffix, proper right suffix}{S12, \S2}{g:right-suffix}
+\sym{$t^{\infty}$}{infinitary normal form}{S3, Thm.~7}{g:t-infty}
+\sym{$\mathrm{BT}(t)$}{B\"ohm tree}{S2, \S2}{g:bohm-tree}
+\sym{$\mathrm{BeT}(t)$}{Berarducci tree}{S3, \S4}{g:berarducci-tree}
+\sym{$\mathrm{Fin}(t)$}{boundedly many root steps}{S3, \S3}{g:fin}
+\sym{$\mathrm{NF}(d,t,P)$}{depth-$d$ prefix of $t^{\infty}$}{S3, Rem.~8}{g:depth-prefix}
+\sym{$\pi'_d(t)$, $\pi_d(t)$}{depth-$d$ prefix, head $S$ shown}{S5, Def.~1; S6, \S2}{g:depth-prefix}
+\sym{$\bullet$}{hole in a prefix}{S5, Def.~1}{g:hole}
+\sym{$\bar t$}{fold into an $S$-model}{S5, \S2; S6, \S2}{g:fold}
+\sym{$b(t)$, $\fold(t)$}{block of $t$}{S1, \S2; S12, \S5}{g:fold}
+\sym{$c(t)$}{class of $t$}{S2, \S3}{g:fold}
+\sym{$\operatorname{st}(t)$}{product state (class, block)}{S2, \S3}{g:product-state}
+\sym{$O(t)$}{observable over a model}{S6, Def.~3}{g:observable}
+\sym{$\Psi(t)$}{values of first stable frame}{S6, Def.~3}{g:sym-Psi}
+\sym{$M_d$, $o_d$}{finite model for depth-$d$ prefixes}{S6, Thm.~1}{g:prefix-regularity}
+\sym{$\simeq_g$}{finite-index term equivalence}{S6, Thm.~9}{g:finite-index}
+\sym{$\mathrm{rd}$}{right depth}{S7, \S2}{g:right-depth}
+\sym{$a\cdot_k b$}{labelled application}{S7, \S2}{g:labelled-reduction}
+\sym{$\red_f$}{reduction by f-steps}{S7, \S4}{g:f-step}
+\sym{$C[u]$, $E[p]$}{context filled with a term}{S7, \S4; S8, \S1}{g:context}
+\sym{$M\Downarrow_n N$, $M\Uparrow$}{whnf in $n$ steps; none}{SIM, \S1}{g:whnf}
+\sym{$\langle t\rangle$}{Scott encoding}{SIM, \S1}{g:scott-encoding}
+\sym{$A$}{$S\,S\,S$; hypothesis (A); a set}{S2, \S1; S4, \S4}{g:sym-A}
+\sym{$\mathbf B$, $B$, $\mathbb M$}{the 38 blocks}{S1, \S2; S6; S9; S12}{g:block-model}
+\sym{$c$, $c_j$}{weights; class; constant; counter pieces}{S1; S2; S4; S11}{g:sym-c}
+\sym{$D$, $d$, $D(v)$}{373-model; state; metric; $S\,v\,(S\,v)$}{S5; S1; S3; S12}{g:sym-D}
+\sym{$E$}{exempt blocks $\{0,17\}$; a context}{S1, \S4; S8, \S1}{g:sym-E}
+\sym{$G$, $G_e$, $G_1$, $G_2$}{$S\,Q\,Q$; heaps; graphs}{S11; S12; S6}{g:sym-G}
+\sym{$\Gc$}{counter grammar $\Zc\times\Hc$}{S12, Def.~1}{g:counter-grammar}
+\sym{$\Hc$, $\Ic$, $\Zc$}{parts of the counter grammar}{S12, Def.~1}{g:counter-grammar}
+\sym{$\Kc$}{normal $c$ with $c\,W$ normalizing}{S12, \S1}{g:set-K}
+\sym{$P$, $P_k$, $\mathcal P$}{$S\,S\,S$; approximants; right combs}{S2; S3; S4; S6}{g:sym-P}
+\sym{$p_K$}{$S\,(S\,S)\,G\,(Q\,(Q\,G))\,S$}{S11, Thm.~1}{g:pK}
+\sym{$a_m$, $b_m$, $i_m$}{spine and counter of the run of $p_K$}{S11, \S3}{g:pk-run}
+\sym{$Q$, $\mathcal Q$, $Q_k$}{overloaded, see entry}{S1; S3; S4; S6; S9; S11}{g:sym-Q}
+\sym{$r$, $R$}{weight; rejecting class; $S\,S$}{S1; S2; S4}{g:sym-r}
+\sym{$T$, $T_E$}{$S\,S$ (S2, S3); $S\,S\,S$ (S12); a tree}{S2; S8; S12}{g:sym-T}
+\sym{$U$, $U_j$}{$S\,U$ (S3); passive argument (S11); $S\,T\,T$ (S12)}{S3; S11; S12}{g:sym-U}
+\sym{$X$}{overloaded; $S\,T\,S$ in S12}{S1--S3; S8; S12}{g:sym-X}
+\sym{$Y$, $Y_n$}{teeth of $p_K$; $X$ or $S\,X\,c$}{S8; S11; S12}{g:sym-Y}
+\sym{$\sigma_j$, $\Cc$}{combs $S$, $S\,S$, $S\,(S\,S)$, \dots}{S12, \S1}{g:comb}
+\sym{$(A,W)$}{normal pair: stack, heap}{S12, \S2}{g:normal-pair}
+\sym{$N$}{normal form of a tooth}{S12, Lemma~6}{g:new-state}
+\sym{$\mathrm{pop}(Z)$}{two-item core of the first item}{S12, Lemma~15}{g:pop}
+\sym{$\Bk$}{the set of S11, \S5}{S11, \S5}{g:frakB}
+\sym{$\beta$}{block table; subscript of $\conv$}{S1, \S2; S4}{g:sym-beta}
+\sym{$\bot$}{block 36; tree bottom}{S1, \S2; S2; S3}{g:sym-bot}
+\sym{$\gamma$, $\mathsf r$}{39-class table; rejecting class 37}{S2, \S3}{g:sym-gamma}
+\sym{$\delta$, $\circledast$}{35-state automaton; rejecting state}{S1, \S3}{g:automaton-35}
+\sym{$\kappa(x)$}{depth along first items to no hnf}{S11, \S3}{g:kappa}
+\sym{$\varphi$}{blocks to states; model to blocks}{S1, eq.~(2); S5}{g:sym-phi}
+\sym{$\pi$}{potential}{S1, \S4}{g:sym-pi}
+\sym{$\tau(t)$, $\#_S(t)$}{weight tie-breakers}{S1, Thm.~9}{g:sym-tau}
+\sym{$\varpi$}{bound on non-free steps}{S6, Lemma~6}{g:productive-runs}
+\sym{$\Self$}{self-dead blocks}{S12, \S5}{g:self-set}
+\sym{$\Theta_1$, $\Theta_2$, $CB$, $IB$}{block sets of the grammar}{S12, \S5}{g:theta-blocks}
+\sym{$o$}{output map, model to trees}{S5, Thm.~2}{g:sym-o}
+\sym{$\sigma$}{normalizing terms of size $\le M$}{S8, \S3}{g:family}
+\sym{$t_k$, $u_k$}{convertible pairs with large joins}{S4, Thm.~4}{g:join-family}
+\hline
+\multicolumn{4}{@{}l}{\emph{Working labels (Part II)}}\\
+\sym{$\approx$}{equal infinitary normal forms; also $\conv$}{LOCK1-structure \S0}{g:wl-bad-pair}
+\sym{$B(t,u)$}{bad set of a tree-equal pair}{LOCK1-structure \S0}{g:wl-bad-pair}
+\sym{$\kappa(t)$}{kind: 0, 1, 2 or $\bot$}{LOCK1-structure \S0}{g:wl-kind}
+\sym{$\mathrm{comp}_\alpha$}{component at address $\alpha$}{LOCK1-CTB \S0}{g:wl-program}
+\sym{$rb_i(t)$}{rightmost branch}{LOCK1-CTB \S0}{g:wl-rn}
+\sym{$\Kc$, $\Kc_1$}{left-cancellation domains}{LOCK1-CT \S12.6}{g:wl-calK}
+\sym{$\Hc$, $\Hc_2$, $\Gc$}{counter grammar of the notes}{LOCK1-CT \S19.2}{g:wl-calH}
+\sym{$\Hc^{x}$, $\Hc^{x}_2$}{extended counter grammar}{LOCK1-CT \S20.1}{g:wl-calHx}
+\sym{$\Gc^{x}$}{$\Hc^{x}_2\times\Hc^{x}$}{LOCK1-CT \S20.1}{g:wl-calGx}
+\sym{$\Gc^{+}$}{pre-entry grammar}{LOCK1-CT \S22.1}{g:wl-calGplus}
+\sym{$\Ic$}{inert terms $S\,c_j\,Q$}{LOCK1-CT \S20.1}{g:wl-calI}
+\sym{$\mathcal{S}$}{$\Kc$-spined T-stacks (not $\Ter$)}{LOCK1-CT \S25.3}{g:wl-calS}
+\sym{$r_1$, $r_2$}{first and second refill}{LOCK1-CT \S15}{g:wl-r1}
+\sym{$\mathrm{Ctx}(\zeta)$, $\mathcal X_Z$}{context closure of a self-dead fold}{LOCK1-CT \S26.2}{g:wl-ctx}
+\sym{$\mathcal D(Z)$}{heaps built around $Z$ (not $D(v)$, not the 373-model)}{LOCK1-CT \S26.2}{g:wl-cd}
+\end{longtable}
+\endgroup
+
+\section*{Part I.\texorpdfstring{\quad}{ } Terms of the papers}
+
+\begin{entry}{g:automaton-35}{35-state automaton (\emph{Dance}, Fig.~5.14); $\delta$, $d(t)$, $\circledast$}{2026-11-26}
+\src{S1, \S3}
+\lean{\texttt{HnfS.}$\delta$, \texttt{HnfS.dance}}
+A bottom-up tree automaton of~\citep{dots} with states $Q=\{0,\dots,34\}$, initial state $0$ for $S$,
+transitions $\delta$ and one rejecting state $\circledast=34$; it accepts $t$ when $d(t)\ne\circledast$,
+where $d(S)=0$ and $d(u\,v)=\delta(d(u),d(v))$. It is the image of the block model under $\varphi$, so
+it rejects exactly the terms of block $\bot$ (S1, Cor.~5). \see{g:q10}
+\end{entry}
+
+\begin{entry}{g:model-373}{373-element model}{2026-11-26}
+\src{S5, Thm.~2}
+\lean{\texttt{D2.d2\_prefix}, \texttt{D2.d2\_slaw}, \texttt{D2.d2\_block}}
+An $S$-model $D$ with $373$ elements and an output map $o$ such that $\pi'_2(t)=o(\bar t)$ for every
+$t\in\Ter$. So the fold determines the depth-two prefix, and the terms with a given depth-two prefix
+form a regular tree language. The 38-element block model is a homomorphic image of $D$.
+\end{entry}
+
+\begin{entry}{g:sym-A}{$A$}{2026-11-26}
+Overloaded.
+\sense{S2, \S1} $A=S\,S\,S$ (also S3, Fig.~1); $A\,A\,A$ has no hnf and is not productive.
+\sense{S2, Prop.~10} (A), the minimal-pairs hypothesis (\see{g:minimal-pair}).
+\sense{S4, \S4} A set $\{S\}$ or $\{S,\,S\,S\}$ in ``$A$-clean'' (\see{g:a-clean}).
+\sense{S12, \S2} The stack of a normal pair $(A,W)$ (\see{g:normal-pair}).
+\end{entry}
+
+\begin{entry}{g:a-clean}{$A$-clean}{2026-11-26}
+\src{S4, \S4}
+A property of terms, for $A=\{S\}$ or $\{S,\,S\,S\}$: every subterm $a\,S$ has $a\in A$. Reduction
+preserves it, and in an $A$-clean term every step adds at least one leaf.
+\end{entry}
+
+\begin{entry}{g:accessible}{accessible}{2026-11-26}
+\src{S7, \S2}
+\lean{\texttt{HeadRec.acc\_all}, \texttt{HeadRec.bsn}}
+A property of labelled terms, defined inductively: a term is accessible if all its
+$\prec$-predecessors are accessible, where the predecessors of $b$ are its $N$-step results, its
+function part and argument, and $a$ when $b=(l\cdot_i a)\cdot_k r$. S7 uses induction on
+accessibility in place of Waldmann's recursive path order. \see{g:labelled-reduction}
+\end{entry}
+
+\begin{entry}{g:frakB}{$\Bk$ (the set $\mathfrak B$), pieces, passive arguments}{2026-11-26}
+\src{S11, \S5}
+\lean{\texttt{S11.InB}, \texttt{S11.RedB}}
+The least set containing the pieces $S$, $S\,S$, $Q$, $S\,Q$, $c_j$ and, for passive arguments
+$U_1,\dots,U_r\in\Bk$, the families (Fa), (Fx), (FQa), (FQa2), (FSS), (FS) built from $a_m$, $c_j$,
+$Q$. Its set of reducts $\mathrm{Red}(\Bk)$ is closed under subterms (S11, Lemmas~16--17), and a
+solution of the spine equations in $\Bk$ is $a_k$ (S11, Lemma~18). \see{g:spine-equations}
+\end{entry}
+
+\begin{entry}{g:berarducci-tree}{Berarducci tree, root-active, root-stable}{2026-11-26}
+\src{S3, \S4}
+A tree assigned to a term: $\bot$ if the term is root-active (every reduct reduces to a redex), $S$
+if $t\red S$, and otherwise $\mathrm{BeT}(f)\,\mathrm{BeT}(w)$ for a root-stable reduct $f\,w$ (no
+reduct of it is a redex). No finite $S$-term is root-active, so the tree has no $\bot$ and equals
+$t^{\infty}$~\citep{berarducci}.
+\end{entry}
+
+\begin{entry}{g:sym-beta}{$\beta$}{2026-11-26}
+Overloaded.
+\sense{S1, \S2; S6, \S2; S9, \S4; S12, \S5} The table of the 38-element block model
+(\see{g:block-model}). \lean{\texttt{HnfS.}$\beta$}
+\sense{S4, \S1} As a subscript, $\conv$ is convertibility (\see{g:conv}).
+\sense{S11, \S5} A member of $\Bk$.
+\end{entry}
+
+\begin{entry}{g:block-model}{block model (38 elements), block}{2026-11-26}
+\src{S1, \S2; reused in S2--S12}
+\lean{\texttt{HnfS.blockTable}, \texttt{HnfS.}$\beta$}
+A table $\beta$ on the blocks $\{0,\dots,37\}$ that satisfies the $S$-law, with block $0$ for $S$ and
+block $36=\bot$ for ``no head normal form''; a term has an hnf iff its block is not $\bot$ (S1,
+Thm.~9 with Prop.~4). S6 writes it $\mathbf B$, S9 $B$ (with facts (M1)--(M3), S9, \S4), and S12
+$\mathbb M$ (\see{g:m2}). S5 shows that it is a homomorphic image of the 373-element model.
+\end{entry}
+
+\begin{entry}{g:bohm-tree}{B\"ohm tree $\mathrm{BT}(t)$}{2026-11-26}
+\src{S2, \S2}
+A tree assigned to a term: $\mathrm{BT}(t)=\bot$ if $t$ has no hnf, and otherwise
+$S\,\mathrm{BT}(a_1)\cdots\mathrm{BT}(a_j)$ for an hnf $S\,a_1\cdots a_j$ of $t$. By S3, Thm.~10 it is
+$t^{\infty}$ with every node that has an infinite left spine, and the subtree below it, replaced by
+$\bot$; that sentence is not mechanized.
+\end{entry}
+
+\begin{entry}{g:sym-bot}{$\bot$}{2026-11-26}
+Overloaded.
+\sense{S1, \S2} Block $36$, left-absorbing, the block of exactly the terms with no hnf.
+\sense{S2, \S2} The root of a B\"ohm tree for a term with no hnf (\see{g:bohm-tree}).
+\sense{S3, \S4} The Berarducci tree of a root-active term; it never occurs for finite $S$-terms.
+\end{entry}
+
+\begin{entry}{g:bridge}{bridge lemma}{2026-11-26}
+\src{S3, Lemma~4}
+\lean{\texttt{TopTerm.bridge}}
+Lemma. If a reduction from $t$ rewrites the root $k$ times, the head reduction of $t$ does so at
+least $k$ times. So top-termination reduces to head reduction.
+\end{entry}
+
+\begin{entry}{g:bursts}{bursts (Lemma), $P_k$, $Q_k$}{2026-11-26}
+\src{S6, Lemma~7}
+\lean{\texttt{BExp.iterS\_run}, \texttt{BExp.fib\_dead}}
+Lemma. With $(P_0,Q_0)=(x,y)$ and $(P_{j+1},Q_{j+1})=(Q_j,P_j\,Q_j)$, $S^k u\,x\,y\hred
+u\,P_k\,Q_k$ in $k$ head steps. For $k\ge8$ neither $P_k$ nor $Q_k$ has an hnf, and for $k\ge10$ both
+are stable frames.
+\end{entry}
+
+\begin{entry}{g:sym-c}{$c$, $c_j$}{2026-11-26}
+Overloaded.
+\sense{S1, \S4} The weight table on pairs (h-block, block) (\see{g:weight}).
+\sense{S2, \S3} The class $c(t)$ of a term (\see{g:fold}).
+\sense{S4, Thm.~4} The constant in a candidate bound $\max(a,b)+c$.
+\sense{S11, \S3} $c_0=G$, $c_{j+1}=Q\,c_j$: the counter pieces of $p_K$ (\see{g:pk-run}).
+\lean{\texttt{S11.c}}
+\end{entry}
+
+\begin{entry}{g:certificate}{certificate}{2026-11-26}
+\sense{S1, \S4} The tables $c$ ($37\times38$) and $\pi$ ($37$ entries), all at most $10$, found by
+integer programming and checked by kernel evaluation against inequalities~(3) on all pairs and~(4)
+on the $9{,}725$ three-item windows. None exists with every entry at most $9$.
+\lean{\texttt{HnfSound.wTable}, \texttt{HnfSound.piTable}}
+\sense{S2, \S6} A list of 7,244 claims about symbolic head reduction: 7,118 run claims and 126 split
+claims. Once the checker is proved sound (S2, Lemma~12), the list settles hypothesis~(A) (S2,
+Prop.~13). \lean{\texttt{HnfCert.checkClaim}, \texttt{HnfCert.claims\_sound}}
+\end{entry}
+
+\begin{entry}{g:claim}{claim, symbolic term}{2026-11-26}
+\src{S2, \S6}
+\lean{\texttt{HnfCert.checkClaim}, \texttt{HnfCert.Inst}}
+A symbolic term is a term built from $S$ and variables $X_\sigma$, one per accepted product state;
+$u$ is an instance of $X_\sigma$ if $\operatorname{st}(u)=\sigma$. A claim is a symbolic term with a
+stratum and a rank, valid if no instance is productive. Split claims case on the two states of an
+application; run claims run head reduction symbolically.
+\end{entry}
+
+\begin{entry}{g:class-model}{class model, 39-state automaton}{2026-11-26}
+\src{S2, \S3}
+\lean{\texttt{HnfProd.clsTable}, \texttt{HnfProd.}$\gamma$, \texttt{HnfProd.cls}}
+A model $\gamma$ of the $S$-law on the classes $\{0,\dots,38\}$, with class $0$ for $S$ and a
+rejecting class $\mathsf r=37$ that absorbs on both sides. A term is accepted iff its class is not
+$\mathsf r$, and it is accepted iff it is productive (S2, Thm.~1); the model does not refine the
+block model. S3, Cor.~11 reads it as deciding whether $t^{\infty}$ has a node with an infinite left
+spine (\texttt{InfNF.nodes\_iff\_cls}).
+\end{entry}
+
+\begin{entry}{g:closed-s-terms}{closed $S$-terms $\Ter$, $\Ter^{\infty}$}{2026-11-26}
+\src{S1, \S2; S3, \S2}
+\lean{\texttt{HnfS.PureS}}
+$\Ter$ is the set of closed terms built from $S$ alone by application, written left-associated; it
+is the same set throughout the series. S3 writes $\Ter^{\infty}\supseteq\Ter$ for the finite and
+infinite binary trees with leaves $S$.
+\end{entry}
+
+\begin{entry}{g:closed-walk}{closed walk}{2026-11-26}
+\src{S9, \S4 (Lemmas~8 and~9)}
+\lean{\texttt{Ncfp.walkB\_eq}, \texttt{Ncfp.comb\_walk}}
+A walk of blocks $v_i=b(p\,Y_1\cdots Y_i)$ under right multiplication $v\mapsto\beta(v,w)$ that
+returns to its start, as it does when $p\conv p\,Y_1\cdots Y_k$. A rank on the blocks falls along
+every arrow except into $\bot$ and the loop $\beta(12,0)=12$, so a closed walk off $\bot$ stays at
+block $12$ with every $Y_i=S$.
+\end{entry}
+
+\begin{entry}{g:grammar-closure}{closure of the counter grammar}{2026-11-26}
+\src{S12, Thm.~18, Cor.~19}
+Theorem. A move of $(Z,W)\in\Gc$ with normalizing first tooth is (i) a descent of the stack to
+$\mathrm{pop}(Z)$, (ii) for $Z=X$, a move to $(W,S\,W)$, (iii) for $Z=U$, to $(W,D(W))$, or (iv) for
+$Z=X$, $W=S\,V$, to $(V,D(S\,V))$, and the new state is in $\Gc$. Moves (ii) and (iii), which copy
+the heap into the stack, recur; the notes call the closure $\mathrm{CLOSE}_x$
+(\see{g:wl-close-x}).
+\end{entry}
+
+\begin{entry}{g:comb}{comb, combs $\sigma_j$, left comb}{2026-11-26}
+\sense{S12, \S1} The terms $\sigma_0=S$, $\sigma_{j+1}=S\,\sigma_j$, with $\Cc=\{\sigma_j\}$; their blocks
+lie in $CB=\{0,1,2,4,8,17\}$ (S12, Lemma~16). S3 calls them right combs.
+\lean{\texttt{Lock1Tables.comb}}
+\sense{s8-combs (draft), Def.~1} A sequence of terms in which each step is an hnf step ($q_n$ has hnf
+$S\,q_{n+1}$, $S\,a_n\,q_{n+1}$ or $S\,q_{n+1}\,b_n$) or a left step ($q_n$ has no hnf and first stable
+frame $q_{n+1}\,w_n$); a left comb has only left steps. S8 does not define ``comb'' alone, and S9,
+Thm.~7 is the left-comb case. \lean{\texttt{Ncfp.teeth\_unbounded\_seq}} \see{g:right-comb}
+\end{entry}
+
+\begin{entry}{g:comb-context}{comb context}{2026-11-26}
+\src{S8, \S2}
+A context $C=c_k\,(\cdots(c_1\,[\,])\cdots)$ with $c_i\in\Ter$, $k\ge0$. On a head run, the last item
+of every frame is $C[u]$ for a comb context $C$, where $u$ is the term's last item (S8, Lemma~5(b)).
+\end{entry}
+
+\begin{entry}{g:conj-inf-conv}{conjecture: $t^\infty$ determines conversion}{2026-11-26}
+\src{S6, Conj.~11}
+Conjecture. If $t^\infty=u^\infty$ then $t\conv u$. With prefix regularity and the McKinsey--Evans
+argument~\citep{mckinsey,evans} it would make convertibility of $S$-terms decidable. The notes call
+it Lock~1 (\see{g:wl-lock1}), and CT is one half of it (\see{g:ct}).
+\end{entry}
+
+\begin{entry}{g:conj-s7}{conjecture: no conversion with a context of itself}{2026-11-26}
+\src{S7, Conj.~6}
+Conjecture. No $t\in\Ter$ and context $E\ne[\,]$ satisfy $t\conv E[t]$. It is NCFP (\see{g:ncfp}),
+and it would strengthen Statman's theorem.
+\end{entry}
+
+\begin{entry}{g:consistent-labelling}{consistent labelling}{2026-11-26}
+\src{S7, \S2 (proof of Lemma~4)}
+A labelling of $t$ in which every label is at most the right depth of the argument below it.
+Labelling each node $f\,x$ by $\mathrm{rd}(x)$ is consistent, and restricted steps lift to $N$-steps
+between consistent labellings. \see{g:labelled-reduction}
+\end{entry}
+
+\begin{entry}{g:consumption}{consumption}{2026-11-26}
+\src{S9, Thm.~1, Cor.~3, Conj.~10}
+\lean{\texttt{Ncfp.thm\_NC\_hnf}, \texttt{Ncfp.ncfp\_left\_comb}}
+The equation $p\conv p\,Y_1\cdots Y_k$, $k\ge1$, the case $E=[\,]\,Y_1\cdots Y_k$ of NCFP. S9 excludes
+it when $p$ has an hnf (Thm.~1) and when the $Y_i$ normalize (Cor.~3); the general case is S9,
+Conj.~10. ``Consumption'' is a working name; S9 does not use it.
+\end{entry}
+
+\begin{entry}{g:context}{context}{2026-11-26}
+\sense{S7, \S4} A term with one hole $[\,]$; $C[u]$ fills it with $u$.
+\sense{S8, \S1} A term with any number of holes; $E[p]$ fills every hole with $p$, and $E$ is closed if
+it has no hole. \see{g:plain-context}
+\end{entry}
+
+\begin{entry}{g:holes-only}{contexts without closed parts}{2026-11-26}
+\src{S8, Cor.~17}
+\lean{\texttt{Ncfp.ncfp\_holes}}
+Corollary. If $E\ne[\,]$ is built from holes by $E'\mapsto S\,E'$ and $E',E''\mapsto S\,E'\,E''$, no
+$p$ satisfies $p\conv E[p]$, at any depth.
+\end{entry}
+
+\begin{entry}{g:conv}{convertibility $\conv$}{2026-11-26}
+\src{S4, \S1}
+\lean{\texttt{WordProblem.Conv}, \texttt{WordProblem.conv\_iff\_join}}
+The equivalence closure of reduction. The system is orthogonal, so $t\conv u$ iff $t$ and $u$ have a
+common reduct (S4, \S1). \see{g:cr}
+\end{entry}
+
+\begin{entry}{g:core-form}{core form}{2026-11-26}
+\src{S6, \S4}
+A presentation of a term as $S^k\,v$ with $v=S$ or $v$ having at least two items; it is unique (by
+S6, Lemma~5).
+\end{entry}
+
+\begin{entry}{g:counter-grammar}{counter grammar $\Gc$; $\Hc$, $\Ic$, $\Zc$}{2026-11-26}
+\src{S12, Def.~1}
+A grammar of normal pairs: $\Hc$ and $\Ic$ are the least sets of normal terms with (H0) $X,U\in\Hc$;
+(H1) $S\,H\in\Hc$; (H2) $S\,P\,c\in\Hc$ for two-item $P\in\Hc$, $c$ normal; (H3) $S\,P\,Q\in\Hc$ for
+one-item $P\in\Hc$, $Q\in\Hc\cup\Ic\cup\{S\}$; (H4) $S\,(S\,P')\,\sigma\in\Hc$ for one-item $P'\in\Hc$,
+$\sigma\in\Cc$; (I) $S\,\sigma\,Q\in\Ic$ for $Q\in\Hc$, $\sigma\in\Cc$. $\Zc$ is the set of two-item
+members of $\Hc$, and $\Gc=\Zc\times\Hc$; every member of $\Gc$ is a normal pair (S12, Lemma~16). These
+are the notes' $\Hc^{x}$, $\Hc^{x}_2$ and $\Gc^{x}$ (\see{g:wl-calHx}), not the notes' $\Hc$.
+\end{entry}
+
+\begin{entry}{g:counter-run}{counter run}{2026-11-26}
+\src{S12, \S1}
+A run of a term $p$ with a state $\rest^e(p)\conv Z\,W$ for some $(Z,W)\in\Gc$ such that every tooth
+of $Z\,W$ normalizes. \see{g:ct-counter}
+\end{entry}
+
+\begin{entry}{g:cr}{(CR) (Church--Rosser)}{2026-11-26}
+\src{S11, \S2; S12, \S1}
+\lean{\texttt{church\_rosser}}
+Theorem~\citep{terese}. If $t\red u$ and $t\red v$, then $u$ and $v$ have a common reduct. So $\conv$
+is the existence of a common reduct, and normal forms are unique. \see{g:normalizes}
+\end{entry}
+
+\begin{entry}{g:ct}{CT (converse of the tooth lemma)}{2026-11-26}
+\src{S11, Conj.~19; S12, Conj.~22}
+Conjecture. If $p,q\in\Ter$ have no hnf and $\tau_n(p)\conv\tau_n(q)$ for all $n\ge1$, then
+$p\conv q$. Open; S6's conjecture ($t^\infty=u^\infty$ implies $t\conv u$) would imply it. S11 proves
+it when one term is $p_K$ or one of its states, and S12 when one term has a counter run.
+\see{g:ct-pk}, \see{g:ct-counter}, \see{g:wl-ct}
+\end{entry}
+
+\begin{entry}{g:ct-counter}{CT against counter runs}{2026-11-26}
+\src{S12, Thm.~2}
+Theorem. Let $(Z,W)\in\Gc$ have only normalizing teeth, and let $p,q$ have no hnf, with
+$\rest^e(p)\conv Z\,W$ and $\tau_n(q)\conv\tau_n(p)$ for all $n\ge1$; then $q\conv p$. The proof is
+not mechanized, apart from the table facts. \see{g:u-family}, \see{g:x-family}
+\end{entry}
+
+\begin{entry}{g:ct-pk}{CT against $p_K$}{2026-11-26}
+\src{S11, Thm.~1, Cor.~2}
+\lean{\texttt{S11.ct\_pK}, \texttt{S11.ct\_pK\_rest}}
+Theorem. Every $q\in\Ter$ without an hnf with $\tau_n(q)\conv\tau_n(p_K)$ for all $n\ge1$ is
+convertible with $p_K$; so is every such $q$ against a state $\rest^n(p_K)$, with the teeth shifted
+by $n$. The Lean proof uses only the axioms \texttt{propext} and \texttt{Quot.sound}. \see{g:pK}
+\end{entry}
+
+\begin{entry}{g:sym-D}{$D$, $d$, $D(v)$}{2026-11-26}
+Overloaded.
+\sense{S1, \S3} $d(t)$, the state of the 35-state automaton (\see{g:automaton-35}).
+\sense{S3, \S2} $d(s,t)=2^{-n}$, the metric on $\Ter^{\infty}$; also a depth bound.
+\sense{S5, Thm.~2} $D$, the 373-element $S$-model (\see{g:model-373}).
+\sense{S12, \S1} $D(v)=S\,v\,(S\,v)$. \lean{\texttt{Lock1Tables.D}}
+\end{entry}
+
+\begin{entry}{g:depth-prefix}{depth-$d$ prefix}{2026-11-26}
+\sense{S3, Rem.~8} The prefix of $t^{\infty}$ to depth $d$, with holes below. In Lean it is a relation
+$\mathrm{NF}(d,t,P)$, defined by one-level forms of the rules of S3, Prop.~9, and shown to exist, to be
+unique and to be unchanged by reduction. \lean{\texttt{InfNF.NF}}
+\sense{S5, Def.~1} $\pi'_d(t)$: $\pi'_0=\pi'_{-1}=\bullet$, and for $d\ge1$ one of $S$,
+$S\,\pi'_{d-1}(a)$, $S\,\pi'_{d-2}(a)\,\pi'_{d-1}(b)$, $\pi'_{d-1}(f)\,\pi'_{d-1}(w)$, by the shape that
+head reduction reaches. It shows the head $S$ of an hnf, which S3's prefix cuts.
+\lean{\texttt{D2.Pre}, \texttt{D2.pre\_nf}}
+\sense{S6, \S2} $\pi_d$, the prefix of S5 (cited there as ``Def.~2''; S5 numbers it Def.~1).
+\lean{\texttt{D2.Pre}, \texttt{Conv.pre\_unique}}
+\end{entry}
+
+\begin{entry}{g:sym-E}{$E$}{2026-11-26}
+Overloaded.
+\sense{S1, \S4} $E=\{0,17\}$, the exempt blocks at which a head step may leave the weight unchanged:
+block $0$ is paid by the count of $S$ items, and block $17$ (towers) by $\tau$.
+\lean{\texttt{HnfSound.exempt}}
+\sense{S7, Conj.~6; S8, \S1} A context (\see{g:context}).
+\end{entry}
+
+\begin{entry}{g:conj-entry}{entry conjecture (second refill)}{2026-11-26}
+\src{S12, Conj.~23}
+Conjecture. In the run of every normal pair whose teeth all normalize, the state after the second
+refill is in $\Gc$. With S12, Lemma~7 and Thm.~2 it would give CT against every $p$ whose teeth
+normalize; the notes call it R2 (\see{g:wl-r2}).
+\end{entry}
+
+\begin{entry}{g:exposed-move}{exposed move}{2026-11-26}
+\src{S11, \S1}
+Move $n$ of $t$ is exposed if (i) it is of kind (B), (ii) at least one head step reaches the last hnf
+$S\,a_k\,b_k$, and (iii) the $y$ with $b_k=y\,a_k$ has no hnf. Then the tooth $y\,a\,w$ reveals the new
+state $a\,w$. No move of $p_K$ is exposed. \see{g:moves}
+\end{entry}
+
+\begin{entry}{g:f2}{(F2)}{2026-11-26}
+\src{S11, \S2; S12, \S1}
+\lean{\texttt{Full.run\_total}}
+Theorem. The head run of every closed $S$-term reaches an hnf or a stable frame. The cited
+proof~\citep{s1,s3} uses the block model and Waldmann's top-termination theorem, and Lean proves it
+from mechanized top-termination (\texttt{TopTerm.reach\_all}). S6, \S2 and S9, item (B) state the same
+fact.
+\end{entry}
+
+\begin{entry}{g:f-step}{f-step, $\red_f$}{2026-11-26}
+\src{S7, \S4}
+\lean{\texttt{HeadRec.FStep}}
+A step whose redex is the whole term or the function part of its parent (not an argument, though
+possibly inside one); head steps are f-steps. By S7, Thm.~5 (\texttt{HeadRec.theorem\_H}), if
+$t\red_f u$ and $t\red C[u]$, then $C=[\,]$.
+\end{entry}
+
+\begin{entry}{g:family}{family, class, type, $\sigma$}{2026-11-26}
+\src{S8, \S3}
+\lean{\texttt{Ncfp.cor\_X1}, \texttt{Ncfp.ncfp\_X1}}
+A collection of classes $Z_i$, each with a type $[Y]$ or $[Y_1,Y_2]$ of classes or $\sigma$ (at least
+one a class) that its members' hnf items follow, where $\sigma$ is the set of normalizing terms of
+size at most a fixed $M$. S8, Lemma~11 builds a family from $p\conv E[p]$.
+\end{entry}
+
+\begin{entry}{g:fin}{$\mathrm{Fin}(t)$}{2026-11-26}
+\src{S3, \S3}
+\lean{\texttt{TopTerm.Fin}, \texttt{TopTerm.Reach}}
+A property of $t$: its head reduction rewrites the root boundedly often. S3 proves it in a positive
+form: the head path reaches an hnf or a term whose function part has block $\bot$.
+\end{entry}
+
+\begin{entry}{g:finite-index}{finite index theorem, $\simeq_g$}{2026-11-26}
+\src{S6, Thm.~9}
+\lean{\texttt{Full.theorem\_six} (named after an earlier numbering), \texttt{Full.sig\_congruence}}
+Theorem. For a finite model there are relations $\simeq_g$ of finite index on terms (core forms with
+equal or periodically equivalent exponents, and cores that agree on values, $\Psi$ and, to grade $g$,
+hnf items). If $t\simeq_{77}t'$, then $O(C[t])=O(C[t'])$ for every context $C$.
+\end{entry}
+
+\begin{entry}{g:finite-meeting}{finite meeting (L6)}{2026-11-26}
+\src{S11, Lemma~6}
+\lean{\texttt{S11.lemma6}}
+Lemma. If $p,q$ have no hnf, $\rest^n(p)\conv\rest^n(q)$ and $\tau_i(p)\conv\tau_i(q)$ for $i\le n$,
+then $p\conv q$. So CT reduces to showing that the states eventually meet.
+\end{entry}
+
+\begin{entry}{g:finite-reducts}{finite reduct sets}{2026-11-26}
+\src{S4, Lemma~1}
+\lean{\texttt{WordProblem.sz\_wstep}, \texttt{WordProblem.mem\_reductsUpTo}}
+Lemma. For each $s$, the reducts of $t$ of size at most $s$ form a finite set computable from $t$ and
+$s$, since size never decreases along a reduction.
+\end{entry}
+
+\begin{entry}{g:fold}{fold, block of a term, class of a term}{2026-11-26}
+\sense{S1, \S2} The block of a term: $b(S)=0$, $b(u\,v)=\beta(b(u),b(v))$, a homomorphism into the
+block model that is invariant under reduction (S1, Lemma~3). S12, \S5 writes $\fold(t)$, with
+$\fold(X)=16$ and $\fold(U)=33$. \lean{\texttt{HnfS.fold}, \texttt{HnfS.fold\_wsteps}}
+\sense{S2, \S3} The class of a term: $c(S)=0$, $c(u\,v)=\gamma(c(u),c(v))$, also invariant under
+reduction (S2, Lemma~5). \lean{\texttt{HnfProd.cls}, \texttt{HnfProd.wsteps\_cls}}
+\sense{S5, \S2; S6, \S2} The map $t\mapsto\bar t$ into an $S$-model, with $S\mapsto s$ and
+$t\,u\mapsto\bar t\,\bar u$; convertible terms have equal folds. \lean{\texttt{D2.foldD}}
+\end{entry}
+
+\begin{entry}{g:frame}{frame}{2026-11-26}
+\sense{S6, \S2; S8, \S1} The presentation $S\,u_1\cdots u_m$ of a term, whose $u_i$ are its items; S8
+writes it $[u_1,\dots,u_m]$. \see{g:items}
+\sense{S9, \S1; S11, \S1; S12, \S1} A term on the head run of a given term. \see{g:head-run}
+\end{entry}
+
+\begin{entry}{g:free-step}{free and non-free head step}{2026-11-26}
+\src{S6, \S2}
+A head step is free if its first item $u_1$ is $S$ or of the form $S\,v$, and non-free otherwise. The
+two bounds on head reduction count non-free steps. \see{g:two-bounds}
+\end{entry}
+
+\begin{entry}{g:fuel-adequacy}{fuel adequacy}{2026-11-26}
+\src{SIM, Thm.~2}
+\lean{\texttt{SelfInterp.fuel\_adequacy\_value}, \texttt{SelfInterp.fuel\_adequacy\_timeout}}
+Theorem of~\citep[Thm.~5.2]{davis-si}: $\texttt{whnfF}\,\langle k\rangle\,\langle M\rangle\red
+\texttt{just}\,\langle N\rangle$ if $M\Downarrow_n N$ with $n<k$, and $\red\texttt{nothing}$ if
+$M\Uparrow$ or $n\ge k$, with $\red$ read as weak reduction. SIM adds the converse and the independence
+of the value from the budget (SIM, Cor.~3, \texttt{SelfInterp.value\_independent}).
+\end{entry}
+
+\begin{entry}{g:function-part}{function part}{2026-11-26}
+\src{S3, \S2}
+The part $f$ of an application $f\,w$. Head reduction of a term without an hnf reaches a term whose
+function part has block $\bot$ (\see{g:fin}).
+\end{entry}
+
+\begin{entry}{g:sym-G}{$G$, $G_e$, $G_1$, $G_2$}{2026-11-26}
+Overloaded.
+\sense{S6, Lemma~8 (proof)} $G_1$ is the graph on block triples $(\bar x,\bar y,\bar z)$ of root frames
+$S\,x\,y\,z$, with an edge to each triple allowed for the next root frame; $G_2$ refines it on a set of
+$190$ triples. Ranks on them give the bound $77$ (\see{g:psi-skeleton}).
+\sense{S11, Thm.~1} $G=S\,Q\,Q$, also written $c_0$. \lean{\texttt{S11.G}}
+\sense{S12, \S7} $G_0=D(S\,Y)$, $G_{e+1}=S\,G_e\,(S\,J_{e+1})$ with $J_{e+1}=S\,(S\,Y)\,(S\,G_e)$: the
+heaps of the run of $X\,Y$. Lean's \texttt{Jfam Y e} is $J_{e+1}$, and \texttt{Lock1Tables.G} is an
+unrelated list of blocks. \lean{\texttt{Lock1Tables.Gfam}, \texttt{Lock1Tables.Jfam}}
+\end{entry}
+
+\begin{entry}{g:sym-gamma}{$\gamma$, $\mathsf r$}{2026-11-26}
+\src{S2, \S3}
+\lean{\texttt{HnfProd.}$\gamma$}
+The table $\gamma$ of the 39-class model and its rejecting class $\mathsf r=37$
+(\see{g:class-model}).
+\end{entry}
+
+\begin{entry}{g:ground-loop}{ground loop}{2026-11-26}
+\src{S7, \S1; S8, \S1}
+\lean{\texttt{HeadRec.no\_ground\_loop}}
+A reduction $t\to^+u$ in which $t$ occurs in $u$ (possibly $u=t$). There are none in $\Ter$
+(\see{g:no-ground-loops}).
+\end{entry}
+
+\begin{entry}{g:sym-h}{$h(t)$}{2026-11-26}
+\src{S2, \S2}
+The unique hnf that $t$ head-reduces to, when there is one; S3, \S2 uses it in the same way.
+\see{g:head-step}
+\end{entry}
+
+\begin{entry}{g:h-block}{h-block, h-fold}{2026-11-26}
+\src{S1, \S2}
+\lean{\texttt{HnfSound.AllH}}
+A block other than $\bot$; a term is h-fold if its block is one. A walk that ends at an h-block visits
+only h-blocks.
+\end{entry}
+
+\begin{entry}{g:head-run}{head run}{2026-11-26}
+\src{S6, \S2; S8, \S1; S9, \S1; S11, \S1; S12, \S1}
+The sequence of head steps from a term; it is deterministic and stops at the first hnf. Its terms are
+the frames in the sense of S9, S11 and S12, and every head run reaches an hnf or a stable frame
+(\see{g:f2}). It is not the run of a normal pair (\see{g:run-pair}).
+\end{entry}
+
+\begin{entry}{g:head-step}{head step, head reduction ($\to_h$, $\hred$)}{2026-11-26}
+\sense{S1, \S2} The step that contracts the leftmost redex: if $\operatorname{fr}(t)=[x,y,z]
+\mathbin{+\!\!+}\rho$, then $t\to x\,z\,(y\,z)\,\rho$, and the new spine is
+$\operatorname{fr}(x)\mathbin{+\!\!+}[z,\,y\,z]\mathbin{+\!\!+}\rho$ (S1, eq.~(1)).
+\lean{\texttt{HnfSound.root\_step}}
+\sense{S2, \S2; S3, \S2} The same step. S2 writes $\to_h^{*}$ for head reduction, which is
+deterministic and stops at an hnf $h(t)$; S3 writes $\to_h$ for one step.
+\lean{\texttt{HnfSound.HeadChain}, \texttt{HnfSound.headChain\_uniq}}
+\sense{S6, \S2; S8, \S1; S9, \S1; S11, \S1; S12, \S1} For $t=S\,u_1\cdots u_m$ with $m\ge3$,
+$t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$, and $\hred$ is its reflexive--transitive closure. S7, \S1
+describes it as contracting the redex at the head of the left spine.
+\end{entry}
+
+\begin{entry}{g:hnf}{head normal form (hnf)}{2026-11-26}
+\src{S1, \S2; used in every later paper}
+\lean{\texttt{HnfS.IsHnf}, \texttt{HnfS.HasHnf}}
+A closed $S$-term with at most two items: $S$, $S\,a$ or $S\,a\,b$. S1 says that $t$ \emph{has} an hnf
+if it reduces to one; S8, S9, S11 and S12 say so if its head run reaches one, and call the first hnf
+reached \emph{the} hnf of $t$. The two readings agree (S11, Lemma~3(c)). \see{g:whnf}
+\end{entry}
+
+\begin{entry}{g:hole}{hole $\bullet$}{2026-11-26}
+\src{S5, Def.~1}
+A leaf that marks a cut in a prefix tree; cutting a tree to depth $k$ replaces every node at depth $k$
+by $\bullet$. It is not the hole $[\,]$ of a context (\see{g:context}).
+\end{entry}
+
+\begin{entry}{g:items}{items}{2026-11-26}
+\src{S1, \S2; S6, \S2; S11, \S1; S12, \S1}
+The terms $u_1,\dots,u_m$ in the unique presentation $t=S\,u_1\cdots u_m$; $t$ is an hnf iff $m\le2$.
+A step is internal if it contracts a redex inside an item (S11, \S2). \see{g:spine}, \see{g:frame}
+\end{entry}
+
+\begin{entry}{g:join-family}{join family $t_k$, $u_k$; no additive bound}{2026-11-26}
+\src{S4, Thm.~4}
+\lean{\texttt{WordProblem.Family.not\_smallJoin\_max\_add}}
+Theorem. With $f_0=S\,P$, $f_{k+1}=S\,S\,f_k$, $h_0=S\,Q$, $h_{k+1}=S\,S\,h_k$, $t_k=f_k\,P\,R$ and
+$u_k=h_k\,Q\,Q$ (S4's $P$, $Q$, $R$), the convertible terms $t_k$, $u_k$ have every common reduct of
+size at least $3k+10$, so no bound $\max(a,b)+c$ works. S4, Conj.~5 says that the smallest common
+reduct has size $6k+12$ (checked for $k\le5$).
+\end{entry}
+
+\begin{entry}{g:kappa}{$\kappa(x)$}{2026-11-26}
+\src{S11, \S3, Lemma~10}
+\lean{\texttt{S11.Kappa}}
+For $x$ with hnf $S\,u_1\cdots u_m$, $m\ge1$, let $x\cdot1=u_1$; $\kappa(x)$ is the least $k$ with
+$x\cdot1^k$ defined and without hnf. It is invariant under $\conv$, and $\kappa(x_n)=i_n+1$. It is not
+the block variable $\kappa$ of S12, \S5, nor the kind $\kappa$ of the notes (\see{g:wl-kind}).
+\end{entry}
+
+\begin{entry}{g:set-K}{$\Kc$}{2026-11-26}
+\src{S12, \S1}
+The least set of normal terms that contains every normal term with at most one item and contains
+$S\,S\,b$ whenever it contains $b$. For normal $c$ and self-dead normal $W$, $c\,W$ normalizes iff
+$c\in\Kc$ (S12, Lemma~11). \see{g:wl-calK}
+\end{entry}
+
+\begin{entry}{g:s11-lemmas}{L3--L7}{2026-11-26}
+\src{S12, \S1}
+S12's names for S11's Lemmas~3 (head runs), 4 (moves), 5 (convertible terms), 6 (finite meeting) and
+7 (right suffixes). \see{g:moves}, \see{g:tooth-lemma}, \see{g:finite-meeting}, \see{g:right-suffix}
+\end{entry}
+
+\begin{entry}{g:labelled-reduction}{labelled reduction, $N$-step}{2026-11-26}
+\src{S7, \S2}
+\lean{\texttt{HeadRec.LStep}, \texttt{HeadRec.acc\_all}}
+A variant of Waldmann's labelling on terms $S$ and $a\cdot_k b$ with $k\in\mathbb N$. An $N$-step
+rewrites $((S\cdot_i x)\cdot_j y)\cdot_k z\to(x\cdot_k z)\cdot_{k+1}(y\cdot_k z)$ when $k<N$. Every
+labelled term is accessible, so $N$-steps terminate (S7, Lemma~3).
+\end{entry}
+
+\begin{entry}{g:last-frame}{last frame}{2026-11-26}
+\src{S8, \S1; S9, \S1}
+\lean{\texttt{Ncfp.lemma\_L}}
+The frame just before the hnf $h\ne t$ on the head run of $t$. It is always $S\,S\,y\,z$ (written
+$[S,y,z]$ in S8), and $h=S\,z\,(y\,z)$ (S8, Lemma~5(a); S9, Lemma~4(a)).
+\end{entry}
+
+\begin{entry}{g:leafless}{leafless set, kind, mint, primitive}{2026-11-26}
+\src{S8, \S4}
+\lean{\texttt{Ncfp.thm\_L}, \texttt{Ncfp.lemma\_PR}}
+A set $Z$ of terms each of which has an hnf with one or two items (its kind), all in $Z$. The mint of
+a head step from $[x,y,z,\dots]$ is the new item $y\,z$, and a member is primitive if no proper subterm
+is in $Z$. By S8, Thm.~16, no nonempty leafless set meets only finitely many $\conv$-classes.
+\end{entry}
+
+\begin{entry}{g:left-spine}{left spine}{2026-11-26}
+\src{S3, \S2}
+\lean{\texttt{InfNF.LeftInf}, \texttt{InfNF.leftInf\_iff}}
+The path from a node of an infinite term that follows function edges; it ends at a leaf $S$ or is
+infinite. The root of $t^{\infty}$ has an infinite left spine iff $b(t)=\bot$ (S3, Prop.~9), and $t$ is
+productive iff no node has one (S3, Thm.~10). It is not the spine $\operatorname{fr}(t)$
+(\see{g:spine}).
+\end{entry}
+
+\begin{entry}{g:lemma-conv}{Lemma (Conv), ``S6 Lemma~4''}{2026-11-26}
+\src{S6, Lemma~4}
+\lean{\texttt{Conv.lemma3\_model}, \texttt{Conv.obs\_conv}; for terms \texttt{Ncfp.hnf1\_conv},
+\texttt{Ncfp.hnf2\_conv}, \texttt{Ncfp.lemma\_T}}
+Lemma. If $t\conv t'$, then $O(t)=O(t')$ over any $S$-model; over terms modulo $\conv$ (S8, Lemma~3;
+S9, item (A)), convertible terms have hnfs with equally many items, convertible in order, or first
+stable frames with convertible parts. The notes cite it as ``S6 Lemma~4'', the source comments of
+s8-combs as ``S6's lemma (Conv)'', and the Lean name carries an older number. \see{g:tooth-lemma}
+\end{entry}
+
+\begin{entry}{g:lemma-dstar}{Lemma D$^*$}{2026-11-26}
+\src{S8, Lemma~9}
+\lean{\texttt{Ncfp.lemma\_Dstar}}
+Lemma. If $w=g\,u$ has at least three items, an hnf and $\sz{u}\ge3$, then $g$ has a two-item hnf
+$[b,a]$. The hnf of $w$ is then $[u,a\,u]$ if $b=S$, $[a\,u,u\,(a\,u)]$ if $b=S\,S$, and
+$[p\,q,q\,(p\,q)]$ otherwise, with $p$ a comb context around $u$.
+\end{entry}
+
+\begin{entry}{g:lemma-kinds}{Lemma (kinds)}{2026-11-26}
+\src{S6, Lemma~5}
+\lean{\texttt{PsiSkel.one\_iff}, \texttt{PsiSkel.one\_item\_of\_fold}}
+Lemma. The block of $t$ decides whether $t$ is $S$, of the form $S\,v$, or has at least two items.
+\end{entry}
+
+\begin{entry}{g:lemma-ss}{Lemma SS}{2026-11-26}
+\sense{S8, Lemma~7} Lemma. If $\varphi$ has $k\ge2$ items and $\varphi\hred[S,y]$, then
+$\varphi=[S,c,S,\dots,S]$ and $y=c\,S\cdots S$, so $\sz{\varphi}=\sz{y}+2$. No infinite sequence has
+$y_i\hred[S,y_{i+1}]$. \lean{\texttt{Ncfp.lemma\_SS}, \texttt{Ncfp.cor\_SS1}}
+\sense{S9, Lemma~5} Lemma. If $\varphi\hred S\,S\,y$, then $\sz{\varphi}=\sz{y}+2$; so there is no
+infinite chain $q_n\hred S\,S\,q_{n+1}$. \lean{\texttt{Ncfp.lemma\_SS\_sz}, \texttt{Ncfp.ss\_bound}}
+\end{entry}
+
+\begin{entry}{g:literal}{literal}{2026-11-26}
+\sense{S8, \S1; S9, \S1; S11, \S1; S12, \S1} A term that is its own hnf, that is, has at most two
+items.
+\sense{S12, \S2} An entry $i$ of a move of kind (B) that needs no head step to reach $S\,a_i\,b_i$; a
+non-literal entry has $b_i=y\,a_i$ for some $y$. \see{g:moves}, \see{g:refill}
+\end{entry}
+
+\begin{entry}{g:m2}{(M2)}{2026-11-26}
+\src{S12, \S5}
+\lean{\texttt{Lock1Tables.hnfless\_iff}}
+Fact. A closed $S$-term has no hnf iff its block is $36$ \citep[Prop.~4 and Thm.~9]{s1}, with S11,
+Lemma~3(c). S9, \S4 lists the same fact among (M1)--(M3).
+\end{entry}
+
+\begin{entry}{g:meet}{meeting of runs}{2026-11-26}
+\src{S12, Prop.~20}
+Proposition. If $\pi\in\Gc$ and $\pi^\circ$ are normal pairs whose teeth all normalize with the same
+normal forms, their runs reach equal states at some index.
+\end{entry}
+
+\begin{entry}{g:minimal-pair}{minimal pair, hypothesis (A)}{2026-11-26}
+\src{S2, Prop.~10}
+\lean{\texttt{HnfQ5.MinimalPairs}, \texttt{HnfQ5.q5\_of\_A}}
+Hypothesis (A): for accepted $u,v$ with $c(u\,v)=\mathsf r$ and $b(u\,v)\ne\bot$, the term $u\,v$ is not
+productive. It implies that every rejected term is unproductive and depends only on $2{,}757$ pairs
+of product states. The certificate proves it (S2, Prop.~13).
+\end{entry}
+
+\begin{entry}{g:move}{move $n$}{2026-11-26}
+\src{S11, \S1; S12, \S1}
+The passage from $\rest^{n-1}(t)$ to $\rest^n(t)$, which produces $\tau_n(t)$; its two kinds are given
+by the Moves (\see{g:moves}). In S12 a move is a pop or raising (\see{g:pop}) and may be a refill
+(\see{g:refill}).
+\end{entry}
+
+\begin{entry}{g:moves}{the Moves (L4)}{2026-11-26}
+\src{S11, Lemma~4; S9, Lemma~6; S12, \S2 (as L4)}
+\lean{\texttt{S11.lemma4}, \texttt{S11.moves\_A}, \texttt{S11.moves\_B}; for S9 \texttt{Ncfp.lemma\_A},
+\texttt{Ncfp.bmove}}
+Lemma. Let $f=f^-\,u$ have no hnf. (A) If $f^-$ has no hnf, then $\tau_1(f)=u$ and $\rest(f)=f^-$.
+(B) Otherwise $f^-\hred S\,a_0\,b_0$, $w_0=u$, $w_{i+1}=b_i\,w_i$ and $a_i\,w_i\hred
+S\,a_{i+1}\,b_{i+1}$ for $i<k$, $a_k\,w_k$ has no hnf, $\tau_1(f)=b_k\,w_k$ and $\rest(f)=a_k\,w_k$.
+\see{g:wl-moves}
+\end{entry}
+
+\begin{entry}{g:ncfp}{NCFP (no conversion fixed points)}{2026-11-26}
+\src{S8 (title, \S6); S7, Conj.~6}
+Conjecture. No $p\in\Ter$ satisfies $p\conv E[p]$ for a context $E\ne[\,]$ with a hole. Settled cases:
+plain contexts of depth at most $2$ and plain contexts without closed parts (S8), and
+$E=[\,]\,x_1\cdots x_k$ with normalizing $x_i$ or with $p$ having an hnf (S9). The notes coined the
+acronym NCFP; the papers state the conjecture without it.
+\end{entry}
+
+\begin{entry}{g:new-state}{new state, tooth normal form $N$}{2026-11-26}
+\src{S12, Lemma~6}
+Lemma. For a normal pair with normalizing first tooth the move is of kind (B) with literal entry
+$0$. With $A^i=\nf(a_i)$, $B^i=\nf(b_i)$ and $W^i=\nf(w_i)$, the new state is the normal pair
+$(A^k,W^k)$, and the tooth has normal form $N=\nf(B^k\,W^k)$. \see{g:normal-pair}
+\end{entry}
+
+\begin{entry}{g:no-ground-loops}{No Ground Loops theorem}{2026-11-26}
+\src{S7, Thm.~1}
+\lean{\texttt{HeadRec.no\_ground\_loop}}
+Theorem (Waldmann; constructive in S7). No $t\in\Ter$ has $t\to^+u$ with $t$ a subterm of $u$. By S7,
+Cor.~2 (\texttt{HeadRec.no\_head\_recurrence}), no $t$ head-reduces in one or more steps to
+$t\,X_1\cdots X_k$; S9 cites the theorem as (C).
+\end{entry}
+
+\begin{entry}{g:normal-pair}{normal pair, stack, heap}{2026-11-26}
+\src{S12, \S2}
+A pair $(A,W)$ of normal terms with $A\,W$ without hnf; then $A=S\,A^0\,B^0$ has two items. $A$ is the
+stack and $W$ the heap, and the teeth and moves of $(A,W)$ are those of $A\,W$.
+\see{g:wl-normal-pair}
+\end{entry}
+
+\begin{entry}{g:normalizes}{normalizes, $\nf(t)$}{2026-11-26}
+\src{S8, \S1; S9, \S1; S12, \S1}
+A term normalizes if it reduces to a normal form, which is then unique by (CR) and written $\nf(t)$;
+every term convertible with it reduces to that form and is no larger (S8, S9). By S12, Lemma~5, every
+subterm of a normalizing term normalizes, and the term has an hnf.
+\end{entry}
+
+\begin{entry}{g:sym-o}{$o$}{2026-11-26}
+\src{S5, Thm.~2}
+\lean{\texttt{D2.out2}}
+The output map from the 373-element model to trees, with $\pi'_2(t)=o(\bar t)$; S6 writes $o_d$ for
+depth $d$.
+\end{entry}
+
+\begin{entry}{g:observable}{observable $O(t)$}{2026-11-26}
+\src{S6, Def.~3}
+\lean{\texttt{Conv.HasObs}, \texttt{Conv.obs\_unique}}
+A tuple read off the head run over an $S$-model: $O(t)=(m,\bar u_1,\dots,\bar u_m)$ if the run reaches
+the hnf $S\,u_1\cdots u_m$, and $O(t)=(\bot,\bar f,\bar w)$ if it first reaches the stable frame
+$f\,w$. \see{g:lemma-conv}
+\end{entry}
+
+\begin{entry}{g:sym-P}{$P$, $P_k$, $\mathcal P$}{2026-11-26}
+Overloaded.
+\sense{S2, Def.~3} $P_k$, the approximants of productivity (\see{g:pk}).
+\sense{S3, App.~A} $\mathcal P$, the set of right combs (\see{g:right-comb}); in S3, Prop.~9, $P$ is a
+function part of block $\bot$ reached by head reduction.
+\sense{S4, \S4} $P=S\,S\,S$.
+\sense{S6, Lemma~7} $P_k$, with $Q_k$, the burst pair (\see{g:bursts}).
+\end{entry}
+
+\begin{entry}{g:pk}{$P_k$ (approximants of productivity)}{2026-11-26}
+\src{S2, Def.~3}
+\lean{\texttt{HnfProd.Pk}}
+Sets of terms: $P_0=\Ter$, and $t\in P_{k+1}$ when $t$ head-reduces to an hnf whose items all lie in
+$P_k$. Equivalently, the B\"ohm tree of $t$ has no $\bot$ above depth $k$; each $P_k$ is invariant
+under reduction (S2, Lemma~8).
+\end{entry}
+
+\begin{entry}{g:pK}{$p_K$}{2026-11-26}
+\src{S11, Thm.~1}
+\lean{\texttt{S11.pK}}
+The term $S\,(S\,S)\,G\,(Q\,(Q\,G))\,S=Q\,c_0\,c_2\,S$, with $c_0=G$ and $c_{j+1}=Q\,c_j$. It has no
+hnf, its states are $\rest^n(p_K)=a_n\,S$ and its teeth $Y_n=b_n\,S$ (S11, Lemma~9), and none of its
+moves is exposed. \see{g:pk-run}, \see{g:ct-pk}
+\end{entry}
+
+\begin{entry}{g:sym-phi}{$\varphi$}{2026-11-26}
+Overloaded.
+\sense{S1, eq.~(2)} The map from blocks onto the states of the 35-state automaton, a homomorphism with
+$\varphi(a)=\circledast$ iff $a=\bot$. \lean{\texttt{HnfS.}$\varphi$, \texttt{HnfS.phi\_onto}}
+\sense{S5, Thm.~2} The homomorphism from the 373-element model onto the blocks.
+\lean{\texttt{D2.d2\_block}}
+\sense{S8, Lemma~7} A term with at least two items, in Lemma SS (\see{g:lemma-ss}).
+\end{entry}
+
+\begin{entry}{g:sym-pi}{$\pi$, $\pi'_d$, $\pi_d$}{2026-11-26}
+Overloaded.
+\sense{S1, \S4} The potential on h-blocks in the certificate (\see{g:weight}).
+\lean{\texttt{HnfSound.piTable}}
+\sense{S5, Def.~1; S6, \S2} $\pi'_d(t)$, $\pi_d(t)$: the depth-$d$ prefix with the head $S$ shown
+(\see{g:depth-prefix}).
+\sense{S12, Prop.~20} $\pi$, a normal pair in $\Gc$ (\see{g:meet}).
+\end{entry}
+
+\begin{entry}{g:plain-context}{plain context, depth}{2026-11-26}
+\src{S8, \S1}
+\lean{\texttt{Ncfp.PlainD}}
+A context built from the hole and closed normalizing terms by $E'\mapsto S\,E'$ and
+$E',E''\mapsto S\,E'\,E''$; its depth is $0$ for the hole or a closed context and otherwise one more
+than the larger depth of $E'$, $E''$. By S8, Thm.~1 (\texttt{Ncfp.ncfp\_depth2}), no $p\conv E[p]$
+for a plain $E\ne[\,]$ of depth at most $2$ with a hole.
+\end{entry}
+
+\begin{entry}{g:pop}{pop, raising move, $\mathrm{pop}(Z)$}{2026-11-26}
+Overloaded.
+\sense{S12, \S2} A move of a normal pair is a pop if $k=0$ (it keeps the heap and replaces the stack by
+a proper subterm) and raising if $k\ge1$ (the heap grows to a proper right extension).
+\sense{S12, Lemma~15} For $Z\in\Zc\setminus\{X,U\}$ with first item $S^m\,P_0$, $P_0\in\Zc$,
+$\mathrm{pop}(Z)=P_0$.
+\end{entry}
+
+\begin{entry}{g:prefix-regularity}{prefix regularity, $M_d$}{2026-11-26}
+\src{S6, Thm.~1}
+\lean{\texttt{Tower.prefix\_regularity}}
+Theorem. For every $d$ there are a finite $S$-model $M_d$, generated by $s$, and a map $o_d$ to trees
+with $\pi_d(t)=o_d(\bar t)$, both computable from $d$. $M_1$ is the block model, and $M_{d+1}$ is
+$\Ter$ modulo the syntactic congruence of the observable over $M_d$ (S6, Lemma~10).
+\see{g:realizable}
+\end{entry}
+
+\begin{entry}{g:product-state}{product state $\operatorname{st}(t)$}{2026-11-26}
+\src{S2, \S3}
+\lean{\texttt{HnfProd.reachPairs}}
+The pair $(c(t),b(t))$ of class and block. Only $115$ pairs occur (the set $R$, S2, Lemma~4(iii)),
+$95$ of them accepted, and an accepted class never pairs with block $\bot$.
+\end{entry}
+
+\begin{entry}{g:productive}{productive}{2026-11-26}
+\sense{S2, Def.~3} A term that lies in every $P_k$ (\see{g:pk}); S2, \S2 shows this equivalent to its
+B\"ohm tree having no $\bot$, the definition of~\citep{dots}.
+\lean{\texttt{HnfCert.Prod}, \texttt{HnfProd.Pk}}
+\sense{S3, \S2} A term whose B\"ohm tree has no $\bot$; equivalently, no node of $t^{\infty}$ has an
+infinite left spine (S3, Thm.~10). \lean{\texttt{InfNF.prod\_iff\_nodes}}
+\end{entry}
+
+\begin{entry}{g:productive-runs}{productive runs (Lemma), $\varpi$}{2026-11-26}
+\src{S6, Lemma~6}
+\lean{\texttt{BExp.skeleton\_r1}, \texttt{BExp.r1\_le}}
+Lemma. There is a map $\varpi$ from the blocks other than $\bot$ to $\{0,\dots,10\}$ such that the head
+run of a term $t$ with an hnf has at most $\varpi(\bar t)$ non-free steps. \see{g:two-bounds}
+\end{entry}
+
+\begin{entry}{g:sym-Psi}{$\Psi(t)$}{2026-11-26}
+\src{S6, Def.~3}
+The pair $(\bar f,\bar w)$ of values of the first stable frame $f\,w$ of a term $t$ without an hnf.
+\end{entry}
+
+\begin{entry}{g:psi-skeleton}{$\Psi$-skeleton (Lemma)}{2026-11-26}
+\src{S6, Lemma~8}
+\lean{\texttt{GCert.psi\_skeleton}, \texttt{PsiSkel.root\_head\_not\_comb}}
+Lemma. The head run of a term without an hnf has at most $77$ non-free steps before its first stable
+frame. The proof uses ranks on the graphs $G_1$, $G_2$ (\see{g:sym-G}). \see{g:two-bounds}
+\end{entry}
+
+\begin{entry}{g:sym-Q}{$Q$, $\mathcal Q$, $Q_k$, $q_n$}{2026-11-26}
+Overloaded.
+\sense{S1, \S3} $Q=\{0,\dots,34\}$, the states of the 35-state automaton.
+\sense{S3, \S3} $\mathcal Q$, the terms that are not right combs; membership is invariant under
+reduction. \lean{\texttt{TopTerm.qB}}
+\sense{S4, \S4} $Q=S\,(S\,S)$.
+\sense{S6, Lemma~7} $Q_k$, with $P_k$, the burst pair (\see{g:bursts}).
+\sense{S8, Thm.~2; S9, Thm.~7} $q_n$: the terms of a right comb, resp.\ the chain of first stable
+frames.
+\sense{S9, \S5} The set of $p$ with an hnf and $p\conv p\,Y_1\cdots Y_k$ for some $k\ge1$; it is empty.
+\lean{\texttt{Ncfp.SComb}, \texttt{Ncfp.scomb\_closed}}
+\sense{S11, Thm.~1} $Q=S\,(S\,S)$, so $Q\,u\,v\hred S\,(u\,v)\,(v\,(u\,v))$. \lean{\texttt{S11.Q}}
+\sense{S12, Def.~1} A metavariable for a member of $\Hc\cup\Ic\cup\{S\}$ in rules (H3) and (I).
+\end{entry}
+
+\begin{entry}{g:q5}{Question~5 (productive terms)}{2026-11-26}
+\src{S2, Thm.~1}
+\lean{\texttt{HnfCert.q5}}
+A question of \citet{dots}: how to characterize the productive closed $S$-terms, whether they form a
+regular set, and whether productivity is decidable. S2 answers it with a 39-state automaton that
+accepts exactly the productive terms (\see{g:class-model}).
+\end{entry}
+
+\begin{entry}{g:q10}{Question~10 (head normal forms)}{2026-11-26}
+\src{S1, Thm.~1}
+\lean{\texttt{HnfSound.q10}}
+A question of \citet{dots}: whether their 35-state automaton accepts exactly the closed $S$-terms with
+a head normal form. S1 proves that it does: rejection gives no hnf (S1, Cor.~5), and every term whose
+block is not $\bot$ reduces to an hnf (S1, Thm.~9, \texttt{HnfSound.sound}).
+\end{entry}
+
+\begin{entry}{g:sym-r}{$r$, $R$}{2026-11-26}
+Overloaded.
+\sense{S1, \S4} $r(t)$, the weight of a term (\see{g:weight}).
+\sense{S2, \S3} $\mathsf r=37$, the rejecting class; $R$, the set of 115 reachable product states.
+\sense{S4, \S4} $R=S\,S$.
+\end{entry}
+
+\begin{entry}{g:realizable}{realizable prefixes}{2026-11-26}
+\src{S6, Cor.~2}
+\lean{\texttt{Tower.realizable}, \texttt{Tower.realizable\_iff}}
+Corollary. For each $d$ and finite tree $P$, the terms with depth-$d$ prefix $P$ form a regular tree
+language, and it is decidable whether some closed $S$-term has an infinitary normal form with that
+prefix. Lean has the decidability for the prefixes $\pi_d$; the reading as prefixes of $t^\infty$ and
+the regular-language claim are not mechanized.
+\end{entry}
+
+\begin{entry}{g:refill}{refill}{2026-11-26}
+\src{S12, \S8}
+A move of a normal pair with at least one non-literal entry. All-literal moves shrink the stack, so
+refills recur. \see{g:conj-entry}, \see{g:wl-refill}
+\end{entry}
+
+\begin{entry}{g:replay}{replay}{2026-11-26}
+\src{S7, \S3}
+The repetition of the steps of a loop $t\to t'\red u$ at an occurrence of $t$ inside another term. The
+proof of No Ground Loops uses it to contradict accessibility.
+\end{entry}
+
+\begin{entry}{g:rest}{rest}{2026-11-26}
+\src{S11, \S1; S12, \S1}
+\lean{\texttt{S11.rest1}, \texttt{S11.restN}}
+The function part $f$ of the first stable frame $f\,w$ of a term $t$ without an hnf: $\rest(t)=f$.
+Then $\rest(t)$ again has no hnf, and the terms $\rest^n(t)$ are the states of $t$ (S11).
+\see{g:tooth}, \see{g:state}
+\end{entry}
+
+\begin{entry}{g:right-comb}{right comb}{2026-11-26}
+\sense{S3, Lemma~5} One of the terms $S$, $S\,S$, $S\,(S\,S)$, \dots, whose set S3 writes $\mathcal P$;
+a term is a right comb iff its block is in $\{0,1,2,4,8,17\}$, and S1, \S4 calls the members of block
+$17$ towers. If $A,B,C$ are not right combs then $b(A\,B\,C)=\bot$; S12 calls these terms combs
+$\sigma_j$ (\see{g:comb}). \lean{\texttt{TopTerm.RC}, \texttt{TopTerm.rc\_of\_not\_qt}}
+\sense{S8, Thm.~2} A sequence $q_0,q_1,\dots$ in which every $q_n$ has the hnf $S\,q_{n+1}$ or
+$S\,a_n\,q_{n+1}$. By S8, Thm.~2, no right comb has teeth of bounded size.
+\lean{\texttt{Ncfp.right\_combs}, \texttt{Ncfp.right\_combs\_seq}}
+\end{entry}
+
+\begin{entry}{g:right-depth}{right depth $\mathrm{rd}$}{2026-11-26}
+\src{S7, \S2}
+The length of the right spine: $\mathrm{rd}(S)=0$ and $\mathrm{rd}(f\,x)=\mathrm{rd}(x)+1$. A
+restricted step never lowers it.
+\end{entry}
+
+\begin{entry}{g:right-suffix}{right suffix, $\sqsubseteq$}{2026-11-26}
+\src{S11, \S2, Lemma~7; S12, \S2}
+\lean{\texttt{S11.lemma7b}, \texttt{S11.lemma7c}, \texttt{S11.lemma7d}}
+A term $e$ such that $t=x_1\,(x_2\,(\cdots(x_d\,e)\cdots))$ for some $d\ge0$, the depth. S12 writes
+$e\sqsubseteq t$, and $e\sqsubset t$ if $d\ge1$. S11, Lemma~7 tracks right suffixes under reduction.
+\see{g:rs}
+\end{entry}
+
+\begin{entry}{g:root-frame}{root frame}{2026-11-26}
+\src{S6, \S3}
+A frame $S\,x\,y\,z$ with three items and no hnf. The proof of the $\Psi$-skeleton bound tracks the
+successive root frames of a head run.
+\end{entry}
+
+\begin{entry}{g:root-normal-form}{root normal form}{2026-11-26}
+\src{S1, Cor.~10}
+Following~\citep{dots}, a closed $S$-term that is $S$, $S\,A$, $S\,A\,B$, or $M_1\,M_2$ with $M_1$
+having an infinite head reduction. S1 shows that the last condition is $d(M_1)=\circledast$, so the
+property is decidable; only the link to the automaton is mechanized.
+\end{entry}
+
+\begin{entry}{g:root-redex}{root redex}{2026-11-26}
+\src{S3, \S2}
+A closed $S$-term with exactly three items, so that its head step rewrites the root.
+\end{entry}
+
+\begin{entry}{g:rs}{(RS)}{2026-11-26}
+\src{S12, \S2}
+Lemma. If $e\sqsubset t$ and $t$ normalizes, then $e$ normalizes and $\nf(e)\sqsubset\nf(t)$; it comes
+from S11, Lemma~7(a). \see{g:right-suffix}
+\end{entry}
+
+\begin{entry}{g:run-pair}{run of a normal pair}{2026-11-26}
+\src{S12, \S2}
+The sequence of states $(A_n,W_n)$ of a normal pair, with tooth normal forms $N_n$;
+$\rest^n(A\,W)\conv A_n\,W_n$. \see{g:head-run}
+\end{entry}
+
+\begin{entry}{g:pk-run}{run of $p_K$: $c_j$, $a_m$, $b_m$, $i_m$, $x_m$, $Y_n$}{2026-11-26}
+\src{S11, \S3, Lemmas~8--9}
+\lean{\texttt{S11.am}, \texttt{S11.bm}, \texttt{S11.im}, \texttt{S11.xm}, \texttt{S11.Y},
+\texttt{S11.lemma9}}
+The spine of $p_K$'s run: $a_0=Q\,c_0\,c_2$, each $a_m$ is $Q\,c_j\,c_n$ or $G\,c_n$, and $a_m\hred
+S\,a_{m+1}\,b_{m+1}$ with $b_m=c_{i_m+1}\,a_m$. The index sequence $i_m$ is unbounded, $x_m=c_{i_m}\,a_m$
+and $Y_n=b_n\,S$. \see{g:pK}, \see{g:kappa}
+\end{entry}
+
+\begin{entry}{g:s-model}{$S$-model, $S$-law}{2026-11-26}
+\src{S5, \S2; S6, \S2}
+\lean{\texttt{D2.d2\_slaw}}
+A set $M$ with a binary operation and an element $s$ that satisfies the $S$-law
+$s\,a\,b\,c=a\,c\,(b\,c)$ for all $a,b,c\in M$. S1, Lemma~2(i) states the law for the block table,
+and because it holds, the fold is invariant under reduction. \see{g:fold}
+\end{entry}
+
+\begin{entry}{g:sym-Sm}{$S^m\,t$}{2026-11-26}
+\src{S12, \S1}
+The term $S\,(S\,(\cdots(S\,t)))$ with $m$ copies of $S$. S6, Lemma~7 uses $S^k u$ in the same way.
+\end{entry}
+
+\begin{entry}{g:scott-encoding}{Scott encoding $\langle t\rangle$}{2026-11-26}
+\src{SIM, \S1}
+\lean{\texttt{SelfInterp.quote\_inj}}
+An encoding of $SKI$ terms that takes four continuations, one per constructor ($S$, $K$, $I$,
+application), and applies its own. Encodings of distinct terms have no common reduct (SIM, \S3).
+\end{entry}
+
+\begin{entry}{g:self-dead}{self-dead}{2026-11-26}
+\src{S12, \S3}
+\lean{\texttt{Lock1Tables.self\_dead}}
+A closed term $W$ such that $W\,(t\,W)$ has no hnf for every closed $t$. Terms whose block is in
+$\Self$ are self-dead, and so is every member of $\Zc$ (S12, Lemma~16(c)). \see{g:self-set},
+\see{g:wl-self-dead}
+\end{entry}
+
+\begin{entry}{g:self-set}{$\Self$}{2026-11-26}
+\src{S12, \S5}
+\lean{\texttt{Lock1Tables.SELF}, \texttt{Lock1Tables.mem\_SELF}}
+The set of blocks $w$ with $\beta(w,\beta(\kappa,w))=36$ for every block $\kappa$; a term with block
+in $\Self$ is self-dead. \see{g:self-dead}
+\end{entry}
+
+\begin{entry}{g:size}{size $\sz{t}$}{2026-11-26}
+\src{S2, \S2; S4, \S2; S8, \S1; S9, \S1; S11, \S1; S12, \S1}
+\lean{\texttt{HeadRec.sz}}
+The number of occurrences of $S$ in $t$. A step adds $\sz{z}-1\ge0$ occurrences, so $t\red u$ implies
+$\sz{t}\le\sz{u}$ (S4, \texttt{WordProblem.sz\_wstep}; S12, \S1).
+\end{entry}
+
+\begin{entry}{g:size-laws}{size laws (F), (L0), (L1), (LA)}{2026-11-26}
+\src{S2, Lemma~11}
+\lean{\texttt{HnfCertLaws.chain\_factor}, \texttt{HnfCertLaws.L0}, \texttt{HnfCertLaws.L1},
+\texttt{HnfCertLaws.LA}}
+Lemma. Four laws on how head reduction changes sizes: (F) factors a head reduction; (L0) a head
+reduction that ends in a spine of at most one item is empty; (L1) $t\to_h^{*}S\,S\,y$ gives
+$\sz{y}=\sz{t}-2$; (LA) $t\to_h^{*}S\,(S\,S)\,y$ gives $\sz{y}\le\sz{t}-2$.
+\end{entry}
+
+\begin{entry}{g:join-bound}{Small Join, join bound}{2026-11-26}
+\src{S4, Def.~2}
+\lean{\texttt{WordProblem.SmallJoin}, \texttt{WordProblem.smallJoin\_decides}}
+A property of $g\colon\mathbb N^2\to\mathbb N$: convertible $t,u$ have a common reduct $w$ with
+$\sz{w}\le g(\sz{t},\sz{u})$. Classically it holds for some $g$, and if it holds for a computable $g$,
+convertibility is decidable (S4, Thm.~3). It is open for computable $g$, and no additive bound works
+(\see{g:join-family}).
+\end{entry}
+
+\begin{entry}{g:spine}{spine $\operatorname{fr}(t)$}{2026-11-26}
+\src{S1, \S2}
+\lean{\texttt{HnfSound.spine}}
+The list $\operatorname{fr}(t)=[u_1,\dots,u_m]$ of the items of $t=S\,u_1\cdots u_m$. It is neither the
+left spine of a node in an infinite tree (\see{g:left-spine}) nor the spine equations of S11.
+\end{entry}
+
+\begin{entry}{g:spine-equations}{spine equations, solution from $k$}{2026-11-26}
+\src{S11, Def.~14}
+\lean{\texttt{S11.SolFrom}}
+A term $s_0$ is a solution from $k$ (it satisfies the spine equations of $p_K$ from $k$) if every
+$s_j$ has a two-item hnf $S\,s_{j+1}\,t_{j+1}$ with $t_{j+1}\conv b_{k+j+1}$. $a_k$ is one, and within
+$\Bk$ the only one (S11, Lemma~18, \texttt{S11.lemma18}). \see{g:frakB}
+\end{entry}
+
+\begin{entry}{g:stable-frame}{stable frame}{2026-11-26}
+\sense{S6, \S2} A frame $S\,u_1\cdots u_m$ with $m\ge3$ such that $f=S\,u_1\cdots u_{m-1}$ has no hnf,
+written $f\,w$ with $w=u_m$; later head steps are head steps of $f$, so $w$ is kept.
+\lean{\texttt{Conv.FirstStable}, \texttt{BExp.stable\_unique}}
+\sense{S9, \S1; S11, \S1; S12, \S1} A frame $f\,w$ of the head run in which $f$ has no hnf. The two
+senses agree in substance, and the first stable frame defines the first tooth and the rest.
+\see{g:f2}, \see{g:tooth}
+\end{entry}
+
+\begin{entry}{g:state}{state}{2026-11-26}
+\sense{S11, \S1} A term $\rest^n(t)$, $n\ge0$, of a term $t$ without an hnf.
+\sense{S12, \S2} A normal pair $(A_n,W_n)$ of the run of a normal pair; it stands for a term
+convertible with $\rest^n$ of the original term. \see{g:normal-pair}
+\end{entry}
+
+\begin{entry}{g:statman}{Statman's theorem}{2026-11-26}
+\src{S8, Cor.~18}
+\lean{\texttt{Ncfp.no\_fpc}, \texttt{Ncfp.no\_fixed\_point\_combinator}}
+Theorem~\citep[Rem.~15]{dots}. $S$ alone defines no fixed-point combinator: no $Y\in\Ter$ has
+$Y\,x\conv x\,(Y\,x)$ for all $x$. S8 obtains it as the case $E=S\,[\,]$, $p=Y\,S$, and S7, Conj.~6
+would strengthen it.
+\end{entry}
+
+\begin{entry}{g:std}{(Std) (standardization)}{2026-11-26}
+\src{S11, \S2}
+\lean{\texttt{wsteps\_split}}
+Theorem~\citep{terese}. If $t\red u$, then $t\hred t'\red u$ with every step from $t'$ to $u$
+internal, so $t'$ and $u$ have the same number of items and corresponding items reduce. S12 uses it
+through S11.
+\end{entry}
+
+\begin{entry}{g:step-adequacy}{step adequacy}{2026-11-26}
+\src{SIM, \S3}
+\lean{\texttt{SelfInterp.step\_whnf}, \texttt{SelfInterp.step\_step}}
+Lemma of~\citep[Lemma~5.1]{davis-si}: the interpreter's \texttt{step} answers \texttt{nothing} on a
+weak head normal form and \texttt{just} of the contracted term on a head redex. It holds as stated
+under weak reduction, not under head reduction.
+\end{entry}
+
+\begin{entry}{g:strong-s7}{strong S7 conjecture}{2026-11-26}
+\src{S8, Conj.~19}
+Conjecture. There are no $t,u\in\Ter$ and one-hole context $C\ne[\,]$ with $t\red u$ and
+$t\red C[u]$. By Church--Rosser it is equivalent to NCFP. \see{g:ncfp}
+\end{entry}
+
+\begin{entry}{g:strongly-convergent}{strongly convergent}{2026-11-26}
+\src{S3, \S2}
+\lean{\texttt{InfSN.not\_weakInf}}
+A reduction of length $\omega$ in which, for every $d$, only finitely many steps contract a redex at
+depth at most $d$; it has a limit in $\Ter^{\infty}$. Every reduction of length $\omega$ from a finite
+$S$-term is strongly convergent (S3, Thm.~6; doubly negated in Lean).
+\end{entry}
+
+\begin{entry}{g:sym-T}{$T$, $T_E$}{2026-11-26}
+Overloaded; $T$ means $S\,S$ in S2 and S3 but $S\,S\,S$ in S12.
+\sense{S2, \S1; S3, Fig.~2 and App.~A} $T=S\,S$; Zachos' term $S\,T\,T\,(S\,T\,T)$ is productive with an
+infinite B\"ohm tree. In S2, \S6, $T$, $T_1$, $T_2$ also name symbolic terms.
+\sense{S8, \S6 and Fig.~1} $T_E$, the unique finite or infinite tree with $T=E[T]$ for a plain context
+$E\ne[\,]$ with normal closed parts; a solution of $p\conv E[p]$ would have it as $p^\infty$.
+\sense{S12, \S1} $T=S\,S\,S$; in S11, $T$ names only a frame inside a proof.
+\lean{\texttt{Lock1Tables.T}}
+\end{entry}
+
+\begin{entry}{g:t-infty}{infinitary normal form $t^{\infty}$}{2026-11-26}
+\src{S3, Thm.~7}
+\lean{\texttt{InfNF.NF}, \texttt{InfNF.nf\_unique}, \texttt{InfNF.nf\_wsteps}}
+The normal form in $\Ter^{\infty}$ reached from $t$ by a strongly convergent reduction; it is shared by
+all reducts, finite iff $t$ normalizes, and equal to the Berarducci tree of $t$. S3 proves that the
+limit exists, by rounds of outermost steps, and cites its uniqueness~\citep{kksv,terese}. Neither the
+existence of the single limit nor its identification with the Lean prefixes is mechanized.
+\end{entry}
+
+\begin{entry}{g:t16-t17}{T16, T17 (table facts in S12)}{2026-11-26}
+\src{S12, Lemma~14}
+\lean{\texttt{Lock1Tables.T16}, \texttt{Lock1Tables.T17}}
+Lemma. The block sets $\Theta_1$, $\Theta_2$, $CB$, $IB$ are closed under the grammar rules,
+$\beta(\rho,\kappa)=36$ for $\rho\in\Theta_2$ and $\kappa$ a block of a member of $\Hc$ or $\Ic$, and
+$\Theta_2\subseteq\Self$; all are checked by kernel evaluation. The labels come from the notes
+(\see{g:wl-table-facts}).
+\end{entry}
+
+\begin{entry}{g:sym-tau}{$\tau(t)$, $\#_S(t)$}{2026-11-26}
+\src{S1, Thm.~9}
+\lean{\texttt{HnfSound.hd}, \texttt{HnfSound.nS}}
+The tie-breakers of the weight: $\tau(t)$ is the number of leading $S$ applications of the first item
+($\tau(S\,v)=1+\tau(v)$), and $\#_S(t)$ the number of items equal to $S$. Neither is the tooth $\tau_n$
+of S11 and S12 (\see{g:tooth}).
+\end{entry}
+
+\begin{entry}{g:theta-blocks}{$\Theta_1$, $\Theta_2$, $CB$, $IB$}{2026-11-26}
+\src{S12, \S5}
+\lean{\texttt{Lock1Tables.TH1}, \texttt{Lock1Tables.TH2}, \texttt{Lock1Tables.CB},
+\texttt{Lock1Tables.IB}}
+The block sets $\Theta_1=\{18,20,27\}$, $\Theta_2=\{16,31,33,34\}$, $CB=\{0,1,2,4,8,17\}$ and
+$IB=\{12,22,30\}$: the blocks of the one-item members of $\Hc$, of $\Zc$, of the combs and of $\Ic$.
+\end{entry}
+
+\begin{entry}{g:tooth}{tooth, teeth}{2026-11-26}
+\sense{S8, Thm.~2} The terms $a_n$ of a right comb, where $q_n$ has the hnf $S\,a_n\,q_{n+1}$.
+\sense{s8-combs (draft), Def.~1} The $a_n$, $b_n$ of an hnf comb and the $w_n$ of a left comb.
+\sense{S9, Thm.~7} The terms $w_n$, where $q_{n+1}\,w_n$ is the first stable frame on the head run of
+$q_n$; their sizes are unbounded. The text does not use the word.
+\lean{\texttt{Ncfp.teeth\_unbounded\_seq}}
+\sense{S11, \S1; S12, \S1} The terms $\tau_n(t)$: for $t$ without an hnf with first stable frame
+$f\,w$, $\tau_1(t)=w$ and $\tau_{n+1}(t)=\tau_1(\rest^n(t))$. S12 often gives a tooth of a normal pair
+by its normal form $N$. \lean{\texttt{S11.tooth1}, \texttt{S11.tooth}}
+\end{entry}
+
+\begin{entry}{g:tooth-lemma}{tooth lemma (L5)}{2026-11-26}
+\src{S11, Lemma~5; S12, \S1 (as L5); cf.\ S6, Lemma~4}
+\lean{\texttt{S11.inv\_hnf2}, \texttt{S11.inv\_first}}
+Lemma. Let $t\conv t'$. If $t$ has the hnf $S\,u_1\cdots u_m$, then $t'$ has an hnf with the same $m$
+and convertible items; if $t$ has no hnf, neither has $t'$, and $\tau_n(t)\conv\tau_n(t')$ and
+$\rest^n(t)\conv\rest^n(t')$ for all $n$. Its converse with teeth only is CT, and the notes call part
+(b) Lemma~T (\see{g:wl-lemma-t}).
+\end{entry}
+
+\begin{entry}{g:top-termination}{top-termination}{2026-11-26}
+\src{S3, Thm.~3}
+\lean{\texttt{TopTerm.top\_termination}, \texttt{TopTerm.Perpetual}}
+Theorem of Waldmann~\citep{waldmann-thesis}. No reduction sequence from a closed $S$-term rewrites the
+root infinitely often. S3 mechanizes his proof with the sets of his case analysis read as sets of
+blocks; the theorem fails for infinite terms (\see{g:sym-U}).
+\end{entry}
+
+\begin{entry}{g:two-bounds}{two bounds on head reduction}{2026-11-26}
+\src{S6, \S3 (Lemmas~6 and~8)}
+\lean{\texttt{BExp.r1\_le}, \texttt{GCert.psi\_skeleton}}
+Lemmas. The head run of a term with an hnf has at most $\varpi(\bar t)\le10$ non-free steps, and the
+head run of a term without an hnf has at most $77$ non-free steps before its first stable frame.
+Prefix regularity rests on them. \see{g:productive-runs}, \see{g:psi-skeleton}
+\end{entry}
+
+\begin{entry}{g:sym-U}{$U$, $U_j$}{2026-11-26}
+Overloaded.
+\sense{S3, \S3} The infinite term $U=S\,U$; $S\,U\,S\,S$ rewrites the root forever, so top-termination
+fails for infinite terms.
+\sense{S11, \S5} $U$, $U_i$: passive arguments of members of $\Bk$ (\see{g:frakB}).
+\sense{S12, \S1} $U=S\,T\,T$ (block $33$); $U_0=U$, $U_{m+1}=D(U_m)$.
+\lean{\texttt{Lock1Tables.U}, \texttt{Lock1Tables.Ufam}, \texttt{Lock1Tables.fold\_U}}
+\end{entry}
+
+\begin{entry}{g:u-family}{$U_j\,U_m$ family}{2026-11-26}
+\src{S12, Cor.~3}
+\lean{\texttt{Lock1Tables.F1}}
+Corollary. For all $j,m\ge0$ every tooth of $U_j\,U_m$ normalizes, so CT holds against every $p$
+without an hnf that has a state convertible with $U_j\,U_m$. The Lean fact \texttt{F1} gives only that
+$U_j\,U_m$ has no hnf.
+\end{entry}
+
+\begin{entry}{g:uq}{\texttt{UQ} (unquoter)}{2026-11-26}
+\src{SIM, Thm.~4}
+\lean{\texttt{SelfInterp.UQ}, \texttt{SelfInterp.UQ\_unquote}}
+The 43-atom closed $SKI$ term of~\citep{davis-si} with $\texttt{UQ}\,\langle t\rangle\red t$ for every
+$SKI$ term $t$.
+\end{entry}
+
+\begin{entry}{g:walk}{walk}{2026-11-26}
+\src{S1, \S2}
+\lean{\texttt{HnfSound.walk}}
+The sequence of blocks $q_0=s$, $q_i=\beta(q_{i-1},b(u_i))$ of a list $[u_1,\dots,u_m]$ from a block
+$s$; from $0$ the walk of $\operatorname{fr}(t)$ ends at $b(t)$. \see{g:weight}, \see{g:closed-walk}
+\end{entry}
+
+\begin{entry}{g:weak-reduction}{weak reduction}{2026-11-26}
+\src{S1, \S2; SIM, \S2}
+The compatible closure of $S\,x\,y\,z\to x\,z\,(y\,z)$, written $\to$, with $\red$ its
+reflexive--transitive closure. SIM reads the cited paper's $\red$ in the same way, as contraction at
+any position, not head reduction. \see{g:head-step}
+\end{entry}
+
+\begin{entry}{g:weight}{weight $r(t)$, potential $\pi$}{2026-11-26}
+\src{S1, \S4}
+\lean{\texttt{HnfSound.wt}, \texttt{HnfSound.wTable}, \texttt{HnfSound.piTable}}
+A number read along the walk of the spine from $0$: given weights $c$ on pairs (h-block, block) and
+potentials $\pi$ on h-blocks, $r(t)=\sum_i c(q_{i-1},b(u_i))$. When the certificate inequalities hold,
+each head step from an h-fold term lowers $(r(t),\#_S(t),\tau(t))$ lexicographically (S1, Thm.~9).
+\see{g:certificate}, \see{g:sym-E}
+\end{entry}
+
+\begin{entry}{g:whnf}{weak head normal form; $M\Downarrow_n N$, $M\Uparrow$}{2026-11-26}
+\src{SIM, \S1}
+Notation for closed $SKI$ terms: $M\Downarrow_n N$ means that $M$ reaches the weak head normal form
+$N$ in exactly $n$ normal-order contractions, and $M\Uparrow$ that it reaches none.
+\end{entry}
+
+\begin{entry}{g:whnfF}{\texttt{whnfF}}{2026-11-26}
+\src{SIM, Thm.~1}
+\lean{\texttt{SelfInterp.whnfF}, \texttt{SelfInterp.whnfF\_eq\_paper}}
+The 618-atom closed $SKI$ term of~\citep{davis-si}: given a fuel numeral $\langle k\rangle$ and an
+encoded term, it runs the term to weak head normal form and answers \texttt{just}~$\langle N\rangle$
+or \texttt{nothing}. SIM proves that bracket abstraction of the definitions yields the printed term.
+\see{g:fuel-adequacy}
+\end{entry}
+
+\begin{entry}{g:window}{window lemma}{2026-11-26}
+\src{S1, Lemma~6}
+\lean{\texttt{HnfSound.window}}
+Lemma. A head step changes the spine only in a window of three items: before and after the step, the
+walk from $0$ reaches the rest $\rho$ of the spine in the same block, by the $S$-law.
+\end{entry}
+
+\begin{entry}{g:word-problem}{word problem for $S$}{2026-11-26}
+\src{S4, \S1}
+The question whether $\conv$ is decidable on closed $S$-terms, asked by Barendregt in
+1975~\citep{barendregt-open}; it is RTA open problem \#97~\citep{rtaloop97}, and Waldmann conjectured
+it decidable~\citep[\S5]{waldmann-ic}. S4 reduces it to a computable join bound (\see{g:join-bound}),
+and S6 to the conjecture that $t^\infty$ determines conversion (\see{g:conj-inf-conv}).
+\end{entry}
+
+\begin{entry}{g:sym-X}{$X$}{2026-11-26}
+Overloaded; only S12 fixes $X$ as a term.
+\sense{S1, \S2} Generic arguments in the hnf shapes $S\,X$, $S\,X\,Y$.
+\sense{S2, \S6} $X_\sigma$, the variable of a symbolic term for any term of accepted product state
+$\sigma$ (\see{g:claim}).
+\sense{S3, App.~A} $X$, $Y$, $Z$ name the arguments of a root redex $S\,X\,Y\,Z$.
+\sense{S7, Cor.~2} $X_1,\dots,X_k$: arbitrary arguments in $t\,X_1\cdots X_k$.
+\sense{S8, \S1} The positions in the depth-two shapes $S\,X$, $S\,X\,Y$, each among $p$, $n$, $S\,p$,
+$S\,p\,p$, $S\,n\,p$, $S\,p\,n$.
+\sense{S12, \S1} $X=S\,T\,S$, of block $16$. \lean{\texttt{Lock1Tables.X}, \texttt{Lock1Tables.fold\_X}}
+\end{entry}
+
+\begin{entry}{g:x-family}{$X\,Y$ family}{2026-11-26}
+\src{S12, Cor.~4, \S7}
+Corollary. For $Y=X$ or $Y=S\,X\,c$ with $c$ normal, every tooth of $X\,Y$ normalizes iff $Y=X$ or
+$c\in\Kc$, and then CT holds against every $p$ with a state convertible with $X\,Y$. The run moves in
+phases through the heaps $G_e$, $J_{e+1}$ (\see{g:sym-G}).
+\end{entry}
+
+\begin{entry}{g:xplus}{Theorem X$^+$}{2026-11-26}
+\src{S8, Thm.~10}
+\lean{\texttt{Ncfp.thm\_Xplus}}
+Theorem. There are no $M\ge1$ and nonempty $Z\subseteq\Ter$ such that every member has a one- or
+two-item hnf with items in $Z$ or of size at most $M$, at least one in $Z$, and whose last frame
+$[S,y,z]$ (if any) has $\sz{z}\le M$, $y=S$, or $y=S\,c$ with $\sz{c}\le M$.
+\end{entry}
+
+\begin{entry}{g:sym-Y}{$Y$, $Y_n$}{2026-11-26}
+Overloaded.
+\sense{S8, Cor.~18} $Y$, a would-be fixed-point combinator (\see{g:statman}).
+\sense{S9, \S1} $Y_1,\dots,Y_k$, the absorbed arguments of $p\conv p\,Y_1\cdots Y_k$
+(\see{g:consumption}).
+\sense{S11, \S3} $Y_n=b_n\,S=\tau_n(p_K)$. \lean{\texttt{S11.Y}}
+\sense{S12, Cor.~4} $Y=X$ or $Y=S\,X\,c$ with $c$ normal, the argument of $X\,Y$.
+\end{entry}
+
+\begin{entry}{g:set-Z}{$\Zc$}{2026-11-26}
+\src{S12, Def.~1}
+The set of two-item members of $\Hc$; their blocks lie in $\Theta_2$. Each $Z\in\Zc$ is self-dead, and
+$Z\,t$ has no hnf for $t\in\Hc\cup\Ic$ (S12, Lemma~16). \see{g:counter-grammar}
+\end{entry}
+
+\section*{Part II.\texorpdfstring{\quad}{ } Working labels (unpublished notes)}
+
+These labels are working names: a statement may be renamed, repaired or withdrawn, and only the papers
+are citable for the mathematics. Where a review repaired a statement, the repaired version is given.
+Statuses are those of LOCK1-CT through \S26 (Wizard: sound, 2026-11-26; repairs W26.1--W26.9
+pending).
+
+\begin{entry}{g:wl-ad}{AD (applicatively dead)}{2026-11-26}
+\src{LOCK1-CT \S25.3}
+A closed $W$ such that $W\,t$ has no hnf for every closed application $t$; for $W$ with an hnf, $W$ is
+AD iff $\fold W\in\{31,34\}$ (Lemma ADF, as repaired, W25.1; proved [P], given (S1), T16, T17 [K],
+T20, T22 [C]). Every member of $\Hc^{x}_2$ other than $X$, $U$ is AD. Lemma ADH (over an AD heap a stack
+with normalizing first tooth pops or makes the T-refill) is the case of Lemma CDH in which the folds
+are those of closed applications (\see{g:wl-cdh}).
+\end{entry}
+
+\begin{entry}{g:wl-bad-pair}{bad pair, $\approx$, $B(t,u)$}{2026-11-26}
+\src{LOCK1-structure \S0}
+A pair $(t,u)$ with $t\approx u$ (that is, $t^\infty=u^\infty$) and $t\not\conv u$: a counterexample
+to Lock~1. $B(t,u)$ is the set of descent words $\sigma$ with $t_\sigma\not\conv u_\sigma$, empty or an
+infinite leafless subtree (Theorem~1 of the note). Overloaded: in LOCK1-CTB $\approx$ means $\conv$
+(\S0, and throughout \S7 by Repair WB2.7). \see{g:wl-kind}
+\end{entry}
+
+\begin{entry}{g:wl-cd}{Lemma CD (context-death), $\mathcal D(Z)$}{2026-11-26}
+\src{LOCK1-CT \S26.2}
+\status{proved [P]; given (S1), T24 [C] (Wizard: sound; W26.3 pending)}
+Lemma. (1) For $Z$ of self-dead fold, $Z\,t$ has no hnf for every $t\in\mathcal X_Z$, in particular for
+every closed $t$ that contains $Z$. (2) $\mathcal D(Z)$ is the least set with $Z\in\mathcal D(Z)$ and
+$S\,p\,q\in\mathcal D(Z)$ whenever $p\in\mathcal D(Z)$, $q\in\mathcal D(Z)$, or $p=S\,p'$ with
+$p'\in\mathcal D(Z)$; every $H\in\mathcal D(Z)$ contains $Z$, and $H\,t$ has no normal form for
+$t\in\mathcal X_Z$ (for example $S\,c\,Z$, $S\,Z\,v$, $S\,(S\,Z)\,v$). $\mathcal D(Z)$ is neither
+$D(v)=S\,v\,(S\,v)$ nor the 373-element model $D$.
+\end{entry}
+
+\begin{entry}{g:wl-cdh}{Lemma CDH}{2026-11-26}
+\src{LOCK1-CT \S26.2}
+\status{proved [P]; given (S1), with label G4 (Wizard: sound)}
+Lemma. Over a context-dead heap $W$, a normal pair $(A,W)$ with normalizing first tooth has
+$B^0\in\Kc$, and either pops ($A^0$ two-item, $A^0\,W$ without hnf) or has $A^0=T$ and makes the
+T-refill to $(W,\nf(B^0\,W))$. It generalizes Lemma ADH (\see{g:wl-ad}).
+\end{entry}
+
+\begin{entry}{g:wl-cds}{Cor. CDS}{2026-11-26}
+\src{LOCK1-CT \S26.2}
+\status{proved [P]; given (S1) (Wizard: sound; W26.2 pending: read the hypotheses as (a) and (c))}
+Corollary. In a normalized run all of whose teeth normalize, if the heap $W_n$ is context-dead, then
+$A_n\in\mathcal S$; with depth $r$ and bottom $S\,T\,B$, moves $n+1,\dots,n+r$ are pops and move
+$n+r+1$ is the T-refill to $(W_n,\nf(B\,W_n))$. The converse is claimed only for a normal self-dead
+$W$.
+\end{entry}
+
+\begin{entry}{g:wl-cl1}{CL1, FL1, RF, FF}{2026-11-26}
+\src{LOCK1-structure \S5}
+\status{open [Conj]; Lock~1 $\Rightarrow$ CL1 $\Rightarrow$ FL1 and Lock~1 $\Leftrightarrow$ RF $\wedge$ FF
+proved [P]}
+Conjectures. CL1: terms with equal trees in every context are convertible; FL1: terms with equal folds
+in every model $M_d$ of S6's tower are convertible; each decides the word problem. RF is residual
+finiteness, and FF says that the fold into every finite $S$-model is a function of $t^\infty$.
+\end{entry}
+
+\begin{entry}{g:wl-close-x}{$\mathrm{CLOSE}_x$}{2026-11-26}
+\src{LOCK1-CT \S19.4 (stated), \S20.1 (proved)}
+\status{proved [P], in corrected form (Theorem CNT$^{x}$); given (S1), T1--T4, T10, T16, T17 [K]}
+\appears{S12 as Thm.~18 (closure of $\Gc$)}
+Theorem. $\Gc^{x}$ is closed under moves with a normalizing tooth. As repaired (W19.4), the invariant
+is $W^i\in\Hc^{x}\cup\Ic$ for all rounds $i\le m$, inert only at $i=1$, and $W^m\in\Hc^{x}$.
+\see{g:grammar-closure}
+\end{entry}
+
+\begin{entry}{g:wl-program}{component sync, program, $\mathrm{comp}_\alpha$}{2026-11-26}
+\src{LOCK1-CTB \S0, \S1 (Prop.~VS), \S7.3 (Repair WB2.5)}
+\status{Prop.~VS proved [P]}
+$\mathrm{comp}_\alpha$ follows an address $\alpha\in\{r,w,1,2\}^*$ through rests, teeth and hnf items and
+is a conversion invariant (Fact~C). A program is an address $\alpha$ or a pair $(\alpha,\beta)$, and it
+fires at move $n$ if the new state (or $a_k$ and $w_k$) is literally that component of the tooth. If
+one program fires at the same index on both sides, the pair is convertible (Prop.~VS).
+\end{entry}
+
+\begin{entry}{g:wl-context-dead}{context-dead heap}{2026-11-26}
+\src{LOCK1-CT \S26 (result paragraph), \S26.2, \S26.4}
+An informal name for a heap $W$ with no normal form against every closed argument in a class closed
+under contexts; formally, $W$ meets hypotheses (a) and (c) of Lemma CDH for some set $Y$ of folds. The
+main instance is $W\in\mathcal D(Z)$ with $Y=\mathrm{Ctx}(\fold Z)$. The open case of TZX$'$ involves
+one-item heaps $S\,w$ with $w\in\mathcal D(Z)\cup\{Z\}$, which \S26.4 calls ``2-context-dead''.
+\end{entry}
+
+\begin{entry}{g:wl-ct}{CT (Conj.~CT)}{2026-11-26}
+\src{LOCK1-CT header, \S1, \S26.7; LOCK1-structure \S3; OPEN-QUESTIONS (A1)}
+\status{open [Conj]; proved [P] against $p_K$, the family of Theorem~F and every run that reaches
+$\Gc^{x}$, and [K] against $p_K$ (lean-ski v1.21.0, \texttt{S11.ct\_pK})}
+\appears{S11 as Conj.~19; S12 as Conj.~22}
+Conjecture. If closed $S$-terms $p,q$ without an hnf have $\tau_n(p)\conv\tau_n(q)$ for every $n\ge1$,
+then $p\conv q$; Lock~1 is CT together with NTD (\see{g:wl-lock1-ct-ntd}). For normalizing teeth, CT
+follows from the chain TZX$'$ $\wedge$ $\mathrm{RCL}_2\Rightarrow$ R2 $\Rightarrow\mathrm{ENTRY}_x
+\Rightarrow$ CT: the first step is proved [P], given (S1), T1--T4, T10, T12, T16, T17 [K], T20, T21,
+T24 [C], and the rest [P], given also T5, T15 [K] (\see{g:wl-r2}, \see{g:wl-table-facts}).
+\end{entry}
+
+\begin{entry}{g:wl-ct-pk}{CT($p_K$), Cor.~CT$_K$}{2026-11-26}
+\src{LOCK1-CTB \S11.3, \S12.5}
+\status{proved [P], classical (G4) in the notes, after Wizard and Witchhunter review; mechanized in
+lean-ski v1.21.0 with only \texttt{propext} and \texttt{Quot.sound}, deciding hnf by the block model}
+\appears{S11 as Thm.~1, with the rests as Cor.~2}
+\lean{\texttt{S11.ct\_pK}, \texttt{S11.ct\_pK\_rest}}
+Theorem. Every closed $q$ without an hnf with $\tau_n(q)\conv\tau_n(p_K)$ for all $n$ satisfies
+$q\conv p_K$. The inputs of LOCK1-CTB \S12.5 are G4, (F2), (CR), (Std), (H), S6 Lemma~4, Lemma~T,
+Lemma~L, the Moves, Prop.~1 ($\Leftarrow$) and Lemma~R; the block model enters only through (F2) and
+G4 (Repair WB6.5). \see{g:ct-pk}
+\end{entry}
+
+\begin{entry}{g:wl-ctx}{$\mathrm{Ctx}(\zeta)$, $\mathcal X_Z$, Lemma CTX}{2026-11-26}
+\src{LOCK1-CT \S26.2}
+\status{Lemma CTX proved [P]; constructive (Wizard: sound)}
+For $\zeta\in\Self$, $\mathrm{Ctx}(\zeta)$ is the least set of reachable folds that contains $\zeta$
+and is closed under $y\mapsto\beta(x,y)$ and $y\mapsto\beta(y,x)$ for reachable $x$; it has 20 or 21
+elements, 36 among them. Lemma CTX: a closed term with a subterm of fold $\zeta$ has its fold in
+$\mathrm{Ctx}(\zeta)$, and the set is closed under application on either side.
+$\mathcal X_Z=\{t\text{ closed}:\fold t\in\mathrm{Ctx}(\fold Z)\}$.
+\end{entry}
+
+\begin{entry}{g:wl-difference-depth}{difference depth, Lemma HR, Cor.~I}{2026-11-26}
+\src{LOCK1-NTD-probe, Round~4}
+\status{refuted [C] as monotone quantities; Lemma HR and Cor.~I proved [P]}
+A family of measures of where the two head forms of a node pair disagree (address depth, function
+depth, argument depth, their sum); none is non-increasing at record turns. Lemma HR: a synchronous
+head step keeps the function depth and does not raise the argument depth. Cor.~I: every infinite
+descent has infinitely many irregular steps.
+\end{entry}
+
+\begin{entry}{g:wl-dxp}{Lemma DX$'$}{2026-11-26}
+\src{LOCK1-CT \S26.2}
+\status{proved [P]; constructive (Wizard: sound)}
+Lemma. Lemma DX of \S12.6 holds with hypothesis (i) weakened to ``$d\,x$ has no normal form for every
+$x\in\mathcal X$''.
+\end{entry}
+
+\begin{entry}{g:wl-event-e}{(E) (essential loss), Theorem E}{2026-11-26}
+\src{LOCK1-NTD-probe \S5.5; LOCK1-INJ \S4.1}
+\status{(E) computed [C] on a separated pair and open on bad pairs; Theorem~E proved [P], classical,
+as repaired (WI1.1)}
+(E) is a synchronous head step after which every image of a minimizing essential leaf becomes
+inessential although the pair stays non-convertible. Theorem~E: such a step collapses a new node
+$a\,z\conv a'\,z'$ with $a\in\{x,x',y,y'\}$, and one of $a$, $a'$ has a two-item hnf.
+\end{entry}
+
+\begin{entry}{g:wl-entry}{ENTRY, $\mathrm{ENTRY}_x$, $\mathrm{HEAP}_x$, TREF}{2026-11-26}
+\src{LOCK1-CT \S19.2 (ENTRY), \S19.5 and \S20.4 ($\mathrm{ENTRY}_x$), \S20.2 (Prop.~ENT)}
+\status{open [Conj]; $\mathrm{ENTRY}_x\Rightarrow$ CT for normalizing teeth proved [P] (Thm.~CT-G$^{x}$),
+given (S1), T1--T5, T10, T12, T15--T17 [K]}
+\appears{S12, \S8 (the weaker form after Conj.~23)}
+Conjectures. ENTRY: every normalized run all of whose teeth normalize has a state in $\Gc$; 150
+complete runs in the pools of \S19 never reach $\Gc$ (counters over a right-comb base) [C].
+$\mathrm{ENTRY}_x$ is the same with $\Gc^{x}$, follows from R2, and by Prop.~ENT (as repaired, W20.6)
+holds iff from some $n_0$ on every heap is in $\Hc^{x}$ ($\mathrm{HEAP}_x$) and a later move is a
+T-round over a two-item member heap or an XB move over $S\,V$, $V\in\Hc^{x}_2$ (TREF).
+\end{entry}
+
+\begin{entry}{g:wl-essential}{essential difference, elex, Theorem P5}{2026-11-26}
+\src{LOCK1-NTD-probe, Round~5 (\S5.3, \S5.5)}
+\status{proved [P]; Theorem P5 as repaired to a containment (WN5.2)}
+A disagreement leaf is essential if every position pair above it is non-convertible, and elex is an
+ordinal rank on essential leaves. Theorem P5: elex decreases at every extraction on a thin path, so
+the residue lies in the thin paths with infinitely many asynchronous reads or essential-loss steps,
+plus the perfect pairs. \see{g:wl-event-e}
+\end{entry}
+
+\begin{entry}{g:wl-fact-k}{Fact K}{2026-11-26}
+\src{LOCK1-structure \S1}
+\status{proved [P]}
+Fact. $t^\infty$ is $S$, $S\cdot a^\infty$, $S\cdot a^\infty\cdot b^\infty$, or $f^\infty\cdot w^\infty$
+with an infinite left spine, according to the kind $\kappa(t)$. Hence $t\approx u$ gives equal descent
+domains and $t_\sigma\approx u_\sigma$ for every $\sigma$. It is not Theorem~K (\see{g:wl-theorem-k}).
+\end{entry}
+
+\begin{entry}{g:wl-fact-s}{Fact S, Fact S$'$}{2026-11-26}
+\src{LOCK1-CTB \S9.2, \S12.3}
+\status{proved [P], without the block model; Fact S$'$ scoped to $p_K$'s run (Repair WB6.4)}
+\appears{S11 as Lemma~8}
+Facts. S: if $a_m\hred S\,a_{m+1}\,b_{m+1}$ for all $m$, then $a_m\,u$ has no hnf and its first stable
+frame is $a_{m+1}\,u\,(b_{m+1}\,u)$. S$'$: for closed $U_1,\dots,U_r$, $r\ge1$, the terms $a_m\,\vec U$,
+$c_j\,a_m\,\vec U$ and $Q\,a_m\,(a_m\,(Q\,a_m))\,\vec U$ have no hnf; together they replace every
+block-model check in the CT($p_K$) chain.
+\end{entry}
+
+\begin{entry}{g:wl-calGplus}{$\Gc^{+}$}{2026-11-26}
+\src{LOCK1-CT \S22.1}
+A grammar of normal pairs that contains $\Gc^{x}$ (Lemma GP0); $T$ is its only atom, and its slots may
+hold members of $\Kc$, generalized inert terms $S\,k\,Q$ with $k\in\Kc$, and two-item terms $S\,k\,Q$
+with $k,Q\in\Kc$. It is not closed under normalized moves (at least nine leaving moves, W22.5) [C], and
+Conj.~START$^{+}$ says that every all-normalizing normal pair lies in it.
+\end{entry}
+
+\begin{entry}{g:wl-calGx}{$\Gc^{x}$}{2026-11-26}
+\src{LOCK1-CT \S20.1}
+\appears{S12 as $\Gc$ in Def.~1; its closure is S12, Thm.~18}
+The set $\Hc^{x}_2\times\Hc^{x}$ of normal pairs, closed under moves with a normalizing tooth (Theorem
+CNT$^{x}$). A pair one of whose runs reaches $\Gc^{x}$ satisfies CT (Cor.~CT-G$_1$; S12, Thm.~2).
+Whether every all-normalizing run enters it is $\mathrm{ENTRY}_x$ (\see{g:wl-entry}).
+\end{entry}
+
+\begin{entry}{g:wl-h1}{(H1)}{2026-11-26}
+\src{LOCK1-CTB \S7.2}
+\status{refuted [P] (Theorem T1 of LOCK1-CTB)}
+The frozen-heap case of Theorem KH: from some move on, the heap is one literal term $w$ and every
+$\tau_1(Y_n)$ is convertible with it. It never happens, so every run with $p_K$'s teeth is an S-run.
+\see{g:wl-t1}
+\end{entry}
+
+\begin{entry}{g:wl-calH}{$\Hc$, $\Hc_2$, $\Gc=\Hc_2\times\Hc$ (counter grammar of the notes)}{2026-11-26}
+\src{LOCK1-CT \S19.2}
+A grammar: $\Hc$ is the least set of normal terms with $X,U\in\Hc$, $S\,H$ for $H\in\Hc$, $S\,P\,c$ for
+two-item $P\in\Hc$ and normal $c$, and $S\,P\,Q$ for one-item $P\in\Hc$ and $Q\in\Hc\cup\{S\}$; $\Gc$ is
+closed under moves with a normalizing tooth (Theorem CNT, proved [P], given (S1), T1--T4, T10, T16
+[K]). It is superseded by $\Hc^{x}$: in the inspected runs over a right-comb base the base persists,
+so they would not reach $\Gc$ (inspection through 150 moves, not proved). Overloaded: S12's $\Hc$ and
+$\Gc$ are the notes' $\Hc^{x}$ and $\Gc^{x}$ (\see{g:wl-calHx}).
+\end{entry}
+
+\begin{entry}{g:wl-calHx}{$\Hc^{x}$, $\Hc^{x}_2$}{2026-11-26}
+\src{LOCK1-CT \S20.1 (stated informally in \S19.4)}
+\appears{S12 as $\Hc$ and $\Zc$ in Def.~1}
+An extension of $\Hc$: rule (H3) admits $Q\in\Hc^{x}\cup\{S\}\cup\Ic$, and (H4) adds $S\,(S\,P')\,Q$ for
+one-item $P'\in\Hc^{x}$ and $Q$ a right comb; $\Hc^{x}_2$ is its two-item part. Every member of
+$\Hc^{x}_2$ is self-dead and has no hnf when applied to a member (via T16, T17 [K]). Every member other
+than $X$, $U$ has fold 31 or 34 (via T20 [C]). \see{g:counter-grammar}
+\end{entry}
+
+\begin{entry}{g:wl-heap}{heap, S-run}{2026-11-26}
+\src{LOCK1-CTB \S7 (Theorem KH), \S12.4}
+The heap of a move is its $w_n$, the last argument carried by the state; S12 uses the word for the
+second term of a normal pair (\see{g:normal-pair}). An S-run is a run whose heap is the literal $S$ at
+every move from the first B-move on, so its states are $a'_n\,S$ and its teeth $b'_n\,S$.
+\end{entry}
+
+\begin{entry}{g:wl-ii}{(ii), (ii$'$), the Left part}{2026-11-26}
+\src{LOCK1-CTB \S7.2, \S8.2}
+\status{proved [P] through (W) (LOCK1-CTB \S11); (ii$'$) $\Leftrightarrow$ (ii) $\Leftrightarrow$
+CT($p_K$) after Repair WB3.1}
+(ii): if $q$ is an S-run with $p_K$'s teeth, then $a'_n\,S\conv a_n\,S$ for some $n$. (ii$'$): the same
+for any spine $a'_{n-1}\hred S\,a'_n\,b'_n$ with $b'_n\conv b_n$ and $a'_n\,S$ without hnf. The
+equivalence with (ii) needs a prepended prefix (Repairs WB3.1, WB4.4).
+\end{entry}
+
+\begin{entry}{g:wl-calI}{$\Ic$ (inert terms)}{2026-11-26}
+\src{LOCK1-CT \S20.1}
+\appears{S12 as $\Ic$, rule (I) of Def.~1}
+The set $\{S\,c_j\,Q: j\ge0,\ Q\in\Hc^{x}\}$, with $c_j$ the right combs; its members are not in
+$\Hc^{x}$, and their folds lie in $IB=\{12,22,30\}$ (T17). Lemma INERT says exactly when an inert term
+applied to a member normalizes.
+\end{entry}
+
+\begin{entry}{g:wl-kill-test}{kill test}{2026-11-26}
+\src{LOCK1-CT \S9.4 (first use) and the kill-test subsections of \S\S18--26}
+A computation designed to refute a conjecture: it enumerates starts, often adversarial, runs them
+within a budget, and looks for a counterexample. A certified non-normalizing tooth confirms an
+eventual-death statement such as TZN for that start, and a complete run is only a candidate against
+it (as repaired, W25.4); no kill test proves a statement.
+\end{entry}
+
+\begin{entry}{g:wl-kind}{kind $\kappa$, head form, descent word, turn}{2026-11-26}
+\src{LOCK1-structure \S0}
+The kind $\kappa(t)$ is 0, 1 or 2 (the items of its hnf) or $\bot$ (no hnf), and the head form is the
+hnf or the first stable frame $f\,w$. A descent word over $\{i,a,b,r,w\}$ addresses a node $t_\sigma$,
+and a turn is any letter other than $r$. Overloaded: in LOCK1-CTB \S8.1, $\kappa$ is the length of a
+1-chain, the notion that S11 calls $\kappa(x)$ (\see{g:kappa}).
+\end{entry}
+
+\begin{entry}{g:wl-calK}{$\Kc$, $\Kc_1$}{2026-11-26}
+\src{LOCK1-CT \S12.6}
+\appears{S12, \S1 (in-text definition after Thm.~2)}
+$\Kc$ is the least set of normal terms that contains every normal term with at most one item and
+contains $S\,S\,b$ whenever it contains $b$; it is exactly the set of normal $c$ with $c\,W$
+normalizing over a self-dead normal heap $W$ (LCD(1), LCD(2)). $\Kc_1$, for one-item heaps, adds
+$S\,(S\,S)\,b$ and the terms $S\,(S\,(S\,S))\,S$ and $S\,(S\,(S\,S))\,(S\,S)$. \see{g:set-K}
+\end{entry}
+
+\begin{entry}{g:wl-lcd1}{LCD(1)}{2026-11-26}
+\src{LOCK1-CT \S12.6 (Theorem LCD, item~1); \S22.4}
+\status{proved [P]; for concrete heaps given (S1), T10 [K]}
+\appears{S12 as Lemma~11(b)}
+Lemma. If $W$ is normal and self-dead and $c$ is normal with $c\,W$ normalizing, then $c\in\Kc$. As a
+classifier of dying moves (\S22.4, as repaired, W22.8) it explains 36--59\% of the deaths at the move
+level, so it is not complete [C].
+\end{entry}
+
+\begin{entry}{g:wl-lcd2}{LCD(2)}{2026-11-26}
+\src{LOCK1-CT \S12.6 (Theorem LCD, item~2)}
+\status{proved [P]}
+\appears{S12 as Lemma~11(a)}
+Lemma. For every $c\in\Kc$ and every normal $W$, $c\,W$ normalizes: $\nf(c\,W)=c\,W$ if $c$ has at
+most one item, and $\nf(S\,S\,b\,W)=S\,W\,\nf(b\,W)$.
+\end{entry}
+
+\begin{entry}{g:wl-lcd3}{LCD(3)}{2026-11-26}
+\src{LOCK1-CT \S12.6 (Theorem LCD, item~3)}
+\status{proved [P]}
+Lemma. If $W$ is normal and self-dead, then $c\mapsto\nf(c\,W)$ is injective on $\Kc$: left
+cancellation holds over $W$.
+\end{entry}
+
+\begin{entry}{g:wl-lcd-one}{$\mathrm{LCD}_1$}{2026-11-26}
+\src{LOCK1-CT \S12.6 (Theorem LCD$_1$)}
+\status{proved [P]; for concrete heaps given (S1), T11 [K]}
+Theorem, the one-item analogue of Theorem LCD and distinct from LCD(1). Over a normal one-item heap,
+every $c\in\Kc_1$ makes $c\,W$ normalize with one of five explicit normal forms, and
+$c\mapsto\nf(c\,W)$ is injective on $\Kc_1$; over a 2-dead heap, $c\,W$ normalizes only for
+$c\in\Kc_1$.
+\end{entry}
+
+\begin{entry}{g:wl-lemma-d}{Lemma D}{2026-11-26}
+Overloaded: two lemmas in two notes.
+\sense{LOCK1-structure \S1} Lemma~D (down) [P]: if $t\conv u$, then $\kappa(t)=\kappa(u)$ and the
+corresponding children are convertible. Its converse is Lemma~U (up); LOCK1-INJ uses this sense.
+\sense{LOCK1-CTB \S10.2} Lemma~D (twins do not cross classes) [P]: a twin's states never meet the
+classes of $p_K$'s states at another index. The final chain does not use it.
+\end{entry}
+
+\begin{entry}{g:wl-lemma-p}{Lemma P (persistence)}{2026-11-26}
+\src{LOCK1-CTB \S10.3, \S12.4}
+\status{proved [P]}
+\appears{S11 as Lemma~15}
+Lemma. If $t$ contains a reduct of $s_j$ for a solution $s$, then every reduct of $t$ contains a
+reduct of some $s_{j'}$ with $j'\ge j$.
+\end{entry}
+
+\begin{entry}{g:wl-rn}{Lemma RN, rightmost branch}{2026-11-26}
+\src{LOCK1-CTB \S0, \S4, \S12.2}
+\status{proved [P], as repaired (WB1.1, WB1.3)}
+\appears{S11 as Lemma~7 (parts (b)--(d) are RN, RN-1, RN-2)}
+$rb_i(t)$ is the rightmost branch: the last items of successive head forms. Lemma RN: a right suffix
+of $t$ is convertible with a node of the branch before its first normalizing node, or normalizes to a
+right suffix of that node's normal form; on an infinite branch it may also sink (WB1.1).
+\end{entry}
+
+\begin{entry}{g:wl-lemma-sc}{Lemma SC (S-cancellation)}{2026-11-26}
+\src{LOCK1-CTB \S8.2, \S12.4}
+\status{proved [P]}
+\appears{S11 as Lemma~12}
+Lemma. (1) If $t$ has no hnf and $e\,S\conv t\,S$, then $e\conv t$. (2) Under side conditions, from
+$e\,S\conv h\,S$ with $h\hred S\,u\,v$ follows $e\hred S\,e_1\,e_2$ with $e_1\,S\conv u\,S$ and
+$e_2\,S\conv v\,S$.
+\end{entry}
+
+\begin{entry}{g:wl-sol}{Lemma SOL}{2026-11-26}
+\src{LOCK1-CTB \S11.3, \S12.4}
+\status{proved [P]; index step without the block model (Repair WB6.3)}
+\appears{S11 as Lemma~18}
+\lean{\texttt{S11.lemma18}}
+Lemma. A member of $\Bk$ that is a solution from $k$ is literally $a_k$. \see{g:wl-solution}
+\end{entry}
+
+\begin{entry}{g:wl-lemma-t}{Lemma T}{2026-11-26}
+\src{LOCK1-structure \S0; LOCK1-CTB \S12.1}
+\status{proved [P]}
+\appears{S11 as Lemma~5(b)}
+Lemma. If $t\conv t'$ have no hnf, then $\tau_1(t)\conv\tau_1(t')$ and $\rest(t)\conv\rest(t')$, so all
+teeth and rests agree. Its finite converse is S11, Lemma~6, and CT is the converse with teeth only.
+\see{g:tooth-lemma}
+\end{entry}
+
+\begin{entry}{g:wl-lock1}{Lock 1}{2026-11-26}
+\src{A1-lock1-S3; LOCK1-structure (header); OPEN-QUESTIONS (A1)}
+\status{open [Conj]; known when one side normalizes [K]; Lock~1 $\Rightarrow$ the word problem is
+decidable [P]}
+\appears{S6 as Conj.~11 (unnamed); S11, \S6 as ``the conjecture of S6''}
+\lean{\texttt{WordProblem.Lock1}, \texttt{WordProblem.lock1\_normalizing}}
+Conjecture. For closed $S$-terms, $t^\infty=u^\infty$ implies $t\conv u$; since S3 makes every finite
+prefix of $t^\infty$ computable, it alone would make conversion decidable. It holds iff CT and NTD
+hold (\see{g:wl-lock1-ct-ntd}); CT for normalizing teeth is reduced via $\mathrm{ENTRY}_x$ and R2 to
+Conj.~TZX$'$ and Conj.~$\mathrm{RCL}_2$, CT for non-normalizing teeth is settled only for $p_K$, and
+NTD has evidence only. \see{g:conj-inf-conv}
+\end{entry}
+
+\begin{entry}{g:wl-lock2}{Lock 2}{2026-11-26}
+\src{A1-lock1-S3 (introduction)}
+The other lock of an older two-lock route to the word problem. A1-lock1-S3 records it as closed and
+as not needed once the prefixes of $t^\infty$ are computable, which leaves Lock~1; it does not restate
+its content.
+\end{entry}
+
+\begin{entry}{g:wl-moves}{the Moves (A-move, B-move), frame term}{2026-11-26}
+\src{LOCK1-CTB \S0, \S12.1}
+\status{proved [P], classical (G4) in the notes; [K] in S11}
+\appears{S11 as Lemma~4}
+\lean{\texttt{S11.lemma4}}
+An A-move and a B-move are the cases (A) and (B) of the Moves (\see{g:moves}). In a B-move, entry $i$
+is literal if it needs no head step; otherwise its last frame is $S\,S\,y\,z$, and $y$ is the frame
+term of the move.
+\end{entry}
+
+\begin{entry}{g:wl-normal-pair}{normal pair, normalized run, rounds}{2026-11-26}
+\src{LOCK1-CT \S8, \S9.0}
+\appears{S12, \S2}
+A pair $(A,W)$ of normal terms with $A\,W$ without hnf; $A$ is the stack and $W$ the heap. If all teeth
+normalize, the normalized run $(A_n,W_n,N_n)$ records stack, heap and tooth normal form after move $n$,
+with rounds $S\,A^{i+1}\,B^{i+1}=\nf(A^i\,W^i)$ and $W^{i+1}=\nf(B^i\,W^i)$ (Lemma~N0).
+\see{g:normal-pair}
+\end{entry}
+
+\begin{entry}{g:wl-ntd}{NTD (no turning descent)}{2026-11-26}
+\src{LOCK1-structure \S3}
+\status{open [Conj]; no counterexample in Rounds~1--5 of LOCK1-NTD-probe [C]}
+Conjecture. For no $t\approx u$ does $B(t,u)$ contain an infinite path with infinitely many turns.
+$\mathrm{NTD}_Z$ (LOCK1-NTD-probe \S5.2) restricts it to descents with tail in $\{i,b,w\}^\omega$.
+\see{g:wl-lock1-ct-ntd}
+\end{entry}
+
+\begin{entry}{g:wl-pk}{$p_K$ and its counter, ``Theorem K's counter''}{2026-11-26}
+\src{LOCK1-CTB \S3, \S12.3}
+\appears{S11, \S3}
+The term $p_K$ of S11 (\see{g:pK}), of size 24, whose counter index $i_n$ is unbounded and takes each
+value finitely often. A run ``runs into Theorem~K's counter'' if some state is literally
+$Q\,(Q^jG)\,(Q^mG)\,w$ or $G\,(Q^mG)\,w$ for some heap $w$.
+\end{entry}
+
+\begin{entry}{g:wl-per}{Per, B$^+$, LC}{2026-11-26}
+\src{LOCK1-CT \S4; LOCK1-CTB \S1 (Remark VS-Per), \S8.1}
+\status{open [Conj]; Per $\Leftrightarrow$ CT$_1\wedge$ LC and B$^+\Rightarrow$ Per proved [P] (Prop.~4.1);
+all three hold at $p_K$ [P]}
+Conjectures, for closed $p$ without an hnf and $k\ge1$. Per: no $p$ has $\tau_{n+k}(p)\conv\tau_n(p)$
+for all $n$; B$^+$: no $p$ has its teeth in finitely many classes; LC (the left-comb case of NCFP): no
+$p\conv p\,Y_1\cdots Y_k$, equivalently no $\rest^k(p)\conv p$. CT$_1$ is CT on one run.
+\end{entry}
+
+\begin{entry}{g:wl-r1}{R1, $r_1$}{2026-11-26}
+Overloaded; neither sense is the conjecture $\mathrm{R1}^{+}$ or $\mathrm{R1}_s$.
+\sense{LOCK1-CT \S8.1} Lemma~R1 [P]: for closed $b$, $W$ with $W\,(b\,W)$ without hnf, $f=S\,T\,b\,W$ has
+no hnf, its move has two rounds with non-literal entry~1, $\tau_1(f)=S\,W\,(b\,W)$ and
+$\rest(f)=W\,(b\,W)$. ``R1 moves'' and ``R1 loads'' refer to it.
+\sense{LOCK1-CT \S15} $r_1$: the index of a run's first refill; a move is visible if its index exceeds
+$r_1$, and $r_2$ (also $m_2$) is the second refill.
+\end{entry}
+
+\begin{entry}{g:wl-r1-plus}{$\mathrm{R1}^{+}$}{2026-11-26}
+\src{LOCK1-CT \S23.3}
+\status{open [Conj]}
+Conjecture. In a normalized run all of whose teeth normalize, the state right after every refill that
+is not of class SSc is in $\Gc^{x}$. Theorem R2C (proved [P], given (S1), T1--T4, T10, T16, T17 [K]):
+TZ $\wedge$ VB $\wedge$ RCL $\Rightarrow\mathrm{R1}^{+}\Rightarrow$ R2, and $\mathrm{R1}^{+}\Rightarrow$
+TZ $\wedge$ VB.
+\end{entry}
+
+\begin{entry}{g:wl-r1-s}{$\mathrm{R1}_s$}{2026-11-26}
+\src{LOCK1-CT \S23.2 (Cor.~PREF1)}
+\status{open [Conj]; R2 $\Rightarrow\mathrm{R1}_s$ proved [P]}
+Conjecture. For every normal pair $(Y,H)$ with $H=\nf(b\,S)$ and all teeth normalizing, the state
+right after its first refill is in $\Gc^{x}$. A prefix puts one SSc refill in front of $(Y,H)$
+(Prop.~PREF), so R2 implies $\mathrm{R1}_s$.
+\end{entry}
+
+\begin{entry}{g:wl-r2}{R2}{2026-11-26}
+\src{LOCK1-CT \S22.3, \S26.7}
+\status{open [Conj]; not refuted [C]; TZX$'$ $\wedge$ $\mathrm{RCL}_2\Rightarrow$ R2 proved [P], given
+(S1), T1--T4, T10, T12, T16, T17 [K], T20, T21, T24 [C] (Theorem R2C$'$ with Cor.~TZK1 and Prop.~VBP;
+W26.8)}
+\appears{S12 as Conj.~23}
+Conjecture. In a normalized run all of whose teeth normalize, with $m_2$ the index of the second refill,
+$(A_{m_2},W_{m_2})\in\Gc^{x}$; R2 implies $\mathrm{ENTRY}_x$ (Prop.~R2E). Theorem R2C$'$ gives TZ $\wedge$
+VB $\wedge$ $\mathrm{RCL}_2\Rightarrow$ R2; since \S26 VB is proved and TZ reduces to TZX$'$, so the
+sufficient remaining set is \{TZX$'$, $\mathrm{RCL}_2$\} (not shown necessary). The evidence is about
+16.5 thousand complete runs, 248 with two refills before entry (as repaired, W23.7). \see{g:conj-entry}
+\end{entry}
+
+\begin{entry}{g:wl-rcl}{RCL, $\mathrm{RCL}_2$}{2026-11-26}
+\src{LOCK1-CT \S23.1 (RCL), \S24.2 ($\mathrm{RCL}_2$)}
+\status{open [Conj]; the case-(a) half of RCL after $r_1$ proved [P] (Cor.~DP1)}
+Conjectures. RCL: in a normalized run all of whose teeth normalize, every refill is of class T, SSc or
+XB. $\mathrm{RCL}_2$: in such a run, a case-(b) second refill is the move of Lemma~XB ($X$ over $S\,V$
+with $V$ two-item and $V\,D(S\,V)$ without hnf); the census class XB is broader than Lemma~XB (W23.9).
+\see{g:wl-refill}
+\end{entry}
+
+\begin{entry}{g:wl-rec}{REC}{2026-11-26}
+\src{LOCK1-CT \S11.5}
+\status{open [Conj]; no counterexample in the pools of \S11 [C]}
+Conjecture. A normal pair all of whose teeth normalize makes case-(a) refills at infinitely many moves.
+In every pool of the notes a case-(b) refill is never followed by another (Conj.~NBB).
+\end{entry}
+
+\begin{entry}{g:wl-rec-k}{REC-K}{2026-11-26}
+\src{LOCK1-CTB \S7.3 (Repair WB2.5)}
+\status{open [Conj]; no counterexample in the small pools of LOCK1-CTB \S7.3 [C]}
+Conjecture. In every run with infinitely many non-normalizing teeth that does not run into Theorem~K's
+counter, a program fires infinitely often. \see{g:wl-program}
+\end{entry}
+
+\begin{entry}{g:wl-rec-t}{$\mathrm{REC}_T$}{2026-11-26}
+\src{LOCK1-CT \S17.3}
+\status{open [Conj]; $\mathrm{REC}_T\Rightarrow$ CT for normalizing teeth proved [P] (Thm.~CT-T), given
+(S1), T1--T5, T10, T12, T15 [K]}
+Conjecture. For every $n_0$ there is $n>n_0$ such that move $n$ is a TEE-shaped case-(a) refill (new
+heap $S\,A_p$ or $S\,A_p\,(S\,A_p)$), as repaired (W17.3). It holds on the family of Theorem~F and along
+every run that reaches $\Gc$ or $\Gc^{x}$.
+\end{entry}
+
+\begin{entry}{g:wl-rec-t-ntd}{REC-T-NTD, record turn}{2026-11-26}
+\src{LOCK1-NTD-probe, Round~3}
+\status{open [Conj]; no counterexample in Round~3 [C]}
+Conjecture. In every descent through a bad set, only finitely many turns land on a new record of
+$\min(\sz{t_\sigma},\sz{u_\sigma})$ (record turns). Since an infinite descent has infinitely many
+records, it implies NTD.
+\end{entry}
+
+\begin{entry}{g:wl-refill}{refill; case-(a), case-(b) refill; classes}{2026-11-26}
+\src{LOCK1-CT \S9.0, \S9.1, \S10.3, \S11.1, \S23.1}
+\appears{S12, \S8 (refill)}
+A move of a normal pair that is not all-literal; with $i$ its last non-literal entry, it is of case
+(a) if $i=k$ (then the tooth is $N=S\,A'\,W'$, Thm.~TR) and of case (b) if $i<k$, and refills recur
+(Cor.~RB1). By the last-round stack $S\,p\,q$, case-(a) refills fall into the classes T ($p=q=S$), SSc
+($p=S\,S$, heap $S$; first refill only) and a-other, and case-(b) refills into XB (Lemma~XB: $X$ over a
+one-item heap) and b-other. \see{g:refill}
+\end{entry}
+
+\begin{entry}{g:wl-calS}{$\mathcal{S}$ ($\Kc$-spined T-stacks)}{2026-11-26}
+\src{LOCK1-CT \S25.3, \S26.2}
+The least set with $S\,T\,B\in\mathcal{S}$ for $B\in\Kc$ and $S\,Y\,B'\in\mathcal{S}$ for
+$Y\in\mathcal{S}$, $B'\in\Kc$; the bottom of $Y$ is the $S\,T\,B$ reached by $r\ge0$ first-argument
+steps, and $r$ is its depth. Over an AD heap (Cor.~ADS), and more generally over a context-dead heap
+(Cor.~CDS), a stack of an all-normalizing run lies in $\mathcal{S}$, pops $r$ times and makes the
+T-refill. Overloaded: it is not the set $\Ter$ of closed $S$-terms, also written $\mathcal S$.
+\end{entry}
+
+\begin{entry}{g:wl-s1}{(S1), G4, (F2) as inputs}{2026-11-26}
+\src{LOCK1-CTB \S0, \S11.8; LOCK1-CT header}
+Inputs named in statuses. ``(S1)'' or ``given S1'' means S1's 38-block model with ``no hnf
+$\Leftrightarrow$ block 36'', and G4 marks the use of excluded middle on ``has an hnf'', which that
+model decides. (F2) is as in the papers (\see{g:f2}). \see{g:block-model}
+\end{entry}
+
+\begin{entry}{g:wl-self-dead}{self-dead, 2-dead}{2026-11-26}
+\src{LOCK1-CT \S12.6}
+\appears{S12, \S3 (self-dead)}
+A term $W$ is self-dead if $W\,(t\,W)$ has no hnf for every closed $t$ (\see{g:self-dead}), and 2-dead
+if $W\,p\,q$ has no hnf for all closed $p$, $q$. Their blocks are given by table facts T10 and T11, and
+every stack of a normal pair is self-dead (Lemma~SD, T12).
+\end{entry}
+
+\begin{entry}{g:wl-solution}{solution from $k$}{2026-11-26}
+\src{LOCK1-CTB \S10, \S12.4}
+\appears{S11 as Def.~14}
+\lean{\texttt{S11.SolFrom}}
+The notes' name for a solution of the spine equations (\see{g:spine-equations}). It is invariant under
+conversion, and $a'_k$ is one for $k$ past the first B-move of any S-run with $p_K$'s teeth.
+\end{entry}
+
+\begin{entry}{g:wl-spine-pair}{spine pair, twin}{2026-11-26}
+\src{LOCK1-structure \S3; LOCK1-CTB \S\S8--10}
+A counterexample to CT: $p$, $q$ without hnf with all teeth pairwise convertible but $\rest^n(p)
+\not\conv\rest^n(q)$ for every $n$; its bad set is the path $r,rr,rrr,\dots$. A twin of $p_K$ is a spine
+pair with one side $p_K$, and by CT($p_K$) there is none.
+\end{entry}
+
+\begin{entry}{g:wl-status-tags}{status tags [P], [C], [K], [Conj], [Sketch]}{2026-11-26}
+\src{LOCK1-CT header (as repaired, W9.4, W13.8) and \S24}
+Tags of the notes. [P]: proved in the note, unmechanized, with the review state recorded per section
+in the note's status log; ``[P], given $X$'' is conditional on the inputs $X$, typically (S1) and table
+facts. [C]: computed, with command and log, and able only to refute; [K]: kernel-checked in Lean on
+lean-ski master; [Conj]: conjectured; [Sketch]: an argument not checked step by step.
+\end{entry}
+
+\begin{entry}{g:wl-sync}{Sync$\bot$, exposed B-move}{2026-11-26}
+\src{LOCK1-CTB \S1}
+\status{Prop.~S$\bot$ proved [P]}
+\appears{S11, \S1 (exposed move)}
+A B-move is exposed if its last entry is non-literal and its frame term has no hnf
+(\see{g:exposed-move}). Sync$\bot$ (Prop.~S$\bot$): if the first $n$ teeth agree and move $n$ is
+exposed on both sides, the pair is convertible. Theorem~K shows that exposure need not recur.
+\end{entry}
+
+\begin{entry}{g:wl-t-refill}{T-refill, T-round, T-start, T-stack}{2026-11-26}
+\src{LOCK1-CT \S20.2, \S23.1, \S24.2, \S25.3}
+A T-round is a round $i$ of a move with $A^i=T=S\,S\,S$; over a self-dead $W^i$ it ends the move as a
+case-(a) refill to $(W^i,\nf(B^i\,W^i))$, the heap becoming the stack (Lemma~TRND). A T-refill is a
+case-(a) refill whose last-round stack is $T$, and every case-(a) refill after the first is one
+(Lemma~DP, Cor.~DP1, proved [P]). A T-start is a pair $(S\,T\,b,Z)$, and a T-stack a stack $S\,T\,B$.
+\end{entry}
+
+\begin{entry}{g:wl-t1}{T1}{2026-11-26}
+Overloaded: a theorem of LOCK1-CTB and a table fact of LOCK1-CT.
+\sense{LOCK1-CTB \S8.1} Theorem~T1 [P; without the block model after WB6.5]: if
+$\tau_1(Y_n)\conv\tau_1(Y_{n'})$ then $i_n=i_{n'}$, the counter index being read off a 1-chain (Lemmas
+T1a, T1b). Hence (H1) is false; S11 has it as Lemma~10.
+\sense{LOCK1-CT \S10} Table fact T1 [K] (\see{g:wl-table-facts}). \lean{\texttt{Lock1Tables.T1}}
+\end{entry}
+
+\begin{entry}{g:wl-table-facts}{table facts T1--T24}{2026-11-26}
+\src{LOCK1-CT \S10.0 (T1--T5), \S11.4 (T7), \S12.0 (T8--T11), \S13.2 (T12), \S14.1 (T13), \S16.2
+(information line, unnamed), \S17.2 (T15), \S19.2 (T16), \S20.1 (T17), \S21.4 (T18), \S22.4 (T19),
+\S23.5 (T20), \S24.1 (T21), \S25.3 (T22), \S26.1 (T23), \S26.2 (T24)}
+\lean{\texttt{Lock1Tables.T1}, \dots, \texttt{Lock1Tables.T17}}
+\appears{S12 as Lemma~14 (T16, T17)}
+Finite checks on S1's 38-block table, which with (S1) become statements about terms. The [K] items are
+in \texttt{Ski/Lock1Tables.lean}: T1--T13 and T15 since lean-ski v1.18.0, T16 since v1.19.0, T17 since
+v1.20.0; there is no T6 and no T14, and names in brackets are Lean declarations.
+\begin{itemize}
+\item T1 [K, \texttt{T1}]: the blocks of terms with 0, 1 and 2 items are disjoint and avoid 36.
+\item T2 [K, \texttt{T2}, \texttt{T2\_dead}]: 13 is the only two-item block that revives a dead
+application.
+\item T3 [K, \texttt{T3a}--\texttt{T3c}]: the table entries equal to 13, 2 and 1 are determined.
+\item T4 [K, \texttt{T4}]: 36 absorbs on the left.
+\item T5 [K, \texttt{T5}, \texttt{T5\_dies}]: a block recurrence of case (b) of Thm.~VIS has solutions
+only at $j=1$.
+\item T7 [K, \texttt{T7}, \texttt{T7\_hnfless}]: $U_e\,(S\,U_e)$ has no hnf (folds 33, 31).
+\item T8 [K, \texttt{T8}]: folds and absence of hnf for the counters on $X$.
+\item T9 [K, \texttt{T9}]: $X$ applied to a right comb has an hnf.
+\item T10 [K, \texttt{SELF\_eq}, \texttt{self\_dead}]: the self-dead blocks $\Self$.
+\item T11 [K, \texttt{DEAD2\_eq}, \texttt{two\_dead}]: the 2-dead blocks.
+\item T12 [K, \texttt{STK\_eq}, \texttt{T12}]: every stack block is self-dead.
+\item T13 [K, \texttt{T13}]: the one-item 2-dead block is 27, and $S\,W\,t$ over it has fold 31.
+\item (No T14. \S16.2 has an unnamed information line of \texttt{s16tab.log}: $\beta(0,\sigma)$ for
+self-dead $\sigma$.)
+\item T15 [K for membership, \texttt{T15}, \texttt{tee\_self\_dead}; the values 34, 31 are [C]]: if $a$
+is the stack of a normal pair, $S\,a\,(S\,a)$ is self-dead.
+\item T16 [K, \texttt{TH1}, \texttt{TH2}, \texttt{T16}, \texttt{T16\_dead}]: the folds of $\Hc$ lie in
+$\Theta$, and two-item members are dead against all members.
+\item T17 [K, \texttt{CB}, \texttt{IB}, \texttt{T17}, \texttt{T17\_dead}; the equality
+$IB=\{12,22,30\}$ is [C]]: comb and inert folds; two-item members are dead against inert terms.
+\item T18 [C]: $\fold(Y_m)=31$, and row 31 is 36 on the comb folds (Prop.~NPF).
+\item T19 [C]: if $f\,x$ has no hnf and $f$, $x$ have hnfs, then $f$ is self-dead (domain as repaired,
+W22.3).
+\item T20 [C]: applications over $\Theta$ have fold 31 or 34; rows 31 and 34.
+\item T21 [C]: $X\,(S\,W)$, $U\,D(W)$ and (as repaired, W24.2) $Y\,W$ have no hnf for $W=S\,c\,Y$,
+$Y\in\{X,U\}$.
+\item T22 [C]: the AD folds are exactly $\{31,34\}$ (as repaired, W25.9), closed under $S\,p\,q$.
+\item T23 [C, information; \texttt{s26tab.py}, not used in proofs]: the folds of the landing heaps
+over a self-dead two-item $Z$. $S\,Z\,v$ is AD; the fold of $S\,c\,Z$ depends only on $\fold c$, is not
+self-dead iff $\fold c\in CB$ (then in $IB$), is 25 (self-dead, not AD) iff $\fold c\in\{3,6,7,12\}$,
+and is AD otherwise; $\beta(\beta(0,p),q)\in\Self$ for $p\in\Self$.
+\item T24 [C, \texttt{s26tab.py}; to port, W26.9]: for $\zeta\in\Self$, $\beta(\zeta,y)=36$ for every
+$y\in\mathrm{Ctx}(\zeta)$ (\see{g:wl-ctx}).
+\end{itemize}
+\end{entry}
+
+\begin{entry}{g:wl-lock1-ct-ntd}{Theorem~4 of LOCK1-structure (Lock~1 $\Leftrightarrow$ CT $\wedge$ NTD)}{2026-11-26}
+\src{LOCK1-structure \S3}
+\status{proved [P], classical}
+Theorem. Lock~1 holds iff CT and NTD both hold; if Lock~1 fails, there is a spine pair or a bad pair
+whose descent turns infinitely often. It splits Lock~1 into two of its consequences rather than
+reducing it to a known statement.
+\end{entry}
+
+\begin{entry}{g:wl-theorem-c}{Theorem C, counter frame (PF, PFc)}{2026-11-26}
+\src{LOCK1-CTB \S9.2, \S10.5}
+\status{proved [P]; not in the final chain}
+A PF frame is $y\hred S\,(S\,S)\,\delta$ (Lemma~F), and a counter frame PFc adds $\delta=Q^jG$.
+Theorem~C: one PFc move after the first B-move of an S-run gives $a'_n\conv a_n$, so $q\conv p_K$.
+\end{entry}
+
+\begin{entry}{g:wl-theorem-k}{Theorem K, Theorem K$_w$}{2026-11-26}
+\src{LOCK1-CTB \S3, \S8.0}
+\status{proved [P]; on $p_K$'s run without the block model (WB6.5), off the run given (S1) and an exact
+check}
+Theorem. The run of $p_K$ is explicit: every move is a one-round B-move whose frame term is a two-item
+hnf, no tooth has an hnf, and no move is exposed; so exposure need not recur in a run with infinitely
+many non-normalizing teeth. K$_w$ is the same run with any closed heap $w$ in place of the last $S$.
+\end{entry}
+
+\begin{entry}{g:wl-theorem-kh}{Theorem KH}{2026-11-26}
+\src{LOCK1-CTB \S7.2}
+\status{proved [P], as repaired (WB2.1)}
+\appears{S11 as Lemma~11}
+Theorem. If $q$ has $p_K$'s teeth, then from its first B-move on every move is a B-move with heap $S$
+or with heap convertible with $\tau_1(Y_n)$, with $k=0$ except possibly once. So $q$ is an S-run or
+falls in case (H1) (\see{g:wl-h1}).
+\end{entry}
+
+\begin{entry}{g:wl-theorem-l}{Theorem L}{2026-11-26}
+\src{LOCK1-CTB \S8.2, \S12.4}
+\status{proved [P]; without the block model after WB6.5}
+\appears{S11 as Lemma~13}
+Theorem. In an S-run with $p_K$'s teeth, $b'_n\conv b_n$ for every $n$ past the first B-move: iterated
+S-cancellation peels the counter one $Q$ at a time. This reduces (ii) to (ii$'$).
+\end{entry}
+
+\begin{entry}{g:wl-theorem-re}{Theorem RE, $\mathrm{NTD}_Z$}{2026-11-26}
+\src{LOCK1-NTD-probe \S5.2}
+\status{proved [P], as repaired (WN5.1)}
+Theorem. If $t\approx u$ and an invariant $\mu$ of the right end differs on $t$ and $u$, the pair is bad
+and NTD fails along the rightmost branch of $t^\infty$ or, after one count, of a child's subtree. Hence
+$\mathrm{NTD}_Z$ implies that $\mu$ is a function of the tree.
+\end{entry}
+
+\begin{entry}{g:wl-theorem-v}{Theorem V (visible holes are injective)}{2026-11-26}
+\src{LOCK1-INJ \S1}
+\status{proved [P] (a corollary of Fact~C, WI1.3)}
+Theorem. A context $C[v]$ in which a copy of $v$ is reachable as $\mathrm{comp}_\alpha$ without any run
+reading $v$ is injective: $C[z]\conv C[z']$ implies $z\conv z'$. Read positions can fail: with
+$T=S\,S\,S$ and $a=S\,T\,(S\,T)$, $a\,T\conv a\,(S\,T\,T)$ although $T\not\conv S\,T\,T$ [C].
+\end{entry}
+
+\begin{entry}{g:wl-thin-perfect}{thin and perfect pairs}{2026-11-26}
+\src{LOCK1-structure \S2 (Theorems~3, 3$'$)}
+\status{proved [P], classical}
+Theorem. A bad pair either has a thin node, below which the bad set is a single infinite path with all
+off-path child pairs convertible, or is perfect: every bad node branches. A thin pair has one context
+$E_n$ of each depth with $p\conv E_n[p_n]$ and $q\conv E_n[q_n]$ (Theorem~3$'$).
+\end{entry}
+
+\begin{entry}{g:wl-tz}{TZ}{2026-11-26}
+\src{LOCK1-CT \S23.3, \S24.1, \S24.2, \S25.1, \S26.3 (Cor.~TZK1), \S26.4}
+\status{open only for $b=S$ over a two-item self-dead $Z\notin\Hc^{x}\cup\mathcal S$ (Conj.~TZX$'$)
+[Conj]; proved for every heap and every $b\ne S$, and for $b=S$ over $Z\in\mathcal S$ [P], given (S1),
+T10, T12, T16, T17 [K], T20, T21, T24 [C] (Cor.~TZK1, Prop.~TZX$_{\mathcal S}$; Wizard: sound)}
+Conjecture (T-round landings). If $(S\,T\,b,Z)$ is a normal pair whose first move is a refill with
+$k=1$ and all of whose teeth normalize, then $(Z,\nf(b\,Z))\in\Gc^{x}$. It holds for $Z\in\Hc^{x}_2$
+(Cor.~TZM1) and is vacuous for heaps with at most one item (W24.5). By Cor.~TZK1 it holds for every $Z$
+when $b\ne S$, and for $b=S$ it is TZN for the landing $(Z,S\,Z)$ (\see{g:wl-tzx}).
+\end{entry}
+
+\begin{entry}{g:wl-tzk}{Prop.~TZK, Cor.~TZK1}{2026-11-26}
+\src{LOCK1-CT \S26.3}
+\status{TZK proved [P], given (S1), T12 [K], T24 [C]; TZK1 proved [P], given (S1), T10, T12, T16,
+T17 [K], T20, T21, T24 [C] (Wizard: sound; W26.7 pending: state the bounded death move with its
+fold-36 witness)}
+Proposition TZK. For two-item self-dead $Z\notin\Hc^{x}$ and $b\in\Kc\setminus\{S\}$, some tooth of
+$(Z,\nf(b\,Z))$ has no normal form, after at most two T-refills (two only if $b=T$); this closes (N1)
+for $b\ne S$ and the (N2) recursion. Corollary TZK1: TZ holds for every $b\ne S$, and for $b=S$ it is
+TZN over the landing $(Z,S\,Z)$.
+\end{entry}
+
+\begin{entry}{g:wl-tzn}{TZN}{2026-11-26}
+\src{LOCK1-CT \S25.1 (Cor.~TS1), \S25.4, \S25.5, \S26.3 (Prop.~TZK), \S26.4}
+\status{proved for $b\ne S$ [P], given (S1), T12 [K], T24 [C] (Prop.~TZK); for $b=S$ proved over
+$Z\in\mathcal S$ (Prop.~TZX$_{\mathcal S}$, same inputs) and open over $Z\notin\mathcal S$
+(Conj.~TZX$'$) [Conj]}
+$\mathrm{TZN}(Z)$, for two-item $Z\notin\Hc^{x}$: for every $b\in\Kc$ some tooth of $(Z,\nf(b\,Z))$
+has no normal form. For $b\in\Kc\setminus\{S\}$ the landing run makes only pops and at most two
+T-refills before a tooth dies, and Prop.~TZA holds vacuously (W26.5). Kill test [C] (\S26.6): 5,806,281
+distinct starts on engine~1 (773,885 also on engine~2), all certified dead, with no budget stop and no
+complete run.
+\end{entry}
+
+\begin{entry}{g:wl-tzx}{Prop.~TZX$_{\mathcal S}$, Conj.~TZX$'$}{2026-11-26}
+\src{LOCK1-CT \S26.4}
+\status{TZX$_{\mathcal S}$ proved [P], given (S1), T12 [K], T24 [C] (Wizard: sound); TZX$'$ open
+[Conj], with 69,061 distinct starts certified dead [C]}
+Proposition TZX$_{\mathcal S}$. For self-dead $Z\in\mathcal S\setminus\Hc^{x}$ of depth $r$, some tooth of
+$(Z,S\,Z)$ has no normal form, within $2r+2$ teeth. Conjecture TZX$'$: the same for two-item self-dead
+$Z\notin\Hc^{x}\cup\mathcal S$, an eventual statement that no finite run refutes; with $\mathrm{RCL}_2$
+it is the sufficient remaining set for R2.
+\end{entry}
+
+\begin{entry}{g:wl-frakB}{the typing $\Bk$, passive slots, Lemmas CL and B}{2026-11-26}
+\src{LOCK1-CTB \S11.1--11.2, \S12.4}
+\status{proved [P]}
+\appears{S11, \S5 ($\Bk$); Lemma~CL as Lemma~16, Lemma~B as Lemma~17}
+\lean{\texttt{S11.InB}}
+The notes' typing of the world of $p_K$, which S11 publishes as $\Bk$ (\see{g:frakB}); trailing
+arguments are passive slots, never moved into function position. Lemma~CL: a set closed under parts
+and under the contracta of its three-argument head-run terms has its reducts closed under reduction
+and subterms. Lemma~B: $\Bk$ is such a set.
+\end{entry}
+
+\begin{entry}{g:wl-vb}{VB (Prop.~VBP)}{2026-11-26}
+\src{LOCK1-CT \S23.3 (Conj.), \S24.3, \S26.5 (Prop.~VBP)}
+\status{proved [P], given (S1), T12 [K], T24 [C], and T1--T4 [K] through Lemma~XB (droppable, W18.6)
+(Prop.~VBP; Wizard: sound)}
+Proposition VBP (formerly Conj.~VB). If $V$ is normal with two items, $V\,D(S\,V)$ has no hnf and all
+teeth of $(X,S\,V)$ normalize, then $V\in\Hc^{x}_2$: the heap $D(S\,V)\in\mathcal D(V)$ is
+context-dead, so Cor.~CDS puts $V\in\mathcal S$ with bottom $X$ or $U$. The reverse statement is not
+``the converse'' (W26.1): $V=S\,(S\,X)\,U\in\Hc^{x}_2$ dies at move~1; the kill test of 199,472
+distinct starts found all dead in the predicted shape [C].
+\end{entry}
+
+\begin{entry}{g:wl-w}{(W), Theorem W, Theorem W6}{2026-11-26}
+\src{LOCK1-CTB \S10.3, \S11.3}
+\status{(W) proved [P] (Theorem W6); Theorem W as repaired (WB5.1, WB5.2)}
+(W): every solution from $k$ that is a subterm of a reduct of $p_K$ satisfies $s\,S\conv a_k\,S$.
+Theorem~W: (ii$'$) $\Leftrightarrow$ (W); Theorem~W6 proves (W): every solution in $\mathrm{Red}(\Bk)$ is
+convertible with $a_k$. These are not the review labels W$n$.$k$.
+\end{entry}
+
+\begin{entry}{g:wl-xu-plus}{$\mathrm{XU}^{+}$}{2026-11-26}
+\src{LOCK1-CT \S18.3}
+\status{open [Conj]; $\mathrm{XU}^{+}\Rightarrow\mathrm{REC}_T$ proved [P] (Cor.~XU)}
+Conjecture. In a normalized run all of whose teeth normalize, $X$ or $U$ over a self-dead heap recurs:
+for every $n_0$ there is $n>n_0$ with $A_{n-1}\in\{X,U\}$ and $W_{n-1}$ self-dead.
+\end{entry}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

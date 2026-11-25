@@ -50,7 +50,7 @@ of counters, and its teeth from then on normalize. Every term without a head nor
 convertible with those of $p$ is then convertible with $p$. This covers the runs of $U_j\,U_m$, of
 $X\,X$, and of $X\,(S\,X\,c)$ for $c$ in an explicit set $\Kc$ of normal terms. The proof compares
 the two runs in normal form, where each state is a pair of normal terms. In the grammar, moves that
-copy the second term of the pair into the first recur. When the second run meets such a move, it
+copy the second term of the pair into the first recur. When a second run with the same teeth meets such a move, it
 reaches the same state at once or after finitely many further moves. The proof is not mechanized
 and case-splits on whether a term has a head normal form; finite facts about a 38-element model are
 checked by kernel evaluation in Lean~4.
@@ -64,7 +64,7 @@ checked by kernel evaluation in Lean~4.
 A closed $S$-term without a head normal form has an infinite sequence of teeth, defined below, and
 convertible terms of this kind have convertible teeth~\citep[Lemma~5]{s11}. We prove the converse,
 CT, when one of the two terms has a counter run (Theorem~\ref{thm:main}): a run whose states are,
-from some point on, convertible with members of an explicit grammar $\Gc$, and whose teeth from
+from some point on, convertible with $Z\,W$ for some $(Z,W)$ in an explicit grammar $\Gc$, and whose teeth from
 then on normalize. The companion paper~\citep{s11} proves CT for one explicit term.
 
 $\Ter$ is the set of closed terms built from $S$ by application, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at
@@ -390,7 +390,7 @@ $\fold(X)=16$ and $\fold(U)=33$. Moreover:
   \textup{(c)} $\Theta_2\subseteq\Self$.
 \item[T17] \textup{(a)} $\beta(0,\gamma)\in CB$ for $\gamma\in CB$;
   $\beta(\beta(0,\gamma),\kappa)\in IB$ for $\gamma\in CB$, $\kappa\in\Theta$.
-  \textup{(b)} The same for $\rho\in\Theta_1$, $\kappa\in CB\cup IB$.
+  \textup{(b)} $\beta(\beta(0,\rho),\kappa)\in\Theta_2$ for $\rho\in\Theta_1$, $\kappa\in CB\cup IB$.
   \textup{(c)} $\beta(\rho,\kappa)=36$ for $\rho\in\Theta_2$, $\kappa\in IB$.
 \end{itemize}
 \end{lemma}
@@ -654,7 +654,7 @@ normalize.
 \section*{Data availability}
 \sloppy
 The proofs in this paper are not mechanized; Lemma~\ref{lem:tables} and (M2) are. In
-\texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), module \texttt{Ski/Lock1Tables.lean}, with
+\texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), version 1.20.0 (commit \texttt{20d8271}), module \texttt{Ski/Lock1Tables.lean}, with
 only \texttt{propext} and \texttt{Quot.sound}: \texttt{fold\_X}, \texttt{fold\_U}, \texttt{T16},
 \texttt{T17} (by \texttt{decide +kernel}), \texttt{T16\_dead}, \texttt{T17\_dead},
 \texttt{hnfless\_iff} (M2), \texttt{mem\_SELF} and \texttt{self\_dead}. \texttt{lean-ski} also

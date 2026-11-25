@@ -42,6 +42,10 @@ This work was carried out in a centaur fashion, with high-level human direction 
   **It shows, with a machine-checked proof, that an $S$-term never equals itself applied to arguments: for any arguments if the term has a head normal form, and for normalizing arguments in general.**
 
   > We show that no term $p$ built from the combinator $S$ is convertible with $p\,x_1\cdots x_k$ for $k\ge1$ and normalizing $S$-terms $x_1,\dots,x_k$; if $p$ has a head normal form, the $x_i$ may be arbitrary $S$-terms. In that case a 38-element model that detects head normal forms turns the conversion into a closed walk, and the walk leads to an infinite chain of terms, each of size two less than the last, which cannot exist. Otherwise the head run of $p$ splits off arguments of unbounded size, yet a conversion makes each convertible with some $x_j$, which bounds its size. The results are mechanized in Lean 4.
+* [An *S*-Term Determined by Its Teeth Among Terms Without a Head Normal Form](s11-ct-no-exposed-move/main.pdf)
+  **It proves, for one explicit term $p_K$ and every state of its run, that a term without a head normal form whose teeth are convertible with $p_K$'s is convertible with $p_K$, although no tooth of $p_K$ exposes the state that produced it. That converse of the tooth lemma is one of the two halves of the question whether a term's infinitary normal form determines its conversion class.**
+
+  > The head run of a closed term built from the combinator $S$, if it never reaches a head normal form, splits off an infinite sequence of arguments, its teeth. Convertible terms of this kind have convertible teeth. We prove the converse for one term, $p_K$: every closed $S$-term without a head normal form whose $n$-th tooth is convertible with that of $p_K$, for every $n$, is convertible with $p_K$. The same holds, with the teeth shifted, for every state of $p_K$'s run. No tooth of $p_K$ exposes the state that produced it, so the proof cannot read the state from one tooth. Instead we show that a second run with the same teeth satisfies the spine equations of $p_K$, and that among the reducts of an explicit set of terms these equations have, up to convertibility, only the solutions given by $p_K$'s run. The proof is not mechanized and case-splits on whether a term has a head normal form.
 
 ## Ancillary papers
 
@@ -56,4 +60,4 @@ Other papers by N. E. Davis on combinatory logic, outside this series; their mec
 
 * N. E. Davis, *A Self-Interpreter for $SKI$: Authoring Semantics for New Symbols*. In review at the *Journal of Functional Programming*. Preprint: [doi:10.5281/zenodo.22867957](https://doi.org/10.5281/zenodo.22867957). Mechanized above in *The $SKI$ Self-Interpreter, Mechanized*.
 * N. E. Davis, *SKIjack: A Low-Level Native Language for the $SKI$ Calculus*. In review at *The Art, Science, and Engineering of Programming*. Compiler: [`sigilante/SKIjack`](https://github.com/sigilante/SKIjack).
-* N. E. Davis, *The Staging Line, Calibrated: Uniform Continuity of Oracle Functionals Is the Decidable Fan Theorem*. In preparation.
+* N. E. Davis, *The Staging Line: Behavioral Lifts and Compactness in Weak Combinatory Logic*. In review at *ACM Transactions on Computational Logic*.

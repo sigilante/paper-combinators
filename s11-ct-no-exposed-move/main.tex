@@ -1,0 +1,586 @@
+%% S11: the converse of the tooth lemma against a run with no exposed move.
+%% DRAFT 2026-11-25.  Neutral amsart shell, as S1--S9.
+%% Source: ~/Code/ski/notes/LOCK1-CTB.md section 12 (the linear proof, Wizard-reviewed), with sections 0,
+%%         11 (the set B, Lemmas CL, B, SOL) and 11.8 (where S1's block model enters); background
+%%         ~/Code/ski/notes/NCFP-proof.md sections 0, 2 and LOCK1-CT.md sections 0-2.
+%%         The corollary (rests of p_K) is the argument recorded in A1-lock1-S3.md, 2026-11-25, rechecked here.
+%% Not mechanized.  Lean is cited only for the inputs (lean-ski v1.20.0, tag merge 20d8271):
+%%   (CR) ....... church_rosser (Ski/Weak.lean)
+%%   (Std) ...... wsteps_split (Ski/Weak.lean): Steps t t' and ParIs t' v; ParI keeps the spine
+%%   (F2) ....... Full.run_total (Ski/Full.lean), through TopTerm.reach_all and Full.stable_iff (block 36 of S1)
+%%   all three in #audit_clean (Ski/Audit.lean).  Lean's Term is SKI; S-terms are closed under its steps.
+%% Map to the note (section 12): lem:head = Lemma L, (Std-h), (H), (AS); lem:moves = the Moves;
+%%   lem:inv = S6 Lemma 4 (syntactic form) + Lemma T; lem:finite = Prop. 1 (<=); lem:suffix = Lemma R,
+%%   RN-1, RN-2; lem:pk = Facts S, S'; lem:teeth = (K), (KT); lem:index = T1, T1a, T1b;
+%%   lem:srun = Step 1; lem:cancel = Step 3 (SC); lem:left = Steps 2 and 4; lem:persist = Step 5, Lemma P;
+%%   lem:closure = Lemma CL; lem:typing = Lemma B; lem:sol = Lemma SOL.
+%% TODO before release:
+%%   1. Wizard on this text; Grammarian on the prose.
+%%   2. lean-ski v1.20.0: check the tag URL in refs.bib (leanski) and add the DOI.
+%%   3. Recheck "Proposition 4, Theorem 9" of S1, "Theorem 7, Proposition 9" of S3 and "Lemma 4" of S6
+%%      against the final versions.
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\red}{\twoheadrightarrow}
+\newcommand{\hred}{\twoheadrightarrow_h}
+\newcommand{\conv}{=_\beta}
+\newcommand{\sz}[1]{\lvert#1\rvert}
+\newcommand{\rest}{\mathrm{rest}}
+\newcommand{\pK}{p_K}
+\newcommand{\B}{\mathfrak B}
+\newcommand{\Red}{\mathrm{Red}}
+\newcommand{\vU}{\vec U}
+
+\title[Teeth Determine a Run That Exposes Nothing]{An $\bm{S}$-Term Determined by Its Teeth, Though No Tooth Exposes Its State}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+The head run of a term built from the combinator $S$ that has no head normal form splits off an
+infinite sequence of arguments, its teeth, and convertible terms have convertible teeth. Whether the
+converse holds is open. We prove it against one run. Let $Q=S\,(S\,S)$, $G=S\,Q\,Q$ and
+$p_K=S\,(S\,S)\,G\,(Q\,(Q\,G))\,S$. Every closed $S$-term without a head normal form whose $n$-th
+tooth is convertible with that of $p_K$, for every $n$, is convertible with $p_K$; the same holds,
+with the teeth shifted, for every state of $p_K$'s run. In this run no tooth exposes the state that produced it, so the
+state cannot be read off a single tooth. Instead we show that a second run with the same teeth
+must follow $p_K$'s spine equations, and that the reducts of $p_K$'s teeth lie among the reducts of
+an explicit set of terms whose passive arguments are never put in function position; there the spine
+equations have only $p_K$'s own solutions. The proof uses excluded middle in one form and is not mechanized.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, head normal form, convertibility, standardization}
+\maketitle
+
+\section{Introduction}
+
+$\Ter$ is the set of closed terms built from $S$ by application, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at
+any position; $\red$ is the reflexive--transitive closure of $\to$, and $\conv$ is convertibility,
+which by Church--Rosser is the existence of a common reduct. The \emph{size} $\sz t$ is the number of
+occurrences of $S$ in $t$.
+
+Every $t\in\Ter$ is $S\,u_1\cdots u_m$ for a unique $m\ge0$; the $u_i$ are its \emph{items}, and $t$
+is a \emph{head normal form} (hnf) iff $m\le2$. If $m\ge3$, the \emph{head step} is
+$t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$. Head steps give the \emph{head run} of $t$, whose terms
+are its \emph{frames}; $\hred$ is their reflexive--transitive closure. The term $t$ \emph{has an hnf} if its
+head run reaches one, and then the first hnf reached is \emph{the} hnf of $t$; $t$ is \emph{literal} if
+it is its own hnf. A frame $f\,w$ is \emph{stable} if $f$ has no hnf.
+
+Let $t$ have no hnf. Its head run reaches a stable frame (input (F2) below); if $f\,w$ is the first,
+put $\tau_1(t)=w$ and $\rest(t)=f$. Then $\rest(t)$ again has no hnf, and the \emph{teeth} of $t$ are
+$\tau_{n+1}(t)=\tau_1(\rest^n(t))$; \emph{move} $n$ goes from $\rest^{n-1}(t)$ to $\rest^n(t)$ and
+produces $\tau_n(t)$. If $t\conv t'$ have no hnf, then $\tau_n(t)\conv\tau_n(t')$ for all $n$
+(Lemma~\ref{lem:inv}, the tooth lemma). Call \emph{CT} the converse: two terms without an hnf whose teeth are pairwise
+convertible are convertible. Agreement of finitely many teeth says nothing about the states
+$\rest^n$; but if the states ever meet, $\rest^n(p)\conv\rest^n(q)$, then $p\conv q$
+(Lemma~\ref{lem:finite}). CT asks whether the tails force one meeting.
+
+There is a simple case. At a move whose state $f=f^-\,u$ has a prefix $f^-$ with an hnf, the
+head run often ends in a last frame $S\,S\,y\,a$, and the tooth is $(y\,a)\,w$ for the new state
+$a\,w$ (Lemma~\ref{lem:moves}). Call the move \emph{exposed} if $y$ has no hnf. Then $(y\,a)\,w$
+and $y\,a$ are stable frames, and $\tau_1$ and $\rest$ read $w$ and $a$ off the tooth; if the
+moves $n$ of $p$ and of $q$ are both exposed, their states are convertible and $p\conv q$. In the
+run of the term $\pK$ below, $y$ is always a counter $Q^jG$ with a two-item hnf
+(equation~\eqref{eq:am}), so no move is exposed, and nothing is read off a single tooth.
+
+\begin{theorem}\label{thm:main}
+Let $Q=S\,(S\,S)$, $G=S\,Q\,Q$ and $\pK=S\,(S\,S)\,G\,(Q\,(Q\,G))\,S$. Every $q\in\Ter$ without an
+hnf such that $\tau_n(q)\conv\tau_n(\pK)$ for all $n\ge1$ satisfies $q\conv\pK$.
+\end{theorem}
+
+\begin{corollary}\label{cor:rests}
+Let $n\ge0$. Every $q\in\Ter$ without an hnf such that $\tau_i(q)\conv\tau_{n+i}(\pK)$ for all
+$i\ge1$ satisfies $q\conv\rest^n(\pK)$.
+\end{corollary}
+
+\emph{Assumptions.} Besides Church--Rosser and standardization, stated as (CR) and (Std) in
+Section~\ref{sec:head}, the proof uses (F2): the head run of every term reaches an hnf or a stable
+frame. (F2) is proved in~\citep{s1,s3} with the 38-element block model of~\citep{s1}, and this is the
+only place where that model enters. The proof is classical in one respect: it splits cases on
+whether a term has an hnf (in Lemma~\ref{lem:moves} and wherever a term's hnf is taken or its
+absence assumed). The block model decides that property~\citep{s1}, so each such split could be made
+constructive with it; we do not do so. Everything else is proved below. The proof is not
+mechanized.
+
+\emph{Plan.} Section~\ref{sec:head} collects facts about head runs. Section~\ref{sec:pk} computes the
+run of $\pK$. Section~\ref{sec:q} shows that a run $q$ with $\pK$'s teeth eventually has states
+$a'_n\,S$ with $a'_{n-1}\hred S\,a'_n\,b'_n$ and $b'_n\conv b_n$, where $b_n$ is the corresponding
+term of $\pK$'s run: the spine equations of $\pK$. Section~\ref{sec:world} shows that some $a'_k$
+then has a reduct inside the reducts of $b_n$, which lie in an explicit set $\Red(\B)$, and that the
+only solutions of the spine equations there are $\pK$'s own.
+
+\section{Head runs}\label{sec:head}
+
+A step is \emph{internal} if it contracts a redex inside an item. We use three known results.
+\begin{itemize}
+\item[(CR)] \citep{terese} If $t\red u$ and $t\red v$, then $u\red w$ and $v\red w$ for some $w$.
+\item[(Std)] \citep{terese} If $t\red u$, then $t\hred t'\red u$ for some $t'$ such that every step
+  from $t'$ to $u$ is internal. So $t'=S\,v_1\cdots v_m$ and $u=S\,v_1'\cdots v_m'$ with the same
+  $m$ and $v_i\red v_i'$.
+\item[(F2)] \citep[Proposition~9(b), $d=1$]{s3}, with \citep[Proposition~4 and Theorem~9]{s1}. The
+  head run of every term reaches an hnf or a stable frame.
+\end{itemize}
+The head run is deterministic and stops at its first hnf. A right context of depth $d$ is
+$x_1\,(x_2\,(\cdots(x_d\,[\,])\cdots))$; $e$ is a \emph{right suffix of $t$ at depth $d$} if $t$ is
+such a context filled with $e$.
+
+\begin{lemma}\label{lem:head}
+\textup{(a)} A head step from $S\,u_1\cdots u_m$ gives a frame whose items are those of $u_1$,
+followed by $u_3,\ u_2\,u_3,\ u_4,\dots,u_m$. Hence if a head run takes at least one step to a
+two-item hnf, its last frame is $S\,S\,y\,z$ and the hnf is $S\,z\,(y\,z)$.
+
+\textup{(b)} While the frames of $f$ have at least three items, the head run of $f\,w$ is that of $f$
+with $w$ appended. A term without an hnf has only frames with at least three items.
+
+\textup{(c)} A term has an hnf iff it reduces to an hnf. A term that head-reduces to a term without
+an hnf has none.
+
+\textup{(d)} If $f$ has no hnf, then neither has $f\,w$, nor any reduct of $f$.
+
+\textup{(e)} Every reduct of an application is an application. Hence $t\conv S$ implies $t=S$.
+\end{lemma}
+
+\begin{proof}
+(a) Two items need $m=3$ and $u_1=S$. (b) A head step from at least three items acts on the
+prefix; a frame with at most two items is an hnf. (c) If $t\red h$ with $h$ an hnf, (Std) gives
+$t\hred t'\red h$ with internal steps after $t'$, which keep the number of items, so $t'$ is an hnf.
+For the second claim, if $t\hred t'$ and the run of $t$ reaches an hnf, then $t'$ lies on the run
+before it, so $t'$ has an hnf.
+(d) By (b) the run of $f\,w$ is that of $f$ with $w$ appended and reaches no hnf; if a reduct of
+$f$ had an hnf, $f$ would reduce to an hnf, and (c) applies. (e) A step at the root of
+$S\,x\,y\,z$ gives the application $x\,z\,(y\,z)$, and other steps keep the root. A common reduct of
+$t$ and the normal form $S$ is $S$, so $t\red S$, and $t$ is not an application.
+\end{proof}
+
+\begin{lemma}\label{lem:moves}
+Let $f=f^-\,u$ have no hnf.
+
+\textup{(A)} If $f^-$ has no hnf, then $f$ is stable, $\tau_1(f)=u$ and $\rest(f)=f^-$.
+
+\textup{(B)} Otherwise $f^-\hred S\,a_0\,b_0$, and with $w_0=u$, $w_{i+1}=b_i\,w_i$ there is $k\ge0$
+such that $a_i\,w_i\hred S\,a_{i+1}\,b_{i+1}$ for $i<k$, $a_k\,w_k$ has no hnf, $\tau_1(f)=b_k\,w_k$
+and $\rest(f)=a_k\,w_k$. So $w_k,w_{k-1},\dots,w_0=u$ are right suffixes of $\tau_1(f)$ at depths
+$1,2,\dots,k+1$, and $w_k$ is an application if $k\ge1$.
+\end{lemma}
+
+\begin{proof}
+(A) $f$ is a frame with at least three items whose prefix has no hnf. (B) By
+Lemma~\ref{lem:head}(b) the run of $f$ follows that of $f^-$, with $u$ appended, to the hnf $h$ of
+$f^-$; if $h$ had at most one item, $h\,u$ would be an hnf. So $f\hred S\,a_0\,b_0\,w_0\to
+a_0\,w_0\,w_1$. If $a_0\,w_0$ has no hnf, this frame is stable. Otherwise the run follows that of
+$a_0\,w_0$ to its hnf, which has two items for the same reason, and reaches
+$S\,a_1\,b_1\,w_1$; and so on. Every frame passed before the construction stops is $c\,w_j$ with $c$
+a frame of a term that has an hnf, or $S\,a_i\,b_i\,w_i$, so none is stable. By (F2) the
+construction stops.
+\end{proof}
+
+\begin{lemma}\label{lem:inv}
+Let $t\conv t'$. \textup{(a)} If $t$ has the hnf $S\,u_1\cdots u_m$, then $t'$ has an hnf
+$S\,u'_1\cdots u'_m$, with the same $m$ and $u_i\conv u'_i$. \textup{(b)} If $t$ has no hnf, then
+$t'$ has none, $\tau_1(t)\conv\tau_1(t')$ and $\rest(t)\conv\rest(t')$; hence
+$\tau_n(t)\conv\tau_n(t')$ and $\rest^n(t)\conv\rest^n(t')$ for all $n$.
+\end{lemma}
+
+\noindent This is the part of~\citep[Lemma~4]{s6} that we need; we prove it from (CR), (Std) and (F2)
+alone.
+
+\begin{proof}
+(a) Every reduct of $T=S\,u_1\cdots u_m$ ($m\le2$) is $S\,u^*_1\cdots u^*_m$ with $u_i\red u_i^*$.
+By (CR), $t'$ and $T$ have a common reduct $T^*$; by (Std), $t'\hred T'\red T^*$ with internal steps,
+so $T'$ has $m$ items, each reducing to the corresponding item of $T^*$, and $T'$ is the hnf of $t'$.
+(b) By (a), $t'$ has no hnf. Let $T=f\,w$ be the first stable frame of $t$. A reduct of $T$ is
+$f^*\,w^*$ with $f\red f^*$, $w\red w^*$, since $f^*$ has no hnf (Lemma~\ref{lem:head}(d)) and so is not
+$S\,a\,b$. As in (a), $t'\hred T'=f'\,w'\red f^*\,w^*$ with $f'\red f^*$, $w'\red w^*$. Now
+$f'\conv f$ has no hnf by (a), so $T'$ is stable. The first stable frame $f''\,w''$ of $t'$ is at
+or before $T'$, and by Lemma~\ref{lem:head}(b) every later head step acts on the prefix; so $w''=w'$
+and $f''\hred f'$. Hence $w''\conv w$ and $f''\conv f$. Induction gives the rest, since $\rest(t)$ has
+no hnf and $\tau_{n+1}(t)=\tau_1(\rest^n(t))$.
+\end{proof}
+
+\begin{lemma}\label{lem:finite}
+Let $p,q$ have no hnf. If $\rest^n(p)\conv\rest^n(q)$ and $\tau_i(p)\conv\tau_i(q)$ for $i\le n$,
+then $p\conv q$.
+\end{lemma}
+
+\begin{proof}
+$p\hred\rest(p)\,\tau_1(p)$, and $\rest(p)$ has no hnf, so by Lemma~\ref{lem:head}(b) its run
+continues with $\tau_1(p)$ appended. By induction $p\hred\rest^n(p)\,\tau_n(p)\cdots\tau_1(p)$, likewise
+for $q$, and $\conv$ is a congruence.
+\end{proof}
+
+\begin{lemma}\label{lem:suffix}
+\textup{(a)} If $t\red t'$ and $e$ is a right suffix of $t$ at depth $d$, then $t'$ has a right
+suffix $e'$ at a depth $\ge d$ with $e\red e'$.
+
+\textup{(b)} Let $t_0=t$ and $t_{i+1}=\tau_1(t_i)$, where $t_0,\dots,t_{J-1}$ have no hnf and
+$t_J=S$ \textup{(}$J\ge1$\textup{)}. Every right suffix of $t$ at depth $d$ is $S$ or is convertible
+with $t_i$ for some $i$ with $d\le i<J$.
+
+\textup{(c)} If $t\conv Z$, where $Z$ has no hnf and $\tau_1(Z)=S$, then every right suffix of $t$
+at depth $\ge1$ is $S$.
+
+\textup{(d)} If $t\conv Y$, where $Y$ and $\tau_1(Y)$ have no hnf and $\tau_1(\tau_1(Y))=S$, then
+every right suffix of $t$ at depth $1$ is $S$ or convertible with $\tau_1(Y)$, and every one at
+depth $\ge2$ is $S$.
+\end{lemma}
+
+\begin{proof}
+(a) One step: if the redex lies inside $e$, take its contractum in place; if it lies off the path
+to $e$, $e$ stays at its depth; otherwise the redex is a right suffix $S\,a\,b\,c$ with $e$ inside
+$c$, and in $a\,c\,(b\,c)$ the term $c$, hence $e$, moves one level down.
+(b) Let $f_i\,t_{i+1}$ be the first stable frame of $t_i$ ($i<J$). Put $r_J=S$ and
+$r_i=f_i\,r_{i+1}$; by downward induction $t_i\red r_i$, so $t\red r_0$, whose right suffixes are
+$r_0,\dots,r_J$ at depths $0,\dots,J$. By (a), $e\red r_{i}$ for some $i\ge d$. If $i=J$, then $e=S$
+(Lemma~\ref{lem:head}(e)); otherwise $e\conv r_i\conv t_i$.
+(c) By Lemma~\ref{lem:inv}, $t$ has no hnf and $\tau_1(t)\conv S$, so $\tau_1(t)=S$; apply (b) with
+$J=1$. (d) Likewise $\tau_1(t)\conv\tau_1(Y)$ has no hnf and $\tau_1(\tau_1(t))=S$; apply (b) with
+$J=2$.
+\end{proof}
+
+\section{The run of \texorpdfstring{$p_K$}{pK}}\label{sec:pk}
+
+Let $c_0=G$ and $c_{j+1}=Q\,c_j$, so $\pK=Q\,c_0\,c_2\,S$. For all $u,v\in\Ter$ the head runs
+\begin{equation}\label{eq:h}
+Q\,u\,v\to S\,S\,v\,(u\,v)\to S\,(u\,v)\,(v\,(u\,v)),\qquad
+G\,u\to Q\,u\,(Q\,u)\hred S\,(u\,(Q\,u))\,(Q\,u\,(u\,(Q\,u)))
+\end{equation}
+are literal. Put $a_0=Q\,c_0\,c_2$. If $a_m=Q\,c_j\,c_n$, put $a_{m+1}=c_j\,c_n$ and
+$b_{m+1}=c_n\,a_{m+1}$; if $a_m=G\,c_n$, put $a_{m+1}=c_n\,c_{n+1}$ and
+$b_{m+1}=c_{n+1}\,a_{m+1}$. Since $c_j\,c_n$ is $Q\,c_{j-1}\,c_n$ or $G\,c_n$, and $c_n\,c_{n+1}=Q\,c_{n-1}\,c_{n+1}$,
+every $a_m$ is $Q\,c_j\,c_n$ or $G\,c_n$ with $n\ge2$, and by~\eqref{eq:h}
+\begin{equation}\label{eq:am}
+a_m\hred S\,S\,c\,a_{m+1}\to S\,a_{m+1}\,b_{m+1},\qquad c\in\{c_n,c_{n+1}\}.
+\end{equation}
+So $b_m=c_{i_m+1}\,a_m$ with $i_m\ge1$. The index $n$ never decreases and grows at every step from
+$G\,c_n$; such steps recur, since $j$ falls at every step from $Q\,c_j\,c_n$; and $i_{m+1}\ge n-1$.
+So \emph{the sequence $i_m$ is unbounded}. Put $x_m=c_{i_m}\,a_m$ and $Y_n=b_n\,S$. By~\eqref{eq:h},
+\begin{equation}\label{eq:bm}
+b_m=Q\,c_{i_m}\,a_m\hred S\,x_m\,(a_m\,x_m).
+\end{equation}
+
+\begin{lemma}\label{lem:pk}
+\textup{(a)} For all $m$ and $u\in\Ter$, $a_m\,u$ has no hnf, and its first stable frame is
+$a_{m+1}\,u\,(b_{m+1}\,u)$.
+
+\textup{(b)} For $r\ge1$ and $U_1,\dots,U_r\in\Ter$, the terms $a_m\,\vU$, $c_j\,a_m\,\vU$
+\textup{(}$j\ge0$\textup{)} and $Q\,a_m\,(a_m\,(Q\,a_m))\,\vU$ have no hnf, where
+$\vU=U_1\cdots U_r$.
+\end{lemma}
+
+\begin{proof}
+(a) By~\eqref{eq:am} and Lemma~\ref{lem:head}(b), $a_m\,u\hred a_{m+1}\,u\,(b_{m+1}\,u)$ in at least
+one step, through frames with at least three items. Repeating with appended arguments,
+$a_m\,u\hred a_{m+j}\,u\,V_j$ in at least $j$ steps for every $j$, so the head run is infinite and
+reaches no hnf. Before $a_{m+1}\,u\,(b_{m+1}\,u)$, every frame is $c\,u$ with $c$ a frame of $a_m$, or
+$S\,a_{m+1}\,b_{m+1}\,u$; none is stable. (b) The first by (a) and Lemma~\ref{lem:head}(d). By~\eqref{eq:h},
+$c_{j}\,a\,\vU\hred c_{j-1}\,a\,U_1\,(a\,(c_{j-1}\,a)\,U_1)\,U_2\cdots U_r$ for $j\ge1$,
+$G\,a\,\vU\hred a\,(Q\,a)\,U_1\cdots$ and $Q\,a\,v\,\vU\hred a\,v\,U_1\cdots$; so each head-reduces to
+a term of the first kind, and Lemma~\ref{lem:head}(c) applies.
+\end{proof}
+
+\begin{lemma}\label{lem:teeth}
+For $n\ge1$: $\rest^{n}(\pK)=a_{n}\,S$ and $\tau_n(\pK)=Y_n$. The terms $Y_n$, $x_n\,S$, $a_n\,x_n$
+and $a_n\,x_n\,S$ have no hnf, $\rest(Y_n)=x_n\,S$, $\tau_1(Y_n)=a_n\,x_n\,S$,
+$\rest(\tau_1(Y_n))=a_n\,x_n$ and $\tau_1(\tau_1(Y_n))=S$. So Lemma~\ref{lem:suffix}\textup{(d)}
+applies to every $t\conv Y_n$, and Lemma~\ref{lem:suffix}\textup{(c)} to every $t\conv\tau_1(Y_n)$.
+\end{lemma}
+
+\begin{proof}
+The first sentence is Lemma~\ref{lem:pk}(a) with $u=S$. The terms have no hnf by
+Lemma~\ref{lem:pk}(b), since $Y_n=c_{i_n+1}\,a_n\,S$. By~\eqref{eq:bm} and Lemma~\ref{lem:moves}(B),
+the move on $Y_n$ has $a_0\,w_0=x_n\,S$, without an hnf, so $k=0$; the move on $a_n\,x_n\,S$ is
+Lemma~\ref{lem:moves}(A).
+\end{proof}
+
+\noindent By~\eqref{eq:am}, the last frame of move $n$ of $\pK$ is $S\,S\,c\,a_n$ with
+$c\in\{c_n,c_{n+1}\}$, which has a two-item hnf: no move is exposed.
+
+For $x$ with an hnf $S\,u_1\cdots u_m$, $m\ge1$, put $x\cdot1=u_1$, and let $\kappa(x)$ be the least
+$k$ such that $x\cdot1^k$ is defined and has no hnf.
+
+\begin{lemma}\label{lem:index}
+\textup{(a)} If $x\conv x'$, then $\kappa(x)=\kappa(x')$, both sides being defined or not.
+\textup{(b)} $\kappa(x_n)=i_n+1$. \textup{(c)} If $\tau_1(Y_n)\conv\tau_1(Y_{n'})$, then $i_n=i_{n'}$.
+\end{lemma}
+
+\begin{proof}
+(a) Lemma~\ref{lem:inv}(a), by induction along $1^k$. (b) By~\eqref{eq:h},
+$c_j\,a\hred S\,(c_{j-1}\,a)\cdots$ for $j\ge1$ and $c_0\,a=G\,a\hred S\,(a\,(Q\,a))\cdots$, and
+$a\,(Q\,a)$ has no hnf (Lemma~\ref{lem:pk}(b)). (c) By Lemma~\ref{lem:teeth},
+$\rest(\tau_1(Y_n))=a_n\,x_n$, and by Lemma~\ref{lem:pk}(a), $\tau_1(a_n\,x_n)=b_{n+1}\,x_n$. By~\eqref{eq:bm}
+and Lemma~\ref{lem:moves}(B), whose $a_0\,w_0=x_{n+1}\,x_n$ has no hnf (Lemma~\ref{lem:pk}(b)),
+$\tau_1(b_{n+1}\,x_n)=a_{n+1}\,x_{n+1}\,x_n$, and by Lemma~\ref{lem:moves}(A) its $\tau_1$ is $x_n$.
+All these terms have no hnf, so Lemma~\ref{lem:inv}(b), applied four times, gives
+$x_n\conv x_{n'}$, and (a), (b) give $i_n=i_{n'}$.
+\end{proof}
+
+\section{Runs with the teeth of \texorpdfstring{$p_K$}{pK}}\label{sec:q}
+
+From now on, $q\in\Ter$ has no hnf and $\tau_n(q)\conv Y_n$ for all $n\ge1$. By
+Lemma~\ref{lem:inv}(b), no $\tau_n(q)$ has an hnf. Write $f_n=\rest^n(q)$.
+
+\begin{lemma}\label{lem:srun}
+There is $n_1\ge1$ such that, for every $n\ge n_1$, $f_{n-1}=a'_{n-1}\,S$ with
+$a'_{n-1}\hred S\,a'_n\,b'_n$, $\tau_n(q)=b'_n\,S$ and $f_n=a'_n\,S$.
+\end{lemma}
+
+\begin{proof}
+Consider a move $n$ of $q$ of kind (B) in Lemma~\ref{lem:moves}, with $w_k$ its last $w$. By
+Lemma~\ref{lem:moves}, $w_k$ is a right suffix of $\tau_n(q)\conv Y_n$ at depth $1$, so by
+Lemmas~\ref{lem:teeth} and~\ref{lem:suffix}(d) it is $S$ or $w_k\conv\tau_1(Y_n)$.
+
+The second case never occurs. Suppose it does, put $w=w_k$, so $f_n=a_k\,w$. If move $n+1$ were of
+kind (A), then $\tau_{n+1}(q)=w$, and Lemma~\ref{lem:inv}(b) would give
+$\tau_1(w)\conv\tau_1(\tau_1(Y_n))=S$ and $\tau_1(w)\conv\tau_1(Y_{n+1})$, which has no hnf.
+So move $n+1$ is of kind (B) with $u=w$, and $w$ is a right suffix of $\tau_{n+1}(q)\conv Y_{n+1}$ at
+depth $k'+1$, where $k'$ is the $k$ of that move. As $w\ne S$, Lemma~\ref{lem:suffix}(d) forces
+$k'=0$ and $w\conv\tau_1(Y_{n+1})$, and $w$ is again the last $w$ of move $n+1$. By induction
+$\tau_1(Y_{n'})\conv\tau_1(Y_n)$ for all $n'\ge n$, so $i_{n'}=i_n$ by Lemma~\ref{lem:index}(c),
+against the unboundedness of $i$.
+
+So at every move of kind (B), $w_k=S$; as $w_k$ is an application if $k\ge1$, $k=0$ and $u=S$. A
+move of kind (A) makes the state a proper subterm, so some move $n_1$ is of kind (B). After a
+move of kind (B) the state is $a_0\,S$; a move of kind (A) from it would make $S$ a tooth, which has an
+hnf. So every move $n\ge n_1$ is of kind (B) with $k=0$ and $u=S$, which is the claim.
+\end{proof}
+
+\begin{lemma}\label{lem:cancel}
+\textup{(a)} If $t$ has no hnf and $e\,S\conv t\,S$, then $e\conv t$.
+
+\textup{(b)} Let $h\hred S\,u\,v$, where $u\,S$ has no hnf and $u$ or $v$ has no hnf. If
+$e\,S\conv h\,S$, then $e\hred S\,e_1\,e_2$ with $e_1\,S\conv u\,S$ and $e_2\,S\conv v\,S$.
+\end{lemma}
+
+\begin{proof}
+We use that $\tau_1$ of a move of kind (B) is an application (Lemma~\ref{lem:moves}).
+(a) By Lemma~\ref{lem:moves}(A), $\tau_1(t\,S)=S$ and $\rest(t\,S)=t$. By Lemma~\ref{lem:inv},
+$e\,S$ has no hnf, so $e$ has no hnf with at most one item; if $e$ had two items, $\tau_1(e\,S)$
+would be an application convertible with $S$, against Lemma~\ref{lem:head}(e). So $e$ has no hnf, and
+$e=\rest(e\,S)\conv t$.
+
+(b) By Lemma~\ref{lem:moves}(B) with $k=0$, $\tau_1(h\,S)=v\,S$ and $\rest(h\,S)=u\,S$. As in (a),
+$e$ has no hnf with at most one item; and $e$ has an hnf, since otherwise $\tau_1(e\,S)=S$ would be
+convertible with the application $v\,S$. So $e\hred S\,e_1\,e_2$, and the move on $e\,S$
+has $a_0=e_1$, $b_0=e_2$, $w_0=S$. If its $k$ is $0$, Lemma~\ref{lem:inv}(b) gives the claim. Let
+$k\ge1$. If $v$ has no hnf, then $v\,S$ has $\tau_1(v\,S)=S$, and the application $w_1=e_2\,S$ is a
+right suffix of $\tau_1(e\,S)\conv v\,S$ at depth $k\ge1$, against Lemma~\ref{lem:suffix}(c). If $u$
+has no hnf, then $\rest(e\,S)=a_k\,w_k\conv u\,S$, whose $\tau_1$ is $S$, so
+$\tau_1(a_k\,w_k)\conv S$ by Lemma~\ref{lem:inv}(b); but $\tau_1(a_k\,w_k)$ is $w_k$ or the $\tau_1$ of a
+move of kind (B), an application in either case.
+\end{proof}
+
+\begin{lemma}\label{lem:left}
+For every $n\ge n_1$, $b'_n\conv b_n$.
+\end{lemma}
+
+\begin{proof}
+Write $b'=b'_n$, $a=a_n$ and $i=i_n$, so $x_n=c_i\,a$. By Lemma~\ref{lem:inv}(b),
+$b'\,S\conv Y_n$ gives $\tau_1(b'\,S)\conv a\,x_n\,S$, which has no hnf. If $b'$ had no hnf,
+$\tau_1(b'\,S)$ would be $S$, which has an hnf; with an hnf of at most one item, $b'\,S$ would be an hnf. So
+$b'\hred S\,\alpha\,\beta$, and the move on $b'\,S$ has $a_0=\alpha$, $b_0=\beta$, $w_0=S$. If its $k$
+were $\ge1$, then $w_k$, an application, would be a right suffix at depth $1$ of $\tau_1(b'\,S)$,
+against Lemmas~\ref{lem:teeth} and~\ref{lem:suffix}(c). So $k=0$, and Lemma~\ref{lem:inv}(b) gives
+$\alpha\,S\conv x_n\,S$ and $\beta\,S\conv a\,x_n\,S$. By Lemma~\ref{lem:cancel}(a), with $t=a\,x_n$,
+$\beta\conv a\,x_n$.
+
+It remains to show $\alpha\conv x_n$. Put $e_0=\alpha$, so $e_0\,S\conv c_i\,a\,S$. For $k<i$,
+suppose $e_k\,S\conv c_{i-k}\,a\,S$. By~\eqref{eq:h},
+$c_{i-k}\,a\hred S\,(c_{i-k-1}\,a)\,(a\,(c_{i-k-1}\,a))$, and $c_{i-k-1}\,a\,S$ and
+$a\,(c_{i-k-1}\,a)$ have no hnf (Lemma~\ref{lem:pk}(b)). So Lemma~\ref{lem:cancel}(b) gives
+$e_k\hred S\,e_{k+1}\,e'_{k+1}$ with $e_{k+1}\,S\conv c_{i-k-1}\,a\,S$ and, by
+Lemma~\ref{lem:cancel}(a), $e'_{k+1}\conv a\,(c_{i-k-1}\,a)$. At $k=i$ we have $e_i\,S\conv G\,a\,S$,
+and $G\,a\hred S\,v\,(Q\,a\,v)$ with $v=a\,(Q\,a)$; here $v$ and $v\,S$ have no hnf. So
+Lemma~\ref{lem:cancel}(b), then (a), give $e_i\hred S\,\zeta\,\eta$ with $\zeta\conv v$ and
+$\eta\,S\conv Q\,a\,v\,S$. Finally $Q\,a\,v\hred S\,(a\,v)\,(v\,(a\,v))$, and $a\,v$, $a\,v\,S$ and
+$v\,(a\,v)$ have no hnf; so, in the same way, $\eta\hred S\,\eta_1\,\eta_2$ with $\eta_1\conv a\,v$ and
+$\eta_2\conv v\,(a\,v)$. Reassembling,
+$\eta\conv S\,(a\,v)\,(v\,(a\,v))\conv Q\,a\,v$, then $e_i\conv S\,v\,(Q\,a\,v)\conv G\,a$, then $e_k\conv c_{i-k}\,a$ for
+$k=i-1,\dots,0$. So $\alpha\conv x_n$, and
+$b'\conv S\,\alpha\,\beta\conv S\,x_n\,(a\,x_n)\conv b_n$ by~\eqref{eq:bm}.
+\end{proof}
+
+\section{The world of \texorpdfstring{$p_K$}{pK}}\label{sec:world}
+
+\begin{definition}
+A \emph{solution from $k$} is a term $s=s_0$ with $s_j\hred S\,s_{j+1}\,t_{j+1}$ (its hnf) and
+$t_{j+1}\conv b_{k+j+1}$ for all $j\ge0$.
+\end{definition}
+
+\begin{lemma}\label{lem:persist}
+\textup{(a)} A term convertible with a solution from $k$ is one.
+\textup{(b)} $a_k$ is a solution from $k$, with $s_j=a_{k+j}$ and $t_j=b_{k+j}$; and $a'_k$ is a
+solution from $k$ for every $k\ge n_1$.
+\textup{(c)} Let $s$ be a solution. If $t$ contains a reduct of $s_j$, then every reduct of $t$
+contains a reduct of some $s_{j'}$ with $j'\ge j$.
+\end{lemma}
+
+\begin{proof}
+(a) Lemma~\ref{lem:inv}(a), by induction on $j$. (b) By~\eqref{eq:am}, and by
+Lemmas~\ref{lem:srun} and~\ref{lem:left}. (c) Take one step $t\to t'$ that contracts
+$\rho=S\,x\,y\,z$, and an occurrence $o$ in $t$ of a reduct $r$ of $s_j$. If $o$ is disjoint from
+$\rho$, lies in $x$, $y$ or $z$, or contains $\rho$, then $t'$ contains $o$ or its one-step reduct.
+Otherwise $o$ is $S$, $S\,x$ or $S\,x\,y$. The first two are impossible: $r\conv s_j$ has a
+two-item hnf (Lemma~\ref{lem:inv}(a)). If $r=S\,x\,y$, then (Std) gives
+$s_j\hred S\,s_{j+1}\,t_{j+1}\red S\,x\,y$ by internal steps, so $x$ is a reduct of $s_{j+1}$, and
+$x$ occurs in the contractum $x\,z\,(y\,z)$. Induction on the number of steps gives the claim.
+\end{proof}
+
+\emph{The set $\B$.} Let $U,U_1,\dots,U_r$ range over $\B$, with $r\ge0$ and $\vU=U_1\cdots U_r$. Then
+$\B$ is the least set of terms that contains the \emph{pieces} $S$, $S\,S$, $Q$, $S\,Q$ and $c_j$
+($j\ge0$), and the terms
+\[
+\begin{array}{llll}
+(\mathrm{Fa})& a_m\,\vU, &(\mathrm{Fx})& c_j\,a_m\,\vU,\\
+(\mathrm{FQa})& Q\,a_m, &(\mathrm{FQa2})& Q\,a_m\,(a_m\,(Q\,a_m))\,\vU,\\
+(\mathrm{FSS})& S\,S\,w,\ w\in\{c_j,\ a_m,\ Q\,a_m,\ a_m\,(Q\,a_m)\},\quad
+&(\mathrm{FS})& S\,w,\ w\in\{a_m,\ c_j\,a_m,\ a_m\,(Q\,a_m),\ a_m\,(a_m\,(Q\,a_m))\},
+\end{array}
+\]
+for all $j,m\ge0$. The $U_i$ are the \emph{passive} arguments. Each $b_n=c_{i_n+1}\,a_n$ is in
+(Fx). Let $\Red(\B)$ be the set of reducts of members of $\B$.
+
+\begin{lemma}\label{lem:closure}
+Suppose that \textup{(i)} the function part and the argument of every member of $\B$ that is an
+application are in $\B$, and \textup{(ii)} for every $\beta\in\B$ and every frame
+$S\,x_0\,y_0\,z_0$ with exactly three items on the head run of $\beta$, the terms $x_0\,z_0$ and
+$y_0\,z_0$ are in $\B$. Then $\Red(\B)$ is closed under subterms.
+\end{lemma}
+
+\begin{proof}
+We show by induction on $n$ that every subterm $t$ of an $n$-step reduct $r$ of a member of $\B$ is
+in $\Red(\B)$. For $n=0$ use (i). Otherwise $r_0\to r$ contracts $S\,x\,y\,z$ and $r_0$ is an
+$(n-1)$-step reduct. If $t$ is disjoint from the contractum or lies in a copy of $x$, $y$ or $z$, it is
+a subterm of $r_0$. If $t$ contains the contractum, it is a reduct of a subterm of $r_0$. Otherwise
+$t$ is $x\,z$ or $y\,z$. By induction $S\,x\,y\,z\in\Red(\B)$, so $\beta\red S\,x\,y\,z$ for some
+$\beta\in\B$, and (Std) gives $\beta\hred S\,x_0\,y_0\,z_0\red S\,x\,y\,z$ by internal steps, with
+$x_0\red x$, $y_0\red y$, $z_0\red z$. So $x\,z$ is a reduct of $x_0\,z_0\in\B$, and likewise $y\,z$.
+\end{proof}
+
+\begin{lemma}\label{lem:typing}
+$\B$ satisfies \textup{(i)} and \textup{(ii)} of Lemma~\ref{lem:closure}.
+\end{lemma}
+
+\begin{proof}
+(i) Inspection: $c_0=S\,Q\,Q$, $c_{j+1}=Q\,c_j$, $Q=S\,(S\,S)$; $a_m$ is $c_{j+1}\,c_n$ or $c_0\,c_n$;
+the function parts of members with $r\ge1$ are members of the same family with $r-1$; and
+$c_j\,a_m$, $Q\,a_m$, $Q\,a_m\,(a_m\,(Q\,a_m))$, $S\,S\,w$ and $S\,w$ split into pieces and members of
+(Fa), (Fx), (FQa).
+
+(ii) Pieces and members of (FQa), (FSS) and (FS) have at most two items. For the others the head run
+follows from~\eqref{eq:h} and Lemma~\ref{lem:head}(b); we write $a=a_m$, $a'=a_{m+1}$, $b'=b_{m+1}$,
+$v=a\,(Q\,a)$, and the head of a member is the member with $r=0$. The run first passes the frames of the head
+with $\vU$ appended, which have at least three items, exactly three only if $r=0$, until the head's
+hnf $S\,g_1\,g_2$; then $S\,g_1\,g_2\,\vU$, with three items exactly if $r=1$; then, if $r\ge1$,
+$g_1\,U_1\,(g_2\,U_1)\,U_2\cdots U_r$, which is again of the form (Fa) or (Fx), with $r+1\ge2$
+arguments. Applying the same description to it, and so on, no later frame has exactly three items. So the frames with exactly three items, and
+their terms $x_0\,z_0$; $y_0\,z_0$, are these:
+\[
+\begin{array}{ll}
+a=Q\,c_j\,c_n,\ r=0: & Q\,c_j\,c_n\mapsto S\,S\,c_n;\ a',\qquad S\,S\,c_n\,a'\mapsto S\,a';\ b'.\\
+a=G\,c_n,\ r=0: & G\,c_n\mapsto c_{n+1};\ c_{n+1},\quad Q\,c_n\,c_{n+1}\mapsto S\,S\,c_{n+1};\ a',\quad
+  S\,S\,c_{n+1}\,a'\mapsto S\,a';\ b'.\\
+a\,U: & S\,a'\,b'\,U\mapsto a'\,U;\ b'\,U.\\
+c_j\,a,\ j\ge1,\ r=0: & Q\,c_{j-1}\,a\mapsto S\,S\,a;\ c_{j-1}\,a,\quad
+  S\,S\,a\,(c_{j-1}\,a)\mapsto S\,(c_{j-1}\,a);\ a\,(c_{j-1}\,a).\\
+c_j\,a\,U,\ j\ge1: & S\,(c_{j-1}\,a)\,(a\,(c_{j-1}\,a))\,U\mapsto c_{j-1}\,a\,U;\ a\,(c_{j-1}\,a)\,U.\\
+G\,a,\ r=0: & G\,a\mapsto Q\,a;\ Q\,a,\quad Q\,a\,(Q\,a)\mapsto S\,S\,(Q\,a);\ v,\quad
+  S\,S\,(Q\,a)\,v\mapsto S\,v;\ Q\,a\,v.\\
+G\,a\,U: & S\,v\,(Q\,a\,v)\,U\mapsto v\,U;\ Q\,a\,v\,U.\\
+Q\,a\,v,\ r=0: & Q\,a\,v\mapsto S\,S\,v;\ a\,v,\qquad S\,S\,v\,(a\,v)\mapsto S\,(a\,v);\ v\,(a\,v).\\
+Q\,a\,v\,U: & S\,(a\,v)\,(v\,(a\,v))\,U\mapsto a\,v\,U;\ v\,(a\,v)\,U.
+\end{array}
+\]
+Every term on the right is in $\B$: $c_{n+1}$ is a piece; $S\,S\,c_n$, $S\,S\,c_{n+1}$, $S\,S\,a$,
+$S\,S\,(Q\,a)$ and $S\,S\,v$ are in (FSS); $S\,a'$, $S\,(c_{j-1}\,a)$, $S\,v$ and $S\,(a\,v)$ in (FS);
+$Q\,a$ in (FQa); $Q\,a\,v$ and $Q\,a\,v\,U$ in (FQa2); $b'=c\,a'$, $c_{j-1}\,a$ and $c_{j-1}\,a\,U$ in
+(Fx); and $a'$, $a'\,U$, $a\,(c_{j-1}\,a)$, $a\,(c_{j-1}\,a)\,U$, $v$, $v\,U$, $a\,v$, $a\,v\,U$,
+$v\,(a\,v)$ and $v\,(a\,v)\,U$ in (Fa).
+\end{proof}
+
+\noindent In every head run of a member of $\B$, a passive argument is only ever passed on as an
+argument ($z_0$ above); this is why $\B$ is closed although it is far from closed under
+application.
+
+\begin{lemma}\label{lem:sol}
+If $\beta\in\B$ is a solution from $k$, then $\beta=a_k$.
+\end{lemma}
+
+\begin{proof}
+A solution has a two-item hnf whose first item has a two-item hnf, and its second item $t_1\conv b_{k+1}$
+has an hnf, by~\eqref{eq:bm} and Lemma~\ref{lem:inv}(a). Members of (Fa), (Fx) and (FQa2) with
+$r\ge1$ have no hnf (Lemma~\ref{lem:pk}(b)). $S$, $S\,S$, $S\,Q$, $Q$ and the members of (FS) have at
+most one item. The first item of $c_j$ ($j\ge1$), $G$, $Q\,a$ and $S\,S\,w$ is $S\,S$, $Q$ or $S$, with at
+most one item. By the table above, $Q\,a\,v$ and $G\,a$ have the first items $a\,v$ and $a\,(Q\,a)$, which
+have no hnf, and $c_j\,a$ ($j\ge1$) has the second item $a\,(c_{j-1}\,a)$, which has no hnf. So
+$\beta=a_m$ for some $m$, with $t_j=b_{m+j}$; hence $b_{m+j}\conv b_{k+j}$ for all $j\ge1$.
+By~\eqref{eq:bm} and Lemma~\ref{lem:inv}(a), $x_{m+j}\conv x_{k+j}$, and by
+Lemma~\ref{lem:index}(a),(b), $i_{m+j}=i_{k+j}$ for all $j\ge1$. If $m\ne k$, the sequence $i$ would
+be periodic from some index on, hence bounded. So $m=k$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+If move $n>n_1$ is literal, that is, $a'_{n-1}=S\,a'_n\,b'_n$, then $\sz{a'_n}<\sz{a'_{n-1}}$. So some
+move $n>n_1$ is not literal, and then Lemma~\ref{lem:head}(a) gives $b'_n=y\,a'_n$ for some $y$. By
+Lemma~\ref{lem:left} and (CR), $b'_n\red R$ and $b_n\red R$ for some $R$. The term $b'_n$ contains
+$a'_n$, which is $s_{n-n_1}$ for the solution $s=a'_{n_1}$ (Lemma~\ref{lem:persist}(b)). By
+Lemma~\ref{lem:persist}(c), $R$ contains a reduct $s'$ of some $a'_k$ with $k\ge n$, and $s'$ is a
+solution from $k$ by Lemma~\ref{lem:persist}(a),(b). As $b_n\in\B$, Lemmas~\ref{lem:closure}
+and~\ref{lem:typing} give $s'\in\Red(\B)$: $\beta\red s'$ for some $\beta\in\B$. Then $\beta$ is a
+solution from $k$ (Lemma~\ref{lem:persist}(a)), so $\beta=a_k$ by Lemma~\ref{lem:sol}, and
+$a'_k\conv s'\conv a_k$. Hence $\rest^k(q)=a'_k\,S\conv a_k\,S=\rest^k(\pK)$ (Lemmas~\ref{lem:srun}
+and~\ref{lem:teeth}), and Lemma~\ref{lem:finite} gives $q\conv\pK$.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:rests}]
+Put $q'=q\,Y_n\cdots Y_1$. By Lemma~\ref{lem:head}(d), $q\,Y_n\cdots Y_{j+1}$ has no hnf for every
+$j\le n$, so for $j<n$ it is a stable frame, its own first one; hence $\tau_i(q')=Y_i$ for $i\le n$,
+$\rest^n(q')=q$, and $\tau_{n+i}(q')=\tau_i(q)\conv Y_{n+i}$ for $i\ge1$. By Theorem~\ref{thm:main},
+$q'\conv\pK$, and Lemma~\ref{lem:inv}(b) gives $q=\rest^n(q')\conv\rest^n(\pK)$.
+\end{proof}
+
+\section{Closing}
+
+Theorem~\ref{thm:main} uses $\pK$ in two ways: the shape of its teeth forces a second run onto the
+spine equations (Section~\ref{sec:q}), and its teeth have their reducts inside a set $\B$ with
+passive argument slots in which the equations have only $\pK$'s solutions
+(Section~\ref{sec:world}). Whether every run without an hnf admits such a set is open. By
+\citep[Theorem~7 and Proposition~9(b)]{s3}, two terms without an hnf whose teeth are pairwise
+convertible have the same infinitary normal form, so CT is a case of the conjecture of~\citep{s6} that
+$t^\infty=u^\infty$ implies $t\conv u$.
+
+\begin{conjecture}
+If $p,q\in\Ter$ have no hnf and $\tau_n(p)\conv\tau_n(q)$ for all $n\ge1$, then $p\conv q$.
+\end{conjecture}
+
+\section*{Data availability}
+\sloppy
+The proof is on paper and is not mechanized. Its inputs (CR) and (Std) are proved in the Lean~4~\citep{lean4}
+development \texttt{lean-ski}~\citep{leanski}, version 1.20.0, as \texttt{church\_rosser} and
+\texttt{wsteps\_split} in \texttt{Ski/Weak.lean}; the latter states that every weak reduction is head steps
+followed by internal parallel steps, which keep the head and the number of items. (F2) is
+\texttt{Full.run\_total} in \texttt{Ski/Full.lean}, whose proof goes through the block model
+of~\citep{s1}. All three use only the axioms \texttt{propext} and \texttt{Quot.sound}; they are stated for
+$SKI$-terms, whose reductions keep $S$-terms among $S$-terms. Independent programs that follow random
+reductions from $\pK$ and its teeth found every term reached in $\Red(\B)$; the proof does not depend
+on them.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

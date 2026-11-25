@@ -92,9 +92,9 @@ convertible are convertible. Agreement of finitely many teeth says nothing about
 $\rest^n$; but if the states ever meet, $\rest^n(p)\conv\rest^n(q)$, then $p\conv q$
 (Lemma~\ref{lem:finite}). CT asks whether the tails force one meeting.
 
-There is a simple case. At a move whose state $f=f^-\,u$ has a prefix $f^-$ with an hnf, the
-head run often ends in a last frame $S\,S\,y\,a$, and the tooth is $(y\,a)\,w$ for the new state
-$a\,w$ (Lemma~\ref{lem:moves}). Call the move \emph{exposed} if $y$ has no hnf. Then $(y\,a)\,w$
+There is a simple case. At a move of kind (B) in Lemma~\ref{lem:moves} whose last hnf
+$S\,a\,b$ is reached by at least one head step, the last frame is $S\,S\,y\,a$
+(Lemma~\ref{lem:head}(a)), so the tooth is $(y\,a)\,w$ and the new state is $a\,w$. Call the move \emph{exposed} if $y$ has no hnf. Then $(y\,a)\,w$
 and $y\,a$ are stable frames, and $\tau_1$ and $\rest$ read $w$ and $a$ off the tooth; if the
 moves $n$ of $p$ and of $q$ are both exposed, their states are convertible and $p\conv q$. In the
 run of the term $\pK$ below, $y$ is always a counter $Q^jG$ with a two-item hnf
@@ -119,12 +119,9 @@ absence assumed). The block model decides that property~\citep{s1}, so each such
 constructive with it; we do not do so. Everything else is proved below. The proof is not
 mechanized.
 
-\emph{Plan.} Section~\ref{sec:head} collects facts about head runs. Section~\ref{sec:pk} computes the
-run of $\pK$. Section~\ref{sec:q} shows that a run $q$ with $\pK$'s teeth eventually has states
-$a'_n\,S$ with $a'_{n-1}\hred S\,a'_n\,b'_n$ and $b'_n\conv b_n$, where $b_n$ is the corresponding
-term of $\pK$'s run: the spine equations of $\pK$. Section~\ref{sec:world} shows that some $a'_k$
-then has a reduct inside the reducts of $b_n$, which lie in an explicit set $\Red(\B)$, and that the
-only solutions of the spine equations there are $\pK$'s own.
+\emph{Plan.} After facts about head runs (Section~\ref{sec:head}) and the run of $\pK$
+(Section~\ref{sec:pk}), Section~\ref{sec:q} puts a run with $\pK$'s teeth onto $\pK$'s spine
+equations, and Section~\ref{sec:world} solves these equations inside the reducts of $\pK$'s teeth.
 
 \section{Head runs}\label{sec:head}
 
@@ -198,8 +195,8 @@ $t'$ has none, $\tau_1(t)\conv\tau_1(t')$ and $\rest(t)\conv\rest(t')$; hence
 $\tau_n(t)\conv\tau_n(t')$ and $\rest^n(t)\conv\rest^n(t')$ for all $n$.
 \end{lemma}
 
-\noindent This is the part of~\citep[Lemma~4]{s6} that we need; we prove it from (CR), (Std) and (F2)
-alone.
+\noindent This is, in substance, \citep[Lemma~4]{s6} with its proof; we prove it from (CR), (Std)
+and (F2) alone.
 
 \begin{proof}
 (a) Every reduct of $T=S\,u_1\cdots u_m$ ($m\le2$) is $S\,u^*_1\cdots u^*_m$ with $u_i\red u_i^*$.
@@ -258,8 +255,10 @@ $J=2$.
 
 Let $c_0=G$ and $c_{j+1}=Q\,c_j$, so $\pK=Q\,c_0\,c_2\,S$. For all $u,v\in\Ter$ the head runs
 \begin{equation}\label{eq:h}
-Q\,u\,v\to S\,S\,v\,(u\,v)\to S\,(u\,v)\,(v\,(u\,v)),\qquad
+\begin{gathered}
+Q\,u\,v\to S\,S\,v\,(u\,v)\to S\,(u\,v)\,(v\,(u\,v)),\\
 G\,u\to Q\,u\,(Q\,u)\hred S\,(u\,(Q\,u))\,(Q\,u\,(u\,(Q\,u)))
+\end{gathered}
 \end{equation}
 are literal. Put $a_0=Q\,c_0\,c_2$. If $a_m=Q\,c_j\,c_n$, put $a_{m+1}=c_j\,c_n$ and
 $b_{m+1}=c_n\,a_{m+1}$; if $a_m=G\,c_n$, put $a_{m+1}=c_n\,c_{n+1}$ and
@@ -321,11 +320,12 @@ $k$ such that $x\cdot1^k$ is defined and has no hnf.
 \end{lemma}
 
 \begin{proof}
-(a) Lemma~\ref{lem:inv}(a), by induction along $1^k$. (b) By~\eqref{eq:h},
-$c_j\,a\hred S\,(c_{j-1}\,a)\cdots$ for $j\ge1$ and $c_0\,a=G\,a\hred S\,(a\,(Q\,a))\cdots$, and
+(a) Lemma~\ref{lem:inv}(a), by induction along $1^k$. (b) By~\eqref{eq:h}, we have
+$c_j\,a\hred S\,(c_{j-1}\,a)\cdots$ for $j\ge1$, and $c_0\,a=G\,a\hred S\,(a\,(Q\,a))\cdots$, where
 $a\,(Q\,a)$ has no hnf (Lemma~\ref{lem:pk}(b)). (c) By Lemma~\ref{lem:teeth},
-$\rest(\tau_1(Y_n))=a_n\,x_n$, and by Lemma~\ref{lem:pk}(a), $\tau_1(a_n\,x_n)=b_{n+1}\,x_n$. By~\eqref{eq:bm}
-and Lemma~\ref{lem:moves}(B), whose $a_0\,w_0=x_{n+1}\,x_n$ has no hnf (Lemma~\ref{lem:pk}(b)),
+$\rest(\tau_1(Y_n))=a_n\,x_n$, and by Lemma~\ref{lem:pk}(a), $\tau_1(a_n\,x_n)=b_{n+1}\,x_n$.
+By~\eqref{eq:bm} and Lemma~\ref{lem:moves}(B), where $a_0\,w_0=x_{n+1}\,x_n$ has no hnf
+(Lemma~\ref{lem:pk}(b)),
 $\tau_1(b_{n+1}\,x_n)=a_{n+1}\,x_{n+1}\,x_n$, and by Lemma~\ref{lem:moves}(A) its $\tau_1$ is $x_n$.
 All these terms have no hnf, so Lemma~\ref{lem:inv}(b), applied four times, gives
 $x_n\conv x_{n'}$, and (a), (b) give $i_n=i_{n'}$.
@@ -371,7 +371,7 @@ $e\,S\conv h\,S$, then $e\hred S\,e_1\,e_2$ with $e_1\,S\conv u\,S$ and $e_2\,S\
 \begin{proof}
 We use that $\tau_1$ of a move of kind (B) is an application (Lemma~\ref{lem:moves}).
 (a) By Lemma~\ref{lem:moves}(A), $\tau_1(t\,S)=S$ and $\rest(t\,S)=t$. By Lemma~\ref{lem:inv},
-$e\,S$ has no hnf, so $e$ has no hnf with at most one item; if $e$ had two items, $\tau_1(e\,S)$
+$e\,S$ has no hnf, so $e$ has no hnf with at most one item; if $e$ had an hnf with two items, $\tau_1(e\,S)$
 would be an application convertible with $S$, against Lemma~\ref{lem:head}(e). So $e$ has no hnf, and
 $e=\rest(e\,S)\conv t$.
 
@@ -445,14 +445,14 @@ $x$ occurs in the contractum $x\,z\,(y\,z)$. Induction on the number of steps gi
 \emph{The set $\B$.} Let $U,U_1,\dots,U_r$ range over $\B$, with $r\ge0$ and $\vU=U_1\cdots U_r$. Then
 $\B$ is the least set of terms that contains the \emph{pieces} $S$, $S\,S$, $Q$, $S\,Q$ and $c_j$
 ($j\ge0$), and the terms
-\[
+\begin{center}\small$
 \begin{array}{llll}
 (\mathrm{Fa})& a_m\,\vU, &(\mathrm{Fx})& c_j\,a_m\,\vU,\\
 (\mathrm{FQa})& Q\,a_m, &(\mathrm{FQa2})& Q\,a_m\,(a_m\,(Q\,a_m))\,\vU,\\
-(\mathrm{FSS})& S\,S\,w,\ w\in\{c_j,\ a_m,\ Q\,a_m,\ a_m\,(Q\,a_m)\},\quad
-&(\mathrm{FS})& S\,w,\ w\in\{a_m,\ c_j\,a_m,\ a_m\,(Q\,a_m),\ a_m\,(a_m\,(Q\,a_m))\},
-\end{array}
-\]
+(\mathrm{FSS})& \multicolumn{3}{l}{S\,S\,w,\quad w\in\{c_j,\ a_m,\ Q\,a_m,\ a_m\,(Q\,a_m)\},}\\
+(\mathrm{FS})& \multicolumn{3}{l}{S\,w,\quad w\in\{a_m,\ c_j\,a_m,\ a_m\,(Q\,a_m),\ a_m\,(a_m\,(Q\,a_m))\},}
+\end{array}$
+\end{center}
 for all $j,m\ge0$. The $U_i$ are the \emph{passive} arguments. Each $b_n=c_{i_n+1}\,a_n$ is in
 (Fx). Let $\Red(\B)$ be the set of reducts of members of $\B$.
 
@@ -490,23 +490,23 @@ with $\vU$ appended, which have at least three items, exactly three only if $r=0
 hnf $S\,g_1\,g_2$; then $S\,g_1\,g_2\,\vU$, with three items exactly if $r=1$; then, if $r\ge1$,
 $g_1\,U_1\,(g_2\,U_1)\,U_2\cdots U_r$, which is again of the form (Fa) or (Fx), with $r+1\ge2$
 arguments. Applying the same description to it, and so on, no later frame has exactly three items. So the frames with exactly three items, and
-their terms $x_0\,z_0$; $y_0\,z_0$, are these:
-\[
-\begin{array}{ll}
-a=Q\,c_j\,c_n,\ r=0: & Q\,c_j\,c_n\mapsto S\,S\,c_n;\ a',\qquad S\,S\,c_n\,a'\mapsto S\,a';\ b'.\\
-a=G\,c_n,\ r=0: & G\,c_n\mapsto c_{n+1};\ c_{n+1},\quad Q\,c_n\,c_{n+1}\mapsto S\,S\,c_{n+1};\ a',\quad
-  S\,S\,c_{n+1}\,a'\mapsto S\,a';\ b'.\\
-a\,U: & S\,a'\,b'\,U\mapsto a'\,U;\ b'\,U.\\
-c_j\,a,\ j\ge1,\ r=0: & Q\,c_{j-1}\,a\mapsto S\,S\,a;\ c_{j-1}\,a,\quad
-  S\,S\,a\,(c_{j-1}\,a)\mapsto S\,(c_{j-1}\,a);\ a\,(c_{j-1}\,a).\\
-c_j\,a\,U,\ j\ge1: & S\,(c_{j-1}\,a)\,(a\,(c_{j-1}\,a))\,U\mapsto c_{j-1}\,a\,U;\ a\,(c_{j-1}\,a)\,U.\\
-G\,a,\ r=0: & G\,a\mapsto Q\,a;\ Q\,a,\quad Q\,a\,(Q\,a)\mapsto S\,S\,(Q\,a);\ v,\quad
-  S\,S\,(Q\,a)\,v\mapsto S\,v;\ Q\,a\,v.\\
-G\,a\,U: & S\,v\,(Q\,a\,v)\,U\mapsto v\,U;\ Q\,a\,v\,U.\\
-Q\,a\,v,\ r=0: & Q\,a\,v\mapsto S\,S\,v;\ a\,v,\qquad S\,S\,v\,(a\,v)\mapsto S\,(a\,v);\ v\,(a\,v).\\
-Q\,a\,v\,U: & S\,(a\,v)\,(v\,(a\,v))\,U\mapsto a\,v\,U;\ v\,(a\,v)\,U.
-\end{array}
-\]
+their terms $x_0\,z_0$; $y_0\,z_0$, are these (members written without $U$ have $r=0$):
+\begin{center}\small$
+\begin{array}{@{}lll@{}}
+\text{member} & \text{frame } S\,x_0\,y_0\,z_0 & x_0\,z_0;\ y_0\,z_0\\[2pt]
+a=Q\,c_j\,c_n & Q\,c_j\,c_n,\quad S\,S\,c_n\,a' & S\,S\,c_n;\ a',\quad S\,a';\ b'\\
+a=G\,c_n & G\,c_n,\quad Q\,c_n\,c_{n+1} & c_{n+1};\ c_{n+1},\quad S\,S\,c_{n+1};\ a'\\
+ & S\,S\,c_{n+1}\,a' & S\,a';\ b'\\
+a\,U & S\,a'\,b'\,U & a'\,U;\ b'\,U\\
+c_j\,a,\ j\ge1 & Q\,c_{j-1}\,a,\quad S\,S\,a\,(c_{j-1}\,a) & S\,S\,a;\ c_{j-1}\,a,\quad S\,(c_{j-1}\,a);\ a\,(c_{j-1}\,a)\\
+c_j\,a\,U,\ j\ge1 & S\,(c_{j-1}\,a)\,(a\,(c_{j-1}\,a))\,U & c_{j-1}\,a\,U;\ a\,(c_{j-1}\,a)\,U\\
+G\,a & G\,a,\quad Q\,a\,(Q\,a) & Q\,a;\ Q\,a,\quad S\,S\,(Q\,a);\ v\\
+ & S\,S\,(Q\,a)\,v & S\,v;\ Q\,a\,v\\
+G\,a\,U & S\,v\,(Q\,a\,v)\,U & v\,U;\ Q\,a\,v\,U\\
+Q\,a\,v & Q\,a\,v,\quad S\,S\,v\,(a\,v) & S\,S\,v;\ a\,v,\quad S\,(a\,v);\ v\,(a\,v)\\
+Q\,a\,v\,U & S\,(a\,v)\,(v\,(a\,v))\,U & a\,v\,U;\ v\,(a\,v)\,U
+\end{array}$
+\end{center}
 Every term on the right is in $\B$: $c_{n+1}$ is a piece; $S\,S\,c_n$, $S\,S\,c_{n+1}$, $S\,S\,a$,
 $S\,S\,(Q\,a)$ and $S\,S\,v$ are in (FSS); $S\,a'$, $S\,(c_{j-1}\,a)$, $S\,v$ and $S\,(a\,v)$ in (FS);
 $Q\,a$ in (FQa); $Q\,a\,v$ and $Q\,a\,v\,U$ in (FQa2); $b'=c\,a'$, $c_{j-1}\,a$ and $c_{j-1}\,a\,U$ in
@@ -514,9 +514,7 @@ $Q\,a$ in (FQa); $Q\,a\,v$ and $Q\,a\,v\,U$ in (FQa2); $b'=c\,a'$, $c_{j-1}\,a$ 
 $v\,(a\,v)$ and $v\,(a\,v)\,U$ in (Fa).
 \end{proof}
 
-\noindent In every head run of a member of $\B$, a passive argument is only ever passed on as an
-argument ($z_0$ above); this is why $\B$ is closed although it is far from closed under
-application.
+\noindent In these runs a passive argument is only ever passed on as an argument ($z_0$ above).
 
 \begin{lemma}\label{lem:sol}
 If $\beta\in\B$ is a solution from $k$, then $\beta=a_k$.
@@ -527,8 +525,8 @@ A solution has a two-item hnf whose first item has a two-item hnf, and its secon
 has an hnf, by~\eqref{eq:bm} and Lemma~\ref{lem:inv}(a). Members of (Fa), (Fx) and (FQa2) with
 $r\ge1$ have no hnf (Lemma~\ref{lem:pk}(b)). $S$, $S\,S$, $S\,Q$, $Q$ and the members of (FS) have at
 most one item. The first item of $c_j$ ($j\ge1$), $G$, $Q\,a$ and $S\,S\,w$ is $S\,S$, $Q$ or $S$, with at
-most one item. By the table above, $Q\,a\,v$ and $G\,a$ have the first items $a\,v$ and $a\,(Q\,a)$, which
-have no hnf, and $c_j\,a$ ($j\ge1$) has the second item $a\,(c_{j-1}\,a)$, which has no hnf. So
+most one item. By~\eqref{eq:h}, the hnfs of $Q\,a\,v$ and $G\,a$ have the first items $a\,v$ and $a\,(Q\,a)$, which
+have no hnf, and that of $c_j\,a$ ($j\ge1$) has the second item $a\,(c_{j-1}\,a)$, which has no hnf. So
 $\beta=a_m$ for some $m$, with $t_j=b_{m+j}$; hence $b_{m+j}\conv b_{k+j}$ for all $j\ge1$.
 By~\eqref{eq:bm} and Lemma~\ref{lem:inv}(a), $x_{m+j}\conv x_{k+j}$, and by
 Lemma~\ref{lem:index}(a),(b), $i_{m+j}=i_{k+j}$ for all $j\ge1$. If $m\ne k$, the sequence $i$ would
@@ -536,8 +534,8 @@ be periodic from some index on, hence bounded. So $m=k$.
 \end{proof}
 
 \begin{proof}[Proof of Theorem~\ref{thm:main}]
-If move $n>n_1$ is literal, that is, $a'_{n-1}=S\,a'_n\,b'_n$, then $\sz{a'_n}<\sz{a'_{n-1}}$. So some
-move $n>n_1$ is not literal, and then Lemma~\ref{lem:head}(a) gives $b'_n=y\,a'_n$ for some $y$. By
+If $a'_{n-1}$ is literal, that is, $a'_{n-1}=S\,a'_n\,b'_n$, then $\sz{a'_n}<\sz{a'_{n-1}}$. So
+$a'_{n-1}$ is not literal for some $n>n_1$, and then Lemma~\ref{lem:head}(a) gives $b'_n=y\,a'_n$ for some $y$. By
 Lemma~\ref{lem:left} and (CR), $b'_n\red R$ and $b_n\red R$ for some $R$. The term $b'_n$ contains
 $a'_n$, which is $s_{n-n_1}$ for the solution $s=a'_{n_1}$ (Lemma~\ref{lem:persist}(b)). By
 Lemma~\ref{lem:persist}(c), $R$ contains a reduct $s'$ of some $a'_k$ with $k\ge n$, and $s'$ is a
@@ -557,10 +555,8 @@ $q'\conv\pK$, and Lemma~\ref{lem:inv}(b) gives $q=\rest^n(q')\conv\rest^n(\pK)$.
 
 \section{Closing}
 
-Theorem~\ref{thm:main} uses $\pK$ in two ways: the shape of its teeth forces a second run onto the
-spine equations (Section~\ref{sec:q}), and its teeth have their reducts inside a set $\B$ with
-passive argument slots in which the equations have only $\pK$'s solutions
-(Section~\ref{sec:world}). Whether every run without an hnf admits such a set is open. By
+Whether every run without an hnf has its teeth's reducts inside a set with passive argument
+slots, like $\B$, is open. By
 \citep[Theorem~7 and Proposition~9(b)]{s3}, two terms without an hnf whose teeth are pairwise
 convertible have the same infinitary normal form, so CT is a case of the conjecture of~\citep{s6} that
 $t^\infty=u^\infty$ implies $t\conv u$.
@@ -571,15 +567,13 @@ If $p,q\in\Ter$ have no hnf and $\tau_n(p)\conv\tau_n(q)$ for all $n\ge1$, then 
 
 \section*{Data availability}
 \sloppy
-The proof is on paper and is not mechanized. Its inputs (CR) and (Std) are proved in the Lean~4~\citep{lean4}
-development \texttt{lean-ski}~\citep{leanski}, version 1.20.0, as \texttt{church\_rosser} and
-\texttt{wsteps\_split} in \texttt{Ski/Weak.lean}; the latter states that every weak reduction is head steps
-followed by internal parallel steps, which keep the head and the number of items. (F2) is
-\texttt{Full.run\_total} in \texttt{Ski/Full.lean}, whose proof goes through the block model
-of~\citep{s1}. All three use only the axioms \texttt{propext} and \texttt{Quot.sound}; they are stated for
-$SKI$-terms, whose reductions keep $S$-terms among $S$-terms. Independent programs that follow random
-reductions from $\pK$ and its teeth found every term reached in $\Red(\B)$; the proof does not depend
-on them.
+The proof is not mechanized. Its inputs are proved in the Lean~4~\citep{lean4} development
+\texttt{lean-ski}~\citep{leanski}, version 1.20.0, for $SKI$-terms, with only the axioms
+\texttt{propext} and \texttt{Quot.sound}: (CR) and (Std) as \texttt{church\_rosser} and
+\texttt{wsteps\_split} in \texttt{Ski/Weak.lean}, (F2) as \texttt{Full.run\_total} in
+\texttt{Ski/Full.lean}, through the block model of~\citep{s1}. Independent programs that follow
+random reductions from $\pK$ and its teeth found every term reached in $\Red(\B)$; the proof does
+not depend on them.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

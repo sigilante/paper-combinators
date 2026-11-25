@@ -272,8 +272,12 @@ one step, through frames with at least three items. Repeating with appended argu
 $a_m\,u\hred a_{m+j}\,u\,V_j$ in at least $j$ steps for every $j$, so the head run is infinite and
 reaches no hnf. Before $a_{m+1}\,u\,(b_{m+1}\,u)$, every frame is $c\,u$ with $c$ a frame of $a_m$, or
 $S\,a_{m+1}\,b_{m+1}\,u$; none is stable. (b) The first by (a) and Lemma~\ref{lem:head}(d). Write
-$a=a_m$ and $v=a\,(Q\,a)$. By~\eqref{eq:h}, $G\,a\,\vU\hred a\,(Q\,a)\,U_1\cdots U_r$ and
-$Q\,a\,v\,\vU\hred a\,v\,U_1\cdots U_r$, terms of the first kind, and
+$a=a_m$ and $v=a\,(Q\,a)$. By~\eqref{eq:h},
+\begin{gather*}
+G\,a\,\vU\hred a\,(Q\,a)\,U_1\,(Q\,a\,v\,U_1)\,U_2\cdots U_r,\\
+Q\,a\,v\,\vU\hred a\,v\,U_1\,(v\,(a\,v)\,U_1)\,U_2\cdots U_r,
+\end{gather*}
+terms of the first kind, and
 $c_{j}\,a\,\vU\hred c_{j-1}\,a\,U_1\,(a\,(c_{j-1}\,a)\,U_1)\,U_2\cdots U_r$ for $j\ge1$, a term of
 the second kind with $j-1$ in place of $j$. By induction on $j$, every term of the second kind
 head-reduces to one of the first kind. Lemma~\ref{lem:head}(c) applies.

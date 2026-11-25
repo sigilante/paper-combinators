@@ -41,7 +41,7 @@ $p_K$. The same holds, with the teeth shifted, for every state of $p_K$'s run. N
 exposes the state that produced it, so the proof cannot read the state from one tooth. Instead we
 show that a second run with the same teeth satisfies the spine equations of $p_K$, and that among
 the reducts of an explicit set of terms these equations have, up to convertibility, only the
-solutions given by $p_K$'s run. The proof is not mechanized and uses excluded middle on having a
+solutions given by $p_K$'s run. The proof is not mechanized and case-splits on whether a term has a
 head normal form.
 \end{abstract}
 
@@ -99,10 +99,11 @@ $i\ge1$ satisfies $q\conv\rest^n(\pK)$.
 
 \emph{Assumptions.} The proof uses Church--Rosser (CR), standardization (Std) and (F2), all stated
 in Section~\ref{sec:head}. The cited proof of (F2)~\citep{s1,s3} uses the 38-element block model
-of~\citep{s1} and Waldmann's top-termination theorem~\citep[Theorem~3]{s3}; this is the only place
-where the block model enters. The proof uses excluded middle on having a head normal form, in
+of~\citep{s1} and Waldmann's top-termination theorem~\citep[Theorem~3]{s3}; no proof below uses the
+block model otherwise. The proof case-splits on whether a term has a head normal form, in
 Lemma~\ref{lem:moves} and wherever a term's hnf is taken or its absence assumed. The block model
-decides that property~\citep{s1}, so each such case split could be made constructive.
+gives a decision procedure for that property~\citep[Proposition~4 and Theorem~9]{s1}; we have not
+audited the argument for other classical principles.
 
 \section{Head runs}\label{sec:head}
 
@@ -112,8 +113,8 @@ A step is \emph{internal} if it contracts a redex inside an item. We use three k
 \item[(Std)] \citep{terese} If $t\red u$, then $t\hred t'\red u$ for some $t'$ such that every step
   from $t'$ to $u$ is internal. So $t'=S\,v_1\cdots v_m$ and $u=S\,v_1'\cdots v_m'$ with the same
   $m$ and $v_i\red v_i'$.
-\item[(F2)] \citep[Proposition~9(b), $d=1$]{s3}, with \citep[Proposition~4 and Theorem~9]{s1}. The
-  head run of every term reaches an hnf or a stable frame.
+\item[(F2)] The head run of every term reaches an hnf~\citep[Theorem~9]{s1} or a stable frame
+  (\citealp[Proposition~9(b)]{s3}; \citealp[Proposition~4]{s1}).
 \end{itemize}
 The head run is deterministic and stops at its first hnf. A right context of depth $d$ is
 $x_1\,(x_2\,(\cdots(x_d\,[\,])\cdots))$; $e$ is a \emph{right suffix of $t$ at depth $d$} if $t$ is
@@ -552,23 +553,20 @@ If $p,q\in\Ter$ have no hnf and $\tau_n(p)\conv\tau_n(q)$ for all $n\ge1$, then 
 \end{conjecture}
 
 \noindent CT follows from the conjecture of~\citep{s6} that $t^\infty=u^\infty$ implies $t\conv u$,
-where $t^\infty$ is the infinitary normal form of $t$~\citep[Theorem~7]{s3}. Let $t$ have no hnf. By
-\citep[Proposition~9(b)]{s3}, the left spine of $t^\infty$ is infinite and its arguments, from the
-root, are $e_1^\infty,e_2^\infty,\dots$, where for each $d$ the head run of $t$ reaches a frame
-$P\,e_d\cdots e_1$ in which $P$ has no hnf; by Lemma~\ref{lem:head}(b) and induction on $d$, the
-$e_i$ are literally the teeth $\tau_i(t)$. Convertible terms have a common reduct (CR), hence the
-same infinitary normal form~\citep[Theorem~7]{s3}. So two terms without an hnf whose teeth are
-pairwise convertible have the same infinitary normal form: an infinite left spine with the arguments
-$\tau_1(t)^\infty,\tau_2(t)^\infty,\dots$. The proof of Theorem~\ref{thm:main}, CT for
-$p=\pK$, uses that the reducts of $\pK$'s teeth lie in $\Red(\B)$. We do not know whether the reducts
-of the teeth of every term without an hnf lie inside a set like $\B$.
+where $t^\infty$ is the infinitary normal form of $t$. Convertible terms have the same $t^\infty$ (CR
+and~\citep[Theorem~7]{s3}). For $t$ without an hnf, the left spine of $t^\infty$ is infinite with
+arguments $e_1^\infty,e_2^\infty,\dots$, where the head run reaches a frame $P\,e_d\cdots e_1$ with $P$
+hnf-less~\citep[Proposition~9(b)]{s3}; this frame is stable, so by Lemma~\ref{lem:head}(b) and induction
+on $d$, $e_i=\tau_i(t)$. Hence terms with pairwise convertible teeth have the same $t^\infty$. We do
+not know whether, as for $\pK$, the reducts of the teeth of every term without an hnf lie inside a
+set like $\B$.
 
 \section*{Data availability}
 \sloppy
-The proof is not mechanized; its inputs (CR), (Std) and (F2) are proved for $SKI$-terms, with only
-the axioms \texttt{propext} and \texttt{Quot.sound}, as \texttt{church\_rosser},
-\texttt{wsteps\_split} and \texttt{Full.run\_total} in the Lean~4~\citep{lean4} development
-\texttt{lean-ski}~\citep{leanski}, version 1.20.0.
+The proof is not mechanized. In \texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), with only
+\texttt{propext} and \texttt{Quot.sound}: (CR) and (Std) are \texttt{church\_rosser} and
+\texttt{wsteps\_split} for $SKI$-terms, hence for $S$-terms; (F2) is \texttt{Full.run\_total}, through
+mechanized top-termination.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

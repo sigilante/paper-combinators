@@ -60,6 +60,7 @@
 %% proved, conditional, open, refuted, computed, and <tag> is [P], [C], [K] or [Conj] (see the entry
 %% "status tags").  Conditions name their inputs, e.g. "given (S1), T10 [K], T20 [C]".  A pure
 %% definition has no \status.  Repair codes such as W26.3 name repair lines of a review in the notes.
+%% "refuted [P]" means shown false by a proof; "refuted [C]" means a computed counterexample.
 %%
 %% Style.  A term entry opens with its genus ("A <kind> that ..."); a result entry opens with the
 %% result word ("Lemma.", "Theorem.", "Conjecture.").  Present tense, active voice, one to three
@@ -244,6 +245,7 @@ Symbol & Meaning & Source & Page\\ \hline\endhead
 \sym{$r_1$, $r_2$}{first and second refill}{LOCK1-CT \S15}{g:wl-r1}
 \sym{$\mathrm{Ctx}(\zeta)$, $\mathcal X_Z$}{context closure of a self-dead fold}{LOCK1-CT \S26.2}{g:wl-ctx}
 \sym{$\mathcal D(Z)$}{heaps built around $Z$ (not $D(v)$, not the 373-model)}{LOCK1-CT \S26.2}{g:wl-cd}
+\sym{$\mathrm{Ctx}_\cup$, $\mathcal X$, $\mathcal D^{SD}$}{one-base context class and heaps}{LOCK1-CT \S27.1}{g:wl-cdplus}
 \end{longtable}
 \endgroup
 
@@ -1499,8 +1501,9 @@ $Z\,t$ has no hnf for $t\in\Hc\cup\Ic$ (S12, Lemma~16). \see{g:counter-grammar}
 
 These labels are working names: a statement may be renamed, repaired or withdrawn, and only the papers
 are citable for the mathematics. Where a review repaired a statement, the repaired version is given.
-Statuses are those of LOCK1-CT through \S26 (Wizard: sound, 2026-11-26; repairs W26.1--W26.9
-pending).
+Statuses are those of LOCK1-CT through \S27 (Wizard on \S26: sound; on \S27: sound with gaps, no false
+[P]; both 2026-11-26). Repairs W26.1--W26.8 are applied in the note, and W26.9 and W27.1--W27.10 are
+pending; the entries use the pending repairs' wording.
 
 \begin{entry}{g:wl-ad}{AD (applicatively dead)}{2026-11-26}
 \src{LOCK1-CT \S25.3}
@@ -1521,13 +1524,25 @@ infinite leafless subtree (Theorem~1 of the note). Overloaded: in LOCK1-CTB $\ap
 
 \begin{entry}{g:wl-cd}{Lemma CD (context-death), $\mathcal D(Z)$}{2026-11-26}
 \src{LOCK1-CT \S26.2}
-\status{proved [P]; given (S1), T24 [C] (Wizard: sound; W26.3 pending)}
+\status{proved [P]; given (S1), T24 [C] (Wizard: sound; gloss as repaired, W26.3)}
 Lemma. (1) For $Z$ of self-dead fold, $Z\,t$ has no hnf for every $t\in\mathcal X_Z$, in particular for
 every closed $t$ that contains $Z$. (2) $\mathcal D(Z)$ is the least set with $Z\in\mathcal D(Z)$ and
 $S\,p\,q\in\mathcal D(Z)$ whenever $p\in\mathcal D(Z)$, $q\in\mathcal D(Z)$, or $p=S\,p'$ with
 $p'\in\mathcal D(Z)$; every $H\in\mathcal D(Z)$ contains $Z$, and $H\,t$ has no normal form for
 $t\in\mathcal X_Z$ (for example $S\,c\,Z$, $S\,Z\,v$, $S\,(S\,Z)\,v$). $\mathcal D(Z)$ is neither
-$D(v)=S\,v\,(S\,v)$ nor the 373-element model $D$.
+$D(v)=S\,v\,(S\,v)$ nor the 373-element model $D$; Lemma CD$^{+}$ generalizes it (\see{g:wl-cdplus}).
+\end{entry}
+
+\begin{entry}{g:wl-cdplus}{Lemma CD$^{+}$, $\mathcal D^{SD}$, $\mathrm{Ctx}_\cup$, $\mathcal X$}{2026-11-26}
+\src{LOCK1-CT \S27.1}
+\status{proved [P]; given (S1), T25 [C] (part (1) constructive; as repaired, W27.3)}
+Lemma. With $\mathrm{Ctx}_\cup$ the union of the sets $\mathrm{Ctx}(\zeta)$ over $\zeta\in\Self$ (23
+folds, not $0$) and $\mathcal X$ the closed terms with fold in $\mathrm{Ctx}_\cup$: $\mathcal X$
+contains every closed term with a subterm of fold in $\Self\cup\{36\}$ and is closed under application
+on either side, and $s\,t$ has no hnf for $\fold s\in\Self\cup\{36\}$, $t\in\mathcal X$.
+$\mathcal D^{SD}$, the least set that contains every closed term of fold in $\Self\cup\{36\}$ and
+$S\,p\,q$ whenever $p$ or $q$ is in it or $p=S\,p'$ with $p'$ in it, has $H\,t$ without normal form for
+$H\in\mathcal D^{SD}$, $t\in\mathcal X$; it contains every $\mathcal D(Z)$, so Lemma CD is a special case.
 \end{entry}
 
 \begin{entry}{g:wl-cdh}{Lemma CDH}{2026-11-26}
@@ -1538,9 +1553,16 @@ $B^0\in\Kc$, and either pops ($A^0$ two-item, $A^0\,W$ without hnf) or has $A^0=
 T-refill to $(W,\nf(B^0\,W))$. It generalizes Lemma ADH (\see{g:wl-ad}).
 \end{entry}
 
+\begin{entry}{g:wl-cdh-plus}{Cor.~CDH$^{+}$}{2026-11-26}
+\src{LOCK1-CT \S27.1}
+\status{proved [P]; given (S1), T25 [C], with label G4}
+Corollary. Lemma CDH and Cor.~CDS hold over every heap $W\in\mathcal D^{SD}$, with
+$Y=\mathrm{Ctx}_\cup$ (\see{g:wl-cdplus}).
+\end{entry}
+
 \begin{entry}{g:wl-cds}{Cor. CDS}{2026-11-26}
 \src{LOCK1-CT \S26.2}
-\status{proved [P]; given (S1) (Wizard: sound; W26.2 pending: read the hypotheses as (a) and (c))}
+\status{proved [P]; given (S1) (Wizard: sound; hypotheses (a) and (c), as repaired, W26.2)}
 Corollary. In a normalized run all of whose teeth normalize, if the heap $W_n$ is context-dead, then
 $A_n\in\mathcal S$; with depth $r$ and bottom $S\,T\,B$, moves $n+1,\dots,n+r$ are pops and move
 $n+r+1$ is the T-refill to $(W_n,\nf(B\,W_n))$. The converse is claimed only for a normal self-dead
@@ -1589,9 +1611,10 @@ $\Gc^{x}$, and [K] against $p_K$ (lean-ski v1.21.0, \texttt{S11.ct\_pK})}
 \appears{S11 as Conj.~19; S12 as Conj.~22}
 Conjecture. If closed $S$-terms $p,q$ without an hnf have $\tau_n(p)\conv\tau_n(q)$ for every $n\ge1$,
 then $p\conv q$; Lock~1 is CT together with NTD (\see{g:wl-lock1-ct-ntd}). For normalizing teeth, CT
-follows from the chain TZX$'$ $\wedge$ $\mathrm{RCL}_2\Rightarrow$ R2 $\Rightarrow\mathrm{ENTRY}_x
-\Rightarrow$ CT: the first step is proved [P], given (S1), T1--T4, T10, T12, T16, T17 [K], T20, T21,
-T24 [C], and the rest [P], given also T5, T15 [K] (\see{g:wl-r2}, \see{g:wl-table-facts}).
+follows from the chain TZX$_e$ $\wedge$ $\mathrm{RCL}_2^{r}\Rightarrow\mathrm{R2}_e\Rightarrow
+\mathrm{ENTRY}_x\Rightarrow$ CT (Theorem R2C$''$): the first step is proved [P], given (S1), T1--T4,
+T10, T12, T16, T17 [K], T20, T21, T24 [C], and the rest [P], given also T5, T15 [K]
+(\see{g:wl-r2c2}, \see{g:wl-table-facts}).
 \end{entry}
 
 \begin{entry}{g:wl-ct-pk}{CT($p_K$), Cor.~CT$_K$}{2026-11-26}
@@ -1648,7 +1671,7 @@ given (S1), T1--T5, T10, T12, T15--T17 [K]}
 \appears{S12, \S8 (the weaker form after Conj.~23)}
 Conjectures. ENTRY: every normalized run all of whose teeth normalize has a state in $\Gc$; 150
 complete runs in the pools of \S19 never reach $\Gc$ (counters over a right-comb base) [C].
-$\mathrm{ENTRY}_x$ is the same with $\Gc^{x}$, follows from R2, and by Prop.~ENT (as repaired, W20.6)
+$\mathrm{ENTRY}_x$ is the same with $\Gc^{x}$, follows from R2 and from $\mathrm{R2}_e$, and by Prop.~ENT (as repaired, W20.6)
 holds iff from some $n_0$ on every heap is in $\Hc^{x}$ ($\mathrm{HEAP}_x$) and a later move is a
 T-round over a two-item member heap or an XB move over $S\,V$, $V\in\Hc^{x}_2$ (TREF).
 \end{entry}
@@ -1728,6 +1751,14 @@ than $X$, $U$ has fold 31 or 34 (via T20 [C]). \see{g:counter-grammar}
 The heap of a move is its $w_n$, the last argument carried by the state; S12 uses the word for the
 second term of a normal pair (\see{g:normal-pair}). An S-run is a run whose heap is the literal $S$ at
 every move from the first B-move on, so its states are $a'_n\,S$ and its teeth $b'_n\,S$.
+\end{entry}
+
+\begin{entry}{g:wl-hcx}{Lemma HCX (the heaps stay in $\mathcal X$)}{2026-11-26}
+\src{LOCK1-CT \S27.1}
+\status{proved [P]; given (S1), constructive}
+Lemma. If $(A,W)$ is a normal pair with $W\in\mathcal X$, then every round heap of every move of its
+normalized run, every later state heap and every tooth that exists lies in $\mathcal X$. It applies to
+$(Z,S\,Z)$ for self-dead $Z$, since $S\,Z$ contains $Z$ (\see{g:wl-cdplus}).
 \end{entry}
 
 \begin{entry}{g:wl-ii}{(ii), (ii$'$), the Left part}{2026-11-26}
@@ -1821,6 +1852,24 @@ Lemma. If $t$ contains a reduct of $s_j$ for a solution $s$, then every reduct o
 reduct of some $s_{j'}$ with $j'\ge j$.
 \end{entry}
 
+\begin{entry}{g:wl-q2}{Lemma Q2 (literal moves over $S\,w$)}{2026-11-26}
+\src{LOCK1-CT \S27.1}
+\status{proved [P] for parts (1)--(2); given (S1), T25 [C], with label G4; part (3) is information
+(W27.5)}
+Lemma. Over a heap $S\,w$ with $w\in\mathcal D^{SD}$, a move whose first three rounds are literal dies,
+so a Q move (all rounds before $k$ literal) whose tooth normalizes has $k\le2$, and with $k=2$ it lands
+over a heap of $\mathcal D^{SD}$. With $k=1$ the new heap can be $S\,(S\,w)$ or $S\,c\,(S\,w)$, which in
+general lie outside $\mathcal D^{SD}$; the note's case list there is incomplete (W27.5).
+\end{entry}
+
+\begin{entry}{g:wl-qd}{Lemma QD (descent between refills)}{2026-11-26}
+\src{LOCK1-CT \S27.1}
+\status{proved [P]; constructive; its content is Cor.~RB1(1) (W27.4)}
+Lemma. A pop or a Q move replaces the stack by a proper subterm at least 2 smaller, so from a state
+$(A_n,W_n)$ at most $(\sz{A_n}-3)/2$ pops and Q moves come in a row, and the next move is a refill or
+dies.
+\end{entry}
+
 \begin{entry}{g:wl-rn}{Lemma RN, rightmost branch}{2026-11-26}
 \src{LOCK1-CTB \S0, \S4, \S12.2}
 \status{proved [P], as repaired (WB1.1, WB1.3)}
@@ -1859,13 +1908,13 @@ teeth and rests agree. Its finite converse is S11, Lemma~6, and CT is the conver
 \begin{entry}{g:wl-lock1}{Lock 1}{2026-11-26}
 \src{A1-lock1-S3; LOCK1-structure (header); OPEN-QUESTIONS (A1)}
 \status{open [Conj]; known when one side normalizes [K]; Lock~1 $\Rightarrow$ the word problem is
-decidable [P]}
+decidable proved [P]}
 \appears{S6 as Conj.~11 (unnamed); S11, \S6 as ``the conjecture of S6''}
 \lean{\texttt{WordProblem.Lock1}, \texttt{WordProblem.lock1\_normalizing}}
 Conjecture. For closed $S$-terms, $t^\infty=u^\infty$ implies $t\conv u$; since S3 makes every finite
 prefix of $t^\infty$ computable, it alone would make conversion decidable. It holds iff CT and NTD
-hold (\see{g:wl-lock1-ct-ntd}); CT for normalizing teeth is reduced via $\mathrm{ENTRY}_x$ and R2 to
-Conj.~TZX$'$ and Conj.~$\mathrm{RCL}_2$, CT for non-normalizing teeth is settled only for $p_K$, and
+hold (\see{g:wl-lock1-ct-ntd}); CT for normalizing teeth is reduced via $\mathrm{ENTRY}_x$ and $\mathrm{R2}_e$ to
+Conj.~TZX$_e$ and Conj.~$\mathrm{RCL}_2^{r}$, CT for non-normalizing teeth is settled only for $p_K$, and
 NTD has evidence only. \see{g:conj-inf-conv}
 \end{entry}
 
@@ -1893,6 +1942,17 @@ A pair $(A,W)$ of normal terms with $A\,W$ without hnf; $A$ is the stack and $W$
 normalize, the normalized run $(A_n,W_n,N_n)$ records stack, heap and tooth normal form after move $n$,
 with rounds $S\,A^{i+1}\,B^{i+1}=\nf(A^i\,W^i)$ and $W^{i+1}=\nf(B^i\,W^i)$ (Lemma~N0).
 \see{g:normal-pair}
+\end{entry}
+
+\begin{entry}{g:wl-ntz}{Prop.~NTZ, Cor.~NTZ1}{2026-11-26}
+\src{LOCK1-CT \S27.3}
+\status{proved [P]; given (S1), T8, T12 [K] (W27.1; the note's label also lists T10, T16, T17 [K],
+T20, T22 [C]); Wizard: sound with gaps, run recomputed independently}
+Proposition. For $Y=S\,(S\,X)\,(S\,X)$ and $Z=S\,(S\,Y)\,(S\,S)$ (two-item, fold 31, $Z\notin\Hc^{x}\cup
+\mathcal S$), every tooth of $(Z,S\,Z)$ normalizes: two Q moves lead to $(X,S\,X\,c)\in\Gc^{x}$ with
+$c=S\,S\,(S\,Z)\in\Kc$, and the T-start $(X,Z)$ lands at $(Z,S\,Z)$. Corollary NTZ1: TZX$'$, TZ and
+$\mathrm{R1}^{+}$ are false, so the routes to R2 through Theorems R2C and R2C$'$ are void (both remain
+true implications); R2 holds on this run.
 \end{entry}
 
 \begin{entry}{g:wl-ntd}{NTD (no turning descent)}{2026-11-26}
@@ -1930,12 +1990,12 @@ $r_1$, and $r_2$ (also $m_2$) is the second refill.
 \end{entry}
 
 \begin{entry}{g:wl-r1-plus}{$\mathrm{R1}^{+}$}{2026-11-26}
-\src{LOCK1-CT \S23.3}
-\status{open [Conj]}
-Conjecture. In a normalized run all of whose teeth normalize, the state right after every refill that
-is not of class SSc is in $\Gc^{x}$. Theorem R2C (proved [P], given (S1), T1--T4, T10, T16, T17 [K]):
-TZ $\wedge$ VB $\wedge$ RCL $\Rightarrow\mathrm{R1}^{+}\Rightarrow$ R2, and $\mathrm{R1}^{+}\Rightarrow$
-TZ $\wedge$ VB.
+\src{LOCK1-CT \S23.3, \S27.3 (Cor.~NTZ1)}
+\status{refuted [P] (Cor.~NTZ1); given (S1), T8, T12 [K] (W27.1)}
+Conjecture, now false. In a normalized run all of whose teeth normalize, the state right after every
+refill that is not of class SSc is in $\Gc^{x}$; the first refill of the T-start $(X,Z)$ of Prop.~NTZ
+lands outside $\Gc^{x}$. Theorem R2C (TZ $\wedge$ VB $\wedge$ RCL $\Rightarrow\mathrm{R1}^{+}\Rightarrow$
+R2) stays a true implication with a false hypothesis (\see{g:wl-ntz}).
 \end{entry}
 
 \begin{entry}{g:wl-r1-s}{$\mathrm{R1}_s$}{2026-11-26}
@@ -1947,16 +2007,32 @@ right after its first refill is in $\Gc^{x}$. A prefix puts one SSc refill in fr
 \end{entry}
 
 \begin{entry}{g:wl-r2}{R2}{2026-11-26}
-\src{LOCK1-CT \S22.3, \S26.7}
-\status{open [Conj]; not refuted [C]; TZX$'$ $\wedge$ $\mathrm{RCL}_2\Rightarrow$ R2 proved [P], given
-(S1), T1--T4, T10, T12, T16, T17 [K], T20, T21, T24 [C] (Theorem R2C$'$ with Cor.~TZK1 and Prop.~VBP;
-W26.8)}
+\src{LOCK1-CT \S22.3, \S26.7, \S27.3--27.6}
+\status{open [Conj]; not refuted, and it holds on the run of Prop.~NTZ [P]; no known sufficient set}
 \appears{S12 as Conj.~23}
 Conjecture. In a normalized run all of whose teeth normalize, with $m_2$ the index of the second refill,
-$(A_{m_2},W_{m_2})\in\Gc^{x}$; R2 implies $\mathrm{ENTRY}_x$ (Prop.~R2E). Theorem R2C$'$ gives TZ $\wedge$
-VB $\wedge$ $\mathrm{RCL}_2\Rightarrow$ R2; since \S26 VB is proved and TZ reduces to TZX$'$, so the
-sufficient remaining set is \{TZX$'$, $\mathrm{RCL}_2$\} (not shown necessary). The evidence is about
-16.5 thousand complete runs, 248 with two refills before entry (as repaired, W23.7). \see{g:conj-entry}
+$(A_{m_2},W_{m_2})\in\Gc^{x}$; R2 implies $\mathrm{ENTRY}_x$ (Prop.~R2E). The routes through Theorems R2C
+and R2C$'$ are void, since TZ is false (Cor.~NTZ1); given TZX$_e$, R2 holds for runs whose first refill
+is T-class or XB (Cor.~R2T), and the weaker $\mathrm{R2}_e$ takes its place in the chain to CT
+(\see{g:wl-r2e}, \see{g:conj-entry}).
+\end{entry}
+
+\begin{entry}{g:wl-r2c2}{Theorem R2C$''$, Cor.~R2T}{2026-11-26}
+\src{LOCK1-CT \S27.4}
+\status{proved [P]; given (S1), T1--T4, T10, T12, T16, T17 [K], T20, T21, T24 [C]; the step to CT also
+needs T5, T15 [K]; Wizard: verified}
+Theorem. TZX$_e$ $\wedge$ $\mathrm{RCL}_2^{r}\Rightarrow\mathrm{R2}_e$, and $\mathrm{R2}_e\Rightarrow
+\mathrm{ENTRY}_x\Rightarrow$ CT for normalizing teeth. Corollary R2T: given TZX$_e$, R2 holds for every
+such run whose first refill is T-class or XB, and then $\mathrm{RCL}_2$ holds for it when entry comes
+before the second refill.
+\end{entry}
+
+\begin{entry}{g:wl-r2e}{$\mathrm{R2}_e$}{2026-11-26}
+\src{LOCK1-CT \S27.4}
+\status{open [Conj]; no candidate in the 253,214 normal pairs of \S27.5 [C]}
+Conjecture. In a normalized run all of whose teeth normalize, some state with index at most $m_3$, the
+index right after the third refill, is in $\Gc^{x}$. R2 implies it and it implies $\mathrm{ENTRY}_x$;
+it is not shown to imply R2 (W27.6). \see{g:wl-r2c2}
 \end{entry}
 
 \begin{entry}{g:wl-rcl}{RCL, $\mathrm{RCL}_2$}{2026-11-26}
@@ -1965,7 +2041,16 @@ sufficient remaining set is \{TZX$'$, $\mathrm{RCL}_2$\} (not shown necessary). 
 Conjectures. RCL: in a normalized run all of whose teeth normalize, every refill is of class T, SSc or
 XB. $\mathrm{RCL}_2$: in such a run, a case-(b) second refill is the move of Lemma~XB ($X$ over $S\,V$
 with $V$ two-item and $V\,D(S\,V)$ without hnf); the census class XB is broader than Lemma~XB (W23.9).
-\see{g:wl-refill}
+\see{g:wl-refill}, \see{g:wl-rcl2r}
+\end{entry}
+
+\begin{entry}{g:wl-rcl2r}{$\mathrm{RCL}_2^{r}$}{2026-11-26}
+\src{LOCK1-CT \S27.4, \S27.5}
+\status{open [Conj]; confirmed only vacuously [C], with 136 undecided budget stops in its scope (W27.9)}
+Conjecture. In a normalized run all of whose teeth normalize and whose first refill is neither T-class
+nor the move of Lemma~XB, a case-(b) second refill is the move of Lemma~XB. In the census of 253,214
+normal pairs no case-(b) second refill follows such a first refill, and 136 runs with an SSc first
+refill stop at the budget undecided. \see{g:wl-r2c2}
 \end{entry}
 
 \begin{entry}{g:wl-rec}{REC}{2026-11-26}
@@ -2053,7 +2138,8 @@ pair with one side $p_K$, and by CT($p_K$) there is none.
 Tags of the notes. [P]: proved in the note, unmechanized, with the review state recorded per section
 in the note's status log; ``[P], given $X$'' is conditional on the inputs $X$, typically (S1) and table
 facts. [C]: computed, with command and log, and able only to refute; [K]: kernel-checked in Lean on
-lean-ski master; [Conj]: conjectured; [Sketch]: an argument not checked step by step.
+lean-ski master; [Conj]: conjectured; [Sketch]: an argument not checked step by step. ``Refuted [P]''
+means shown false by a proof, and ``refuted [C]'' by a computed counterexample.
 \end{entry}
 
 \begin{entry}{g:wl-sync}{Sync$\bot$, exposed B-move}{2026-11-26}
@@ -2081,10 +2167,10 @@ T1a, T1b). Hence (H1) is false; S11 has it as Lemma~10.
 \sense{LOCK1-CT \S10} Table fact T1 [K] (\see{g:wl-table-facts}). \lean{\texttt{Lock1Tables.T1}}
 \end{entry}
 
-\begin{entry}{g:wl-table-facts}{table facts T1--T24}{2026-11-26}
+\begin{entry}{g:wl-table-facts}{table facts T1--T25}{2026-11-26}
 \src{LOCK1-CT \S10.0 (T1--T5), \S11.4 (T7), \S12.0 (T8--T11), \S13.2 (T12), \S14.1 (T13), \S16.2
 (information line, unnamed), \S17.2 (T15), \S19.2 (T16), \S20.1 (T17), \S21.4 (T18), \S22.4 (T19),
-\S23.5 (T20), \S24.1 (T21), \S25.3 (T22), \S26.1 (T23), \S26.2 (T24)}
+\S23.5 (T20), \S24.1 (T21), \S25.3 (T22), \S26.1 (T23), \S26.2 (T24), \S27.1 (T25)}
 \lean{\texttt{Lock1Tables.T1}, \dots, \texttt{Lock1Tables.T17}}
 \appears{S12 as Lemma~14 (T16, T17)}
 Finite checks on S1's 38-block table, which with (S1) become statements about terms. The [K] items are
@@ -2126,6 +2212,8 @@ self-dead iff $\fold c\in CB$ (then in $IB$), is 25 (self-dead, not AD) iff $\fo
 and is AD otherwise; $\beta(\beta(0,p),q)\in\Self$ for $p\in\Self$.
 \item T24 [C, \texttt{s26tab.py}; to port, W26.9]: for $\zeta\in\Self$, $\beta(\zeta,y)=36$ for every
 $y\in\mathrm{Ctx}(\zeta)$ (\see{g:wl-ctx}).
+\item T25 [C, \texttt{s27tab.py}; to port]: $\beta(f,y)=36$ for every $f\in\Self\cup\{36\}$ and every
+$y\in\mathrm{Ctx}_\cup$, with T24 as a special case (\see{g:wl-cdplus}).
 \end{itemize}
 \end{entry}
 
@@ -2195,32 +2283,42 @@ $E_n$ of each depth with $p\conv E_n[p_n]$ and $q\conv E_n[q_n]$ (Theorem~3$'$).
 \end{entry}
 
 \begin{entry}{g:wl-tz}{TZ}{2026-11-26}
-\src{LOCK1-CT \S23.3, \S24.1, \S24.2, \S25.1, \S26.3 (Cor.~TZK1), \S26.4}
-\status{open only for $b=S$ over a two-item self-dead $Z\notin\Hc^{x}\cup\mathcal S$ (Conj.~TZX$'$)
-[Conj]; proved for every heap and every $b\ne S$, and for $b=S$ over $Z\in\mathcal S$ [P], given (S1),
-T10, T12, T16, T17 [K], T20, T21, T24 [C] (Cor.~TZK1, Prop.~TZX$_{\mathcal S}$; Wizard: sound)}
-Conjecture (T-round landings). If $(S\,T\,b,Z)$ is a normal pair whose first move is a refill with
-$k=1$ and all of whose teeth normalize, then $(Z,\nf(b\,Z))\in\Gc^{x}$. It holds for $Z\in\Hc^{x}_2$
-(Cor.~TZM1) and is vacuous for heaps with at most one item (W24.5). By Cor.~TZK1 it holds for every $Z$
-when $b\ne S$, and for $b=S$ it is TZN for the landing $(Z,S\,Z)$ (\see{g:wl-tzx}).
+\src{LOCK1-CT \S23.3, \S24.1, \S24.2, \S25.1, \S26.3 (Cor.~TZK1), \S26.4, \S27.3 (Cor.~NTZ1)}
+\status{refuted [P] (Cor.~NTZ1); given (S1), T8, T12 [K] (W27.1); true for every $b\ne S$ and for
+$b=S$ over $Z\in\mathcal S$ (Cor.~TZK1, Prop.~TZX$_{\mathcal S}$)}
+Conjecture, now false (T-round landings). If $(S\,T\,b,Z)$ is a normal pair whose first move is a
+refill with $k=1$ and all of whose teeth normalize, then $(Z,\nf(b\,Z))\in\Gc^{x}$; the T-start $(X,Z)$
+of Prop.~NTZ has all teeth normalizing and lands outside $\Gc^{x}$. Its timed form $\mathrm{TZ}_e$
+replaces it (\see{g:wl-tze}, \see{g:wl-ntz}).
+\end{entry}
+
+\begin{entry}{g:wl-tze}{$\mathrm{TZ}_e$, $\mathrm{TZX}_e$, Prop.~TZE}{2026-11-26}
+\src{LOCK1-CT \S27.4}
+\status{open [Conj]; no candidate against $\mathrm{TZX}_e$ among 1,500,410 distinct open-class starts
+[C]; Prop.~TZE proved [P], given (S1), T10, T12, T16, T17 [K], T20, T21, T24 [C]}
+Conjecture $\mathrm{TZ}_e$: if $(S\,T\,b,Z)$ is a normal pair whose first move is a refill with $k=1$
+and all of its teeth normalize, the run of the landing $(Z,\nf(b\,Z))$ has a state in $\Gc^{x}$ by the
+state right after its own first refill. $\mathrm{TZX}_e$ is the case $b=S$, $Z$ two-item, self-dead,
+$Z\notin\Hc^{x}\cup\mathcal S$, and Prop.~TZE says $\mathrm{TZ}_e\Leftrightarrow\mathrm{TZX}_e$; Prop.~NTZ
+does not contradict it (entry at index 2, first refill at index 3).
 \end{entry}
 
 \begin{entry}{g:wl-tzk}{Prop.~TZK, Cor.~TZK1}{2026-11-26}
 \src{LOCK1-CT \S26.3}
 \status{TZK proved [P], given (S1), T12 [K], T24 [C]; TZK1 proved [P], given (S1), T10, T12, T16,
-T17 [K], T20, T21, T24 [C] (Wizard: sound; W26.7 pending: state the bounded death move with its
-fold-36 witness)}
+T17 [K], T20, T21, T24 [C] (Wizard: sound; bounded death move with its fold-36 witness as repaired,
+W26.7)}
 Proposition TZK. For two-item self-dead $Z\notin\Hc^{x}$ and $b\in\Kc\setminus\{S\}$, some tooth of
 $(Z,\nf(b\,Z))$ has no normal form, after at most two T-refills (two only if $b=T$); this closes (N1)
 for $b\ne S$ and the (N2) recursion. Corollary TZK1: TZ holds for every $b\ne S$, and for $b=S$ it is
-TZN over the landing $(Z,S\,Z)$.
+TZN over the landing $(Z,S\,Z)$, which Prop.~NTZ refutes (\see{g:wl-ntz}).
 \end{entry}
 
 \begin{entry}{g:wl-tzn}{TZN}{2026-11-26}
 \src{LOCK1-CT \S25.1 (Cor.~TS1), \S25.4, \S25.5, \S26.3 (Prop.~TZK), \S26.4}
 \status{proved for $b\ne S$ [P], given (S1), T12 [K], T24 [C] (Prop.~TZK); for $b=S$ proved over
-$Z\in\mathcal S$ (Prop.~TZX$_{\mathcal S}$, same inputs) and open over $Z\notin\mathcal S$
-(Conj.~TZX$'$) [Conj]}
+$Z\in\mathcal S$ (Prop.~TZX$_{\mathcal S}$, same inputs) and refuted [P] over $Z\notin\mathcal S$
+(Prop.~NTZ; given (S1), T8, T12 [K], W27.1)}
 $\mathrm{TZN}(Z)$, for two-item $Z\notin\Hc^{x}$: for every $b\in\Kc$ some tooth of $(Z,\nf(b\,Z))$
 has no normal form. For $b\in\Kc\setminus\{S\}$ the landing run makes only pops and at most two
 T-refills before a tooth dies, and Prop.~TZA holds vacuously (W26.5). Kill test [C] (\S26.6): 5,806,281
@@ -2230,12 +2328,12 @@ complete run.
 
 \begin{entry}{g:wl-tzx}{Prop.~TZX$_{\mathcal S}$, Conj.~TZX$'$}{2026-11-26}
 \src{LOCK1-CT \S26.4}
-\status{TZX$_{\mathcal S}$ proved [P], given (S1), T12 [K], T24 [C] (Wizard: sound); TZX$'$ open
-[Conj], with 69,061 distinct starts certified dead [C]}
+\status{TZX$_{\mathcal S}$ proved [P], given (S1), T12 [K], T24 [C] (Wizard: sound); TZX$'$ refuted
+[P] (Prop.~NTZ), given (S1), T8, T12 [K] (W27.1)}
 Proposition TZX$_{\mathcal S}$. For self-dead $Z\in\mathcal S\setminus\Hc^{x}$ of depth $r$, some tooth of
-$(Z,S\,Z)$ has no normal form, within $2r+2$ teeth. Conjecture TZX$'$: the same for two-item self-dead
-$Z\notin\Hc^{x}\cup\mathcal S$, an eventual statement that no finite run refutes; with $\mathrm{RCL}_2$
-it is the sufficient remaining set for R2.
+$(Z,S\,Z)$ has no normal form, within $2r+2$ teeth. Conjecture TZX$'$, now false: the same for two-item
+self-dead $Z\notin\Hc^{x}\cup\mathcal S$; of 1,500,410 such starts all die certified except the start
+$Z$ of Prop.~NTZ, whose teeth all normalize (\see{g:wl-ntz}, \see{g:wl-tze}).
 \end{entry}
 
 \begin{entry}{g:wl-frakB}{the typing $\Bk$, passive slots, Lemmas CL and B}{2026-11-26}
@@ -2256,7 +2354,7 @@ and subterms. Lemma~B: $\Bk$ is such a set.
 Proposition VBP (formerly Conj.~VB). If $V$ is normal with two items, $V\,D(S\,V)$ has no hnf and all
 teeth of $(X,S\,V)$ normalize, then $V\in\Hc^{x}_2$: the heap $D(S\,V)\in\mathcal D(V)$ is
 context-dead, so Cor.~CDS puts $V\in\mathcal S$ with bottom $X$ or $U$. The reverse statement is not
-``the converse'' (W26.1): $V=S\,(S\,X)\,U\in\Hc^{x}_2$ dies at move~1; the kill test of 199,472
+``the converse'' (W26.1): $V=S\,(S\,X)\,U\in\Hc^{x}_2$ dies at move~2 of $(X,S\,V)$; the kill test of 199,472
 distinct starts found all dead in the predicted shape [C].
 \end{entry}
 

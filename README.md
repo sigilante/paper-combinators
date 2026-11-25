@@ -56,4 +56,4 @@ Other papers by N. E. Davis on combinatory logic, outside this series; their mec
 
 * N. E. Davis, *A Self-Interpreter for $SKI$: Authoring Semantics for New Symbols*. In review at the *Journal of Functional Programming*. Preprint: [doi:10.5281/zenodo.22867957](https://doi.org/10.5281/zenodo.22867957). Mechanized above in *The $SKI$ Self-Interpreter, Mechanized*.
 * N. E. Davis, *SKIjack: A Low-Level Native Language for the $SKI$ Calculus*. In review at *The Art, Science, and Engineering of Programming*. Compiler: [`sigilante/SKIjack`](https://github.com/sigilante/SKIjack).
-* N. E. Davis, *The Staging Line, Calibrated: Uniform Continuity of Oracle Functionals Is the Decidable Fan Theorem*. In preparation.
+* N. E. Davis, *The Staging Line: Behavioral Lifts and Compactness in Weak Combinatory Logic*. In review at *ACM Transactions on Computational Logic*.

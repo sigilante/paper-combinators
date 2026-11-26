@@ -53,6 +53,9 @@ This work was carried out in a centaur fashion, with high-level human direction 
 
 ## Ancillary papers
 
+* [A Glossary for the Combinator *S* Series](glossary/main.pdf)
+  **A living glossary of the series' terms, symbols, named results and conjectures, each with the paper and definition or section that introduces it and its Lean name; a second part records the working labels of the Lock 1 notes with their current status. Entries are dated and added as the series grows.**
+
 * [The *SKI* Self-Interpreter, Mechanized](self-interpreter-mechanized/main.pdf)
   **It machine-checks a published self-interpreter for *SKI* against the terms as printed, so the 618-atom interpreter and 43-atom unquoter are certified to do what their paper claims, and it adds a converse of fuel adequacy, which shows that the interpreter's answer does not depend on its budget.**
 

@@ -1,0 +1,540 @@
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\app}{\mathbin{+\!\!+}}
+\newcommand{\args}{\mathrm{args}}
+\newcommand{\tw}[1]{\mathsf{tw}_{#1}}
+\newcommand{\run}{\mathrm{run}}
+\newcommand{\seat}{\mathrm{seat}}
+\newcommand{\Fires}{\mathrm{Fires}}
+\newcommand{\Silent}{\mathrm{Silent}}
+\newcommand{\Eternal}{\mathrm{Eternal}}
+\newcommand{\Quiet}{\mathrm{Quiet}}
+\newcommand{\QuietD}{\mathrm{Quiet}^{\exists}}
+\newcommand{\BOT}{\mathrm{BOT}}
+\newcommand{\KCAP}{\mathrm{KCAP}}
+\newcommand{\RD}{\mathrm{RD}}
+\newcommand{\FOD}{\mathrm{FOD}}
+\newcommand{\capf}{\mathrm{cap}}
+\newcommand{\prog}{\mathrm{prog}}
+\newcommand{\lam}{\Lambda}
+\newcommand{\rd}{\mathrm{reader}}
+\newcommand{\cps}{\mathrm{capsule}}
+\newcommand{\pads}{\mathrm{pads}}
+\newcommand{\lean}[1]{\texttt{#1}}
+\newcommand{\Seq}{\mathsf{Seq}}
+\newcommand{\Iter}{\mathsf{Iter}}
+\newcommand{\Loop}{\mathsf{Loop}}
+\newcommand{\Cond}{\mathsf{Cond}}
+\newcommand{\Reindex}{\mathsf{Reindex}}
+\newcommand{\Par}{\mathsf{Par}}
+
+\title[Clock Closure]{Clock Closure on Head Runs of the Combinator $\bm{S}$, and a Uniform Countdown}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+A head step on a closed term built from the combinator $S$ pops the first three arguments
+$x,y,z$ of the head and pushes the arguments of $x$, then $z$ and $y\,z$. The step \emph{fires} if
+$x$ is the normal term $F=S\,\tw8\,\tw8$, where $\tw8$ is the right comb of eight $S$'s. A
+\emph{clock} is a family of argument lists with a schedule: for each member, whether its head run
+fires and after how many steps. A member that does not fire must also never halt. We prove that
+clocks are closed under four operations on head runs (a quiet prefix followed by a clock, iteration
+with an exit at the bottom, sums and reindexing) and that an endless loop of quiet segments never
+fires and never halts. With these we prove that a countdown term with a program of $m$ layers,
+whose tags are arbitrary $S$-terms, and a register holding $g$ first fires at head step
+$22+(5m+13)g$, for every program and every $g$. Two capsules, of four and six leaves, first fire at
+steps $5g+1$ and $7g+1$. Every definition, lemma, theorem and corollary is mechanized in Lean~4,
+using only the axioms of propositional extensionality and quotient soundness. Every clock proved
+here fires for all parameters; the loop statement is proved but unused.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, head reduction, clocks, Lean}
+\maketitle
+
+\section{Introduction}
+
+A closed term built from $S$ \emph{fires} when its head step takes the marker $F$ as first
+argument. We give the exact head step at which a countdown term first fires, as a function of the
+number $m$ of layers in its program and the number $g$ in its register
+(Theorem~\ref{thm:main}). The proof rests on a small algebra of clocks on head runs
+(Theorem~\ref{thm:closure}); two capsule countdowns serve as the first instances.
+
+$\Ter$ is the set of closed terms built from $S$ by application. Every $t\in\Ter$ is
+$S\,u_1\cdots u_m$ for a unique $m\ge0$, and $\args(t)=[u_1,\dots,u_m]$ is the list of its
+items~\citep{s1,s11}. If $m\ge3$, the \emph{head step} contracts the leftmost redex,
+$t\to_h u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$, and then
+\begin{equation}\label{eq:head}
+\args(u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m)=\args(u_1)\app[u_3,\;u_2\,u_3,\;u_4,\dots,u_m]
+\end{equation}
+\citep[equation~(1)]{s1}. So the head run of $t$ is a run on the list $\args(t)$ alone. Write $\tw n$ for the
+right comb with $n$ leaves ($\tw0=\tw1=S$, $\tw{n+2}=S\,\tw{n+1}$), and let $F=S\,\tw8\,\tw8$, the
+\emph{marker}, a normal form with seventeen leaves. A head step \emph{fires} if its $u_1$ is $F$,
+that is, if the term is $S\,F\,y\,z\cdots$. We ask at which head step a term first fires, as a
+function of the numbers $m$ and $g$ that its construction encodes.
+
+Write $SS$ for $S\,S$, and let
+\begin{gather*}
+A=SS\,S,\qquad \FOD=SS\,SS,\qquad g_1=S\,(S\,S\,\FOD),\qquad \RD=S\,g_1,\\
+\KCAP=S\,SS\,(S\,(S\,SS)),\qquad \BOT=S\,F\,F.
+\end{gather*}
+A \emph{layer} is $\lam(W,s)=S\,SS\,(SS\,W)\,s$. The \emph{program} with tags $W_1,\dots,W_m$ is
+$\prog(\vec W)=\lam(W_1,\prog(W_2,\dots,W_m))$, with $\prog()=A$. The \emph{register} is
+$\rho_0=\BOT$, $\rho_{c+1}=\KCAP\,\rho_c$. With $\sigma=\prog(\vec W)$, the \emph{countdown
+reader} is
+\[
+\rd(\vec W,g)=S\,S\,(\rho_g\,(\RD\,\sigma))\,\tw7\,(S\,\tw4\,\tw7)\,\tw8 .
+\]
+
+\begin{theorem}\label{thm:main}
+Let $W_1,\dots,W_m\in\Ter$, $g\ge0$ and $N=21+(5m+13)g$. The head run of $\rd(\vec W,g)$ makes at
+least $N$ steps; its term after $N$ steps is $S\,F\,y\,z\cdots$, and no earlier term of the run is.
+So the first firing is head step $22+(5m+13)g$.
+\end{theorem}
+
+We count head steps from $1$, so the step that fires is step $N+1$. The subscript of $\Fires$ and
+the Lean statements count the $N$ steps before it, from $0$.
+
+The proof is one instance of a small algebra of head runs. Section~\ref{sec:frames} sets up runs
+on argument lists with an arbitrary tail. Section~\ref{sec:closure} defines clocks, proves their
+closure under four operations, and proves that an endless loop of quiet segments is silent and
+eternal. Section~\ref{sec:capsules} proves two capsule countdowns, the first with its revolution
+computed by hand. Section~\ref{sec:reader} proves Theorem~\ref{thm:main}. The Lean kernel evaluates
+each segment of a run with the tags, the program and the register below its top $\KCAP$ as free
+variables; induction on $m$ then covers every program at once, in place of a check word by word.
+Section~\ref{sec:scope} says what is not proved.
+
+\emph{Assumptions.} The results depend on the head-step equation~\eqref{eq:head}
+of~\citep{s1}. Corollary~2 of~\citep{s7} is cited only to explain why $\Loop$ needs a family,
+\citep{s11} only for terminology, and~\citep{clocknote,murm2} only for comparison.
+
+\section{Frames and firing}\label{sec:frames}
+
+By~\eqref{eq:head}, a head run is a run on argument lists, so we work with lists. A \emph{frame}
+is a finite list of terms. A frame with at least three entries has a \emph{step}
+\[
+[x,y,z]\app r\;\mapsto\;\args(x)\app[z,\;y\,z]\app r,
+\]
+and $x$ is the \emph{seat} of that step; shorter frames have no step. Let $\run_n(l)$ be the frame
+after $n$ steps from $l$, if they are all defined. The head run of $t\in\Ter$ is the run of
+$\args(t)$. This is the sense of the list $[u_1,\dots,u_m]$; in~\citep{s11} the terms of a head run
+are themselves called frames, and the frame of such a term in our sense is its $\args$.
+
+\begin{definition}\label{def:fire}
+Let $l,a,b$ be frames and $n\ge0$.
+\begin{itemize}
+\item $\Fires_n(l)$: $\run_n(l)$ is defined and has seat $F$, and for no $k<n$ is
+  $\run_k(l)$ defined with seat $F$.
+\item $\Silent(l)$: no defined $\run_k(l)$ has seat $F$.
+\item $\Eternal(l)$: every $\run_k(l)$ is defined and has at least three entries.
+\item $\Quiet_n(a,b)$: for every frame $R$, $\run_n(a\app R)=b\app R$ and no $\run_k(a\app R)$
+  with $k<n$ has seat $F$. $\QuietD_n(a,b)$: $\Quiet_n(a,b\app J)$ for some $J$, the
+  \emph{deposit}.
+\end{itemize}
+\end{definition}
+
+$\Quiet_n(a,b)$ quantifies over every tail $R$, and a deposit $J$ stays behind the
+\emph{window}, the first three entries, on which the step acts. $\Fires_n(l)$ says that step $n+1$ is the first firing.
+
+\begin{lemma}\label{lem:frame}
+\textup{(a)} If $\run_n(l)=l'$, then $\run_n(l\app R)=l'\app R$.
+
+\textup{(b)} Let $\run_n(a)=b$, and let no $\run_k(a)$ with $k<n$ have seat $F$. Then
+$\Quiet_n(a,b)$.
+
+\textup{(c)} If $\Quiet_n(a,b\app J)$ and $\Quiet_m(b,c)$, then $\Quiet_{n+m}(a,c\app J)$.
+
+\textup{(d)} If $\Quiet_n(a,b)$ and $\Fires_m(b\app R)$, then $\Fires_{n+m}(a\app R)$.
+
+\textup{(e)} If $\Fires_n(l)$, then $\Fires_n(l\app R)$ and not $\Silent(l)$; if also
+$\Fires_m(l)$, then $n=m$.
+
+\textup{(f)} If $\Quiet_n(a,b)$ and $b$ is silent and eternal, so is $a$. If $l$ is silent and
+eternal, so is $l\app J$.
+\end{lemma}
+
+\begin{proof}
+(a) A defined step reads only the first three entries; induction on $n$. (b) By (a), the frames
+from $a\app R$ are those from $a$ with $R$ appended, and each frame before the last has three
+entries, since it steps, so its seat is unchanged. (c) Apply $\Quiet_m(b,c)$ to the tail $J\app R$.
+(d) Split each $k<n+m$ at $n$. (e) By (b), $a=l$ runs quietly to $\run_n(l)$, whose seat survives
+appending; (d) gives the first claim; the others follow from minimality. (f) The first claim splits
+$k$ at $n$. Every frame on an eternal run has three entries, so by (a) appending $J$ changes no
+seat and no length below three.
+\end{proof}
+
+Lemma~\ref{lem:frame} holds for lists of arbitrary terms. To read a frame run as head reduction we
+need the head symbol $S$, which $\args$ drops.
+
+\begin{lemma}\label{lem:bridge}
+Let $t\in\Ter$ and $n\ge0$. The head run of $t$ makes at least $n$ steps iff $\run_n(\args(t))$ is
+defined, and then its term after $n$ steps is $S\,v_1\cdots v_k$ with
+$[v_1,\dots,v_k]=\run_n(\args(t))$. Hence, if $\Fires_n(\args(t))$, the term after $n$ head
+steps is $S\,F\,y\,z\cdots$ and no earlier term of the run is.
+\end{lemma}
+
+\begin{proof}
+By~\eqref{eq:head} and induction on $n$; the steps preserve membership in $\Ter$, and every
+$u\in\Ter$ is $S$ applied to $\args(u)$.
+\end{proof}
+
+\emph{Checked runs.} Let $\run^F_n$ be the run that is undefined if it would step from a frame with
+seat $F$. If $\run^F_n(a)=b$, then $\Quiet_n(a,b)$, by Lemma~\ref{lem:frame}(b). If moreover $b$
+has seat $F$, then $\Fires_n(a\app R)$ for every $R$. The test ``seat $=F$'' is a pattern match on
+$S\,\tw8\,\tw8$, and the step needs $\args(x)$ only for the seat $x$. So the Lean kernel can
+evaluate $\run^F_n(a)$ when $a$ contains free variables, as long as the pattern match decides every
+seat above the free variables (no free variable is a seat, heads a seat, or sits where the match
+compares the seat with $S\,\tw8\,\tw8$); otherwise the evaluation would be stuck and the proof
+would fail. Each segment below is one such evaluation, and its free variables are the terms it
+quantifies over.
+
+\section{Clocks and their closure}\label{sec:closure}
+
+A clock pairs a family of frames with the step, if any, at which each member first fires.
+Theorem~\ref{thm:closure} builds new clocks from old.
+
+\begin{definition}\label{def:clock}
+Let $P$ be a type. A \emph{clock} on $P$ consists of frames $\phi(p)$, a predicate $H\colon P\to
+\{\mathrm{true},\mathrm{false}\}$ and a function $T\colon P\to\mathbb N$, with proofs that
+\begin{itemize}
+\item if $H(p)$, then $\Fires_{T(p)}(\phi(p)\app R)$ for every $R$;
+\item if not $H(p)$, then $\phi(p)$ is silent and eternal.
+\end{itemize}
+\end{definition}
+
+The pair $(T,H)$ is the \emph{schedule}. When $H(p)$ fails, the definition requires eternity as
+well as silence. On this side it is stricter than the dynamical definition of~\citep{clocknote},
+which in turn asks for a computable $T$ and a decidable $H$, as Definition~\ref{def:clock} does not
+(Remark~\ref{rem:scope}): a family whose run halts without firing, such as the empty frame, is not
+a clock.
+
+By Lemma~\ref{lem:frame}(f), eternity lets the non-firing side of a clock pass through a deposit.
+The tail $R$ in the first condition follows from Lemma~\ref{lem:frame}(e); we state it to shorten later
+proofs.
+
+Theorem~\ref{thm:closure} gives four operations on clocks, $\Seq$, $\Iter$, $\Cond$ and
+$\Reindex$, and one statement about frames, $\Loop$: an endless loop of quiet segments is silent
+and eternal. $\Loop$ builds no clock.
+
+\begin{theorem}\label{thm:closure}
+\textup{($\Seq$)} Let $C$ be a clock on $Q$ with frames $\phi$. For $p\in P$ let $a(p)$ and
+$J(p)$ be frames, $o(p)\in Q$ and $c(p)\in\mathbb N$, and let them satisfy $\Quiet_{c(p)}(a(p),\phi(o(p))\app J(p))$ for
+all $p$. Then for every $p$: if $H(o(p))$, then $\Fires_{c(p)+T(o(p))}(a(p)\app R)$ for every $R$;
+otherwise $a(p)$ is silent and eternal. So $a$ is a clock on $P$ with $H\circ o$ and
+$c+T\circ o$.
+
+\textup{($\Iter$)} For $c\in\mathbb N$ let $b(c)$ and $J(c)$ be frames and $\pi(c)\in\mathbb N$,
+and let $e\in\mathbb N$. Assume $\Quiet_{\pi(c)}(b(c+1),b(c)\app J(c))$ for all $c$ and
+$\Fires_e(b(0)\app R)$ for all $R$. Then $\Fires_{e+\sum_{c<g}\pi(c)}(b(g)\app R)$ for all $g$
+and $R$. So $b$ is a clock on $\mathbb N$ with $H\equiv\mathrm{true}$ and
+$T(g)=e+\sum_{c<g}\pi(c)$.
+
+\textup{($\Loop$)} For $k\in\mathbb N$ let $\kappa(k)$ and $J(k)$ be frames and
+$\pi(k)\in\mathbb N$, and let them satisfy $\Quiet_{\pi(k)+1}(\kappa(k),\kappa(k+1)\app J(k))$ for all $k$. Then $\kappa(0)$ is silent
+and eternal.
+
+\textup{($\Cond$)} For clocks $C_1$ on $P_1$ and $C_2$ on $P_2$ there is a clock on $P_1\sqcup P_2$
+whose frames, $T$ and $H$ are those of $C_1$ on $P_1$ and those of $C_2$ on $P_2$.
+
+\textup{($\Reindex$)} For a clock $C$ on $Q$ with frames $\phi$ and a function $f\colon P\to Q$
+there is a clock on $P$ with frames $\phi\circ f$, $T\circ f$ and $H\circ f$.
+\end{theorem}
+
+\begin{proof}
+($\Seq$) Apply Lemma~\ref{lem:frame}(d) with the tail $J(p)\app R$, and on the non-firing side
+both parts of Lemma~\ref{lem:frame}(f). ($\Iter$) Induction on $g$: by Lemma~\ref{lem:frame}(d)
+with the tail $J(g)\app R$, the segment from $b(g+1)$ adds $\pi(g)$ to the firing of $b(g)$; this
+is why the exit is assumed for every tail. ($\Loop$) By strong induction on $j$, for all $k$ and
+$R$ the frame $\run_j(\kappa(k)\app R)$ is defined, has three entries and a seat other than $F$:
+if $j\le\pi(k)$ the segment from $\kappa(k)$ says so; otherwise its run reaches
+$\kappa(k+1)\app J(k)\app R$ after $\pi(k)+1\ge1$ steps, and the induction hypothesis applies with
+$k+1$ and $j-\pi(k)-1$. Take $k=0$ and $R$ empty. ($\Cond$) By cases on the sum. ($\Reindex$) By
+composition.
+\end{proof}
+
+The following two remarks are not mechanized. For clocks $C_1,C_2$ on the same $P$, a
+conditional ``if $\theta(p)$ then $C_1$ else $C_2$'', with $\theta$ a function to Booleans, is
+$\Reindex$ of the sum along $p\mapsto$ ($\iota_1 p$ if $\theta(p)$, else $\iota_2 p$).
+
+$\Loop$ needs a family $\kappa$, not one frame. If $\kappa(k)=l$ for all $k$, with $l$ a frame of
+$S$-terms, then by Lemma~\ref{lem:bridge} the term $S\,l_1\cdots l_r$ would head-reduce in at least
+one step to itself applied to the deposit. No closed $S$-term does that~\citep[Corollary~2]{s7}.
+
+\begin{corollary}\label{cor:iff}
+For a clock and every $p$: $\Fires_n(\phi(p))$ for some $n$ iff $H(p)$, and then $n=T(p)$.
+\end{corollary}
+
+\begin{proof}
+If not $H(p)$, $\phi(p)$ is silent, and Lemma~\ref{lem:frame}(e) excludes a firing. If $H(p)$, take
+$R$ empty; uniqueness is Lemma~\ref{lem:frame}(e).
+\end{proof}
+
+\begin{remark}\label{rem:scope}
+A clock is a schedule paired with a proof. Nothing in Definition~\ref{def:clock} makes $T$ or $H$
+computable, and Corollary~\ref{cor:iff} says only that $H$ is the firing predicate and $T$ the
+first firing. Computability of the schedule, and so decidability of firing, is claimed here only
+for the named instances \lean{k4Clock}, \lean{c6Clock} and \lean{readerClock} of
+Sections~\ref{sec:capsules} and~\ref{sec:reader}. Their $H$ is constantly true, and their $T$ is
+the closed form $5g$, $7g$ or $21+(5m+13)g$ (counted from $0$). The non-firing side (the statement
+$\Loop$ on frames and the non-firing halves of $\Seq$ and $\Cond$) is proved but used by no clock
+in this paper. In particular, no family that fires only for some parameters, such as a gate that
+fires iff $g=0$, is proved here.
+\end{remark}
+
+\section{Two capsule countdowns}\label{sec:capsules}
+
+A capsule is a term whose head run counts down $g$ revolutions of fixed length before it fires.
+We prove this for two capsules: $K_4$, with a revolution of five steps, and $C_6$, with seven.
+Let $K_4=S\,A=S\,(S\,S\,S)$ and $C_6=S\,(S\,(S\,A))$. For a term $C$ let $C^{(0)}=\BOT$,
+$C^{(g+1)}=C\,C^{(g)}$, and
+\begin{gather*}
+\cps(C,g)=C^{(g)}\,A\,\tw7\,(S\,\tw4\,\tw7)\,\tw8\,\tw5,\\
+\pads=[\tw7,\;S\,\tw4\,\tw7,\;\tw8,\;\tw5],\\
+\args(\cps(C,0))=[F,F,A]\app\pads,\\
+\args(\cps(K_4,g+1))=[A,K_4^{(g)},A]\app\pads.
+\end{gather*}
+For $g=0$ the seat is $F$, so the frame fires at step $1$.
+
+\begin{lemma}\label{lem:k4}
+For every term $V$ we have $\QuietD_5([A,K_4\,V,A],[A,V,A])$, and
+$\Fires_5([A,\BOT,A]\app R)$ for every $R$.
+\end{lemma}
+
+\begin{proof}
+Let $X$ be $K_4\,V$ or $\BOT$. As $\args(A)=[S,S]$ and $S\,A=K_4$,
+\begin{align*}
+[A,X,A]&\to[S,S,A,X\,A]\to[A,K_4,X\,A]\\
+&\to[S,S,X\,A,K_4\,(X\,A)]\to[X\,A,\;S\,(X\,A),\;K_4\,(X\,A)].
+\end{align*}
+The seats are $A$, $S$, $A$, $S$ and $X\,A$. None is $F$: the items of $A$ are $S,S$, and $X\,A$
+has three items. If $X=K_4\,V$, then $\args(X\,A)=[A,V,A]$, and the fifth step gives $[A,V,A]$
+followed by a deposit. If $X=\BOT$, then $\args(X\,A)=[F,F,A]$: the fifth step leads to
+a frame with seat $F$.
+\end{proof}
+
+The run never opens $V$, the register below its top $K_4$, so $V$ may be any term.
+
+\begin{theorem}\label{thm:capsules}
+For every $g\ge0$,
+\[
+\Fires_{5g}\bigl(\args(\cps(K_4,g))\bigr)\quad\text{and}\quad\Fires_{7g}\bigl(\args(\cps(C_6,g))\bigr).
+\]
+So the head run of $\cps(K_4,g)$ first fires at step $5g+1$, and that of $\cps(C_6,g)$ at step $7g+1$.
+\end{theorem}
+
+\begin{proof}
+For $g=0$ the frame is $[F,F,A]\app\pads$. Otherwise apply $\Iter$ to $b(c)=[A,K_4^{(c)},A]$,
+$\pi\equiv5$, $e=5$ (Lemma~\ref{lem:k4}): the frame $b(g-1)\app\pads$ fires after
+$5+5(g-1)=5g$ steps. For $C_6$ each revolution starts from $[S\,K_4,C_6^{(c)},A]$, and two kernel
+evaluations give $\QuietD_7([S\,K_4,C_6\,V,A],[S\,K_4,V,A])$ for every $V$ and
+$\Fires_7([S\,K_4,\BOT,A]\app R)$ for every $R$.
+
+Since $\cps(C,g)\in\Ter$ for $C\in\{K_4,C_6\}$, Lemma~\ref{lem:bridge} turns these counts into
+head steps.
+\end{proof}
+
+\section{The countdown reader}\label{sec:reader}
+
+We use the terms of the introduction. Write $\sigma=\prog(\vec W)$ and
+$\capf(\sigma,c)=[g_1,\;\sigma,\;\rho_c\,(\RD\,\sigma)]$, the \emph{capture} frame. The tags $W_i$
+are arbitrary terms of $\Ter$. For $g\ge1$ the reader's run has three parts: a prefix of $28$ steps
+to the capture frame $\capf(\sigma,g-1)$ followed by a deposit, then $g-1$ revolutions of $5m+13$
+steps, then an exit of $5m+6$ steps before the firing step. For $g=0$ it fires after $21$ steps.
+The lemmas below fix each part.
+
+\begin{lemma}[layer]\label{lem:layer}
+For all terms $W,W',s,Q$, with $\lam'=\lam(W',s)$,
+\[
+\Quiet_5\bigl([S,W,\lam',Q],\;[S,W',s,Q]\app[\,s\,(SS\,W'\,s)\,Q,\;W\,\lam'\,Q\,]\bigr).
+\]
+\end{lemma}
+
+\begin{proof}
+As $\args(\lam')=[SS,\,SS\,W',\,s]$, $\args(SS)=[S]$ and $\args(SS\,W'\,s)=[S,W',s]$,
+\begin{align*}
+[S,W,\lam',Q]&\to[\lam',\;W\lam',\;Q]\to[SS,\;SS\,W',\;s,\;Q,\;W\lam'\,Q]\\
+&\to[S,\;s,\;SS\,W'\,s,\;Q,\;W\lam'\,Q]\\
+&\to[SS\,W'\,s,\;s\,(SS\,W'\,s),\;Q,\;W\lam'\,Q]\\
+&\to[S,\;W',\;s,\;Q,\;s\,(SS\,W'\,s)\,Q,\;W\lam'\,Q].
+\end{align*}
+The seats $S$, $\lam'$, $SS$, $S$, $SS\,W'\,s$ have $0$, $3$, $1$, $0$ and $3$ items, and $F$
+has $2$, so none is $F$. The tail behind the window is untouched (Lemma~\ref{lem:frame}(b)).
+\end{proof}
+
+No free variable is a seat, so $W,W',s,Q$ are arbitrary. Each layer begins with a step whose seat
+is $S$ and whose next entry is a tag; the step after it opens the layer.
+
+\begin{lemma}[segments]\label{lem:segments}
+Let $W,s,Q,C,\sigma$ be terms, $R$ a frame, and
+$t(X)=S\,S\,(X\,(\RD\,\sigma))\,\tw7\,(S\,\tw4\,\tw7)\,\tw8$. Then:
+\begin{enumerate}
+\item[(a)] $\QuietD_{28}\bigl(\args(t(\KCAP\,C)),\;[g_1,\sigma,C\,(\RD\,\sigma)]\bigr)$;
+\item[(b)] $\Fires_{21}\bigl(\args(t(\BOT))\app R\bigr)$;
+\item[(c)] $\QuietD_7\bigl([g_1,\lam(W,s),Q],\;[S,W,s,Q]\bigr)$;
+\item[(d)] $\QuietD_{11}\bigl([S,W,A,\KCAP\,C\,(\RD\,\sigma)],\;
+  [g_1,\sigma,C\,(\RD\,\sigma)]\bigr)$;
+\item[(e)] $\Fires_4\bigl([S,W,A,\BOT\,(\RD\,\sigma)]\app R\bigr)$;
+\item[(f)] $\QuietD_{13}\bigl([g_1,A,\KCAP\,C\,(\RD\,A)],\;[g_1,A,C\,(\RD\,A)]\bigr)$,
+  and\\ $\Fires_6\bigl([g_1,A,\BOT\,(\RD\,A)]\app R\bigr)$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Each statement is one kernel evaluation of a checked run (Section~\ref{sec:frames}) with the
+displayed terms free. In (c) the run opens the layer $\lam(W,s)$ but not $W$ or $s$; in (d) and
+(f) it opens $\KCAP\,C$ but not $C$; in (d) it opens $\RD\,\sigma$ but not $\sigma$, and in (f),
+where $\sigma=A$, it opens $A$ as well.
+\end{proof}
+
+Informally, segment (c) starts a revolution by opening the first layer of the program. Segment (d)
+ends one: when the run reaches the innermost program $A$, it pops the top $\KCAP$ of the register
+and rebuilds the capture frame with the register decremented. Segment (a) is the prefix, (b) and
+(e) are the exits, and (f) covers $m=0$, where the program is $A$ and (c) does not apply.
+
+\begin{lemma}\label{lem:rev}
+Let $m=|\vec W|$ and $\sigma=\prog(\vec W)$. For every $c$ and every $R$,
+\[
+\QuietD_{5m+13}\bigl(\capf(\sigma,c+1),\capf(\sigma,c)\bigr)\quad\text{and}\quad
+\Fires_{5m+6}\bigl(\capf(\sigma,0)\app R\bigr).
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemma~\ref{lem:layer}, Lemma~\ref{lem:frame}(c) and induction on the list of tags,
+\[
+\QuietD_{5k}\bigl([S,W,\prog(\vec V),Q],\;[S,W',A,Q]\bigr)
+\]
+for every list $\vec V$ of $k$ tags, where $W'$ is the last tag of $W\vec V$. Let $m\ge1$.
+Chain Lemma~\ref{lem:segments}(c) for the first layer and these $5(m-1)$ steps for the others,
+with $Q=\rho_{c+1}\,(\RD\,\sigma)$ and then (d) with $C=\rho_c$, or with $Q=\BOT\,(\RD\,\sigma)$
+and then (e). This gives $7+5(m-1)+11=5m+13$ and
+$7+5(m-1)+4=5m+6$ (Lemma~\ref{lem:frame}(c),(d)). For $m=0$ use (f): $13$ and $6$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+By $\Iter$ with $b(c)=\capf(\sigma,c)$, $\pi\equiv5m+13$ and $e=5m+6$ (Lemma~\ref{lem:rev}),
+\[
+\Fires_{(5m+6)+(5m+13)c}\bigl(\capf(\sigma,c)\app R\bigr)\qquad\text{for all $c$ and $R$.}
+\]
+For $g=0$, Lemma~\ref{lem:segments}(b) gives $\Fires_{21}(\args(\rd(\vec W,0)))$. For $g=c+1$,
+$\rho_g=\KCAP\,\rho_c$, so Lemma~\ref{lem:segments}(a) with $C=\rho_c$ runs
+$\args(\rd(\vec W,g))$ in $28$ quiet steps to $\capf(\sigma,c)$ and a deposit, and
+Lemma~\ref{lem:frame}(d) gives a first firing after
+\[
+28+(5m+6)+(5m+13)c=21+(5m+13)(c+1)=21+(5m+13)g
+\]
+steps. As $\rd(\vec W,g)\in\Ter$, Lemma~\ref{lem:bridge} turns this into the statement on
+head reduction.
+\end{proof}
+
+The proof gives $\Fires_{21+(5m+13)g}(\args(\rd(\vec W,g))\app R)$ for every tail $R$ and, in the
+mechanization, also, at the level of frames, for tags that contain $K$ or $I$; the statement on
+head reduction assumes $S$-terms. So the reader is a clock on pairs
+$(\vec W,g)$ with $H$ constantly true and $T=21+(5m+13)g$.
+
+\begin{remark}\label{rem:reads}
+On its way to the firing the run passes frames that begin with $\capf(\sigma,c)$, for
+$c=g-1,\dots,0$, and after each of these frames, before the next one or the firing, frames that
+begin with $[S,W_i]$, for $i=1,\dots,m$ in order. The proof yields these frames and no more. It
+does not show that the run passes exactly $g$ capture frames, or that the steps with seat $S$ and a
+tag in the next entry spell $W_1\cdots W_m$ exactly $g$ times. So ``the countdown reads its
+program'' describes the proof; it is not a theorem.
+\end{remark}
+
+\section{Scope}\label{sec:scope}
+
+Theorem~\ref{thm:closure} has four operations on clocks and one statement about frames. $\Seq$ is
+a quiet prefix followed by a clock; $\Iter$ has a single exit at the bottom; $\Cond$ is a sum;
+$\Reindex$ pulls a clock back along a function; $\Loop$ says that an endless loop of quiet segments
+is silent and eternal, and builds no clock. $\Reindex$ and $\Loop$ are not in~\citep{clocknote}.
+We prove closure operation by operation, and nothing about a least class closed under them. We
+neither mechanize nor claim the statement of~\citep[Theorem~2]{clocknote}, that no composite
+witnesses universality. We drop a product $\Par$, which would run two machines ``in disjoint frame
+regions'': a head run moves one window over one frame, so no two regions evolve at once, and we do
+not define an interleaving of two machines within one head run.
+
+The \emph{clock shop} is the catalogue of machines built in~\citep[\S\,The clock shop]{murm2}.
+Its other schedules are observed on sampled parameters and proved neither here nor
+in~\citep{murm2}. The ranges sampled there are: the transfer train, $6n+3$, for $n\in[1,4]$; the
+fold apparatus, $26n+5$, for $n\in[0,3]$; the ratio encoder, wired through the gate, $26qn+4$ iff
+$g=0$, for $n\in[0,2]$, $q\in[1,2]$, $g\in[0,2]$; and the two-counter relay, $12a+6b+4$ iff
+$g=0$, for $a\in[0,3]$, $b\in[0,2]$, $g\in[0,2]$. The pads and other terms were drawn at random,
+with six draws for the last two. When $g\ge1$, the run was followed to index $26qn+304$, or
+$12a+6b+304$, in the counting of~\citep{murm2}, without firing.
+
+\emph{Corrections to earlier claims.} \citep[Proposition~1]{clocknote} lists the row ``countdown
+reader, always, $21+23g$''. That row is right only for $m=2$, and only as a 0-based count. By
+Theorem~\ref{thm:main} the first firing is step $22+(5m+13)g$, as~\citep{murm2} already observed.
+The same proposition calls its schedules verified over their classes; they were sampled, not
+proved. For the reader, \citep{murm2} gives a symbolic execution, checked in Python, for each of
+the fifteen words of length at most three over two tag constants. Theorem~\ref{thm:main} holds for
+every program.
+
+\section*{Data availability}
+\sloppy
+Every definition, lemma, theorem and corollary above is mechanized in
+\texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), version~1.22.0 (merge commit
+\texttt{3ad41d7}, released 26 November 2026), in \texttt{Ski/S10Frame.lean},
+\texttt{S10Closure.lean}, \texttt{S10Capsule.lean} and \texttt{S10Reader.lean}. The modules use
+only the axioms \texttt{propext} and \texttt{Quot.sound}, and \texttt{Ski/S10Audit.lean} checks
+every declaration in them. The Remarks, the two remarks after Theorem~\ref{thm:closure} and
+Section~\ref{sec:scope} are commentary and are not mechanized. The Lean datatype of terms also has
+the constructors $K$ and $I$: frame-level statements hold for arbitrary terms, and term-level
+statements assume \texttt{PureS}. Lean counts steps from $0$, as the subscripts of $\Fires$ do
+above. The list gives the Lean names.
+
+{\raggedright
+\begin{description}
+\item[Theorem~\ref{thm:main}] \texttt{S10.reader\_fires\_term}, from \texttt{S10.captures\_fire},
+\texttt{S10.reader\_fires\_append} and \texttt{S10.reader\_fires}, for \texttt{S10.reader},
+\texttt{S10.prog}, \texttt{S10.lam}, \texttt{S10.reg} and \texttt{S10.cap}; the reader clock is
+\texttt{S10.readerClock}.
+\item[Definition~\ref{def:fire}] \texttt{S10.fstep}, \texttt{S10.frun}, \texttt{S10.seat},
+\texttt{S10.FiresAt}, \texttt{S10.Silent}, \texttt{S10.Eternal}, \texttt{S10.Quiet} and
+\texttt{S10.QuietD}, with \texttt{S10.args}, \texttt{S10.tw} and \texttt{S10.F}.
+\item[Lemma~\ref{lem:frame}] \texttt{S10.frun\_append}, \texttt{S10.Quiet.of\_nil},
+\texttt{S10.Quiet.trans}, \texttt{S10.Quiet.fires}, \texttt{S10.FiresAt.append},
+\texttt{S10.FiresAt.not\_silent}, \texttt{S10.FiresAt.unique},
+\texttt{S10.Quiet.silent\_eternal} and \texttt{S10.silent\_eternal\_append}.
+\item[Lemma~\ref{lem:bridge}] \texttt{S10.iter\_eq\_frun} and \texttt{S10.TFiresAt.of\_firesAt};
+checked runs are \texttt{S10.qrun}, \texttt{S10.Quiet.of\_qrun}, \texttt{S10.Quiet.of\_qrun\_take}
+and \texttt{S10.firesAt\_of\_qrun}.
+\item[Definition~\ref{def:clock}] \texttt{S10.Clock}.
+\item[Theorem~\ref{thm:closure}] \texttt{S10.clock\_closure}, with the constructors
+\texttt{S10.Clock.seq}, \texttt{S10.Clock.iter}, \texttt{S10.Clock.cond} and
+\texttt{S10.Clock.reindex} and the lemmas \texttt{S10.iter\_fires} and
+\texttt{S10.loop\_silent\_eternal}.
+\item[Corollary~\ref{cor:iff}] \texttt{S10.Clock.fires\_iff} and \texttt{S10.Clock.firesAt\_T}.
+\item[Lemma~\ref{lem:k4}] \texttt{S10.k4\_rev} and \texttt{S10.k4\_exit}.
+\item[Theorem~\ref{thm:capsules}] \texttt{S10.k4\_fires}, \texttt{S10.c6\_fires} (with
+\texttt{S10.c6\_rev}, \texttt{S10.c6\_exit}), \texttt{S10.k4\_fires\_term},
+\texttt{S10.c6\_fires\_term}, \texttt{S10.k4Clock} and \texttt{S10.c6Clock}, for
+\texttt{S10.capsule} and \texttt{S10.creg}.
+\item[Lemma~\ref{lem:layer}] \texttt{S10.layer}.
+\item[Lemma~\ref{lem:segments}] \texttt{S10.prefix28}, \texttt{S10.zero21}, \texttt{S10.head7},
+\texttt{S10.tail11}, \texttt{S10.exit4}, \texttt{S10.rev0} and \texttt{S10.exit0}.
+\item[Lemma~\ref{lem:rev}] \texttt{S10.layers}, \texttt{S10.revolution} and
+\texttt{S10.exit\_fires}.
+\end{description}
+\par}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

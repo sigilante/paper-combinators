@@ -470,9 +470,14 @@ witnesses universality. We drop a product $\Par$, which would run two machines `
 regions'': a head run moves one window over one frame, so no two regions evolve at once, and we do
 not define an interleaving of two machines within one head run.
 
-The other schedules of the clock shop~\citep{murm2} are observed on sampled parameters and proved
-neither here nor in~\citep{murm2}: the transfer train ($6n+3$), the fold apparatus ($26n+5$), the
-ratio encoder ($26qn+4$ iff $g=0$), the two-counter relay ($12a+6b+4$ iff $g=0$) and the gate.
+The \emph{clock shop} is the catalogue of machines built in~\citep[\S\,The clock shop]{murm2}.
+Its other schedules are observed on sampled parameters and proved neither here nor
+in~\citep{murm2}. The ranges sampled there are: the transfer train, $6n+3$, for $n\in[1,4]$; the
+fold apparatus, $26n+5$, for $n\in[0,3]$; the ratio encoder, wired through the gate, $26qn+4$ iff
+$g=0$, for $n\in[0,2]$, $q\in[1,2]$, $g\in[0,2]$; and the two-counter relay, $12a+6b+4$ iff
+$g=0$, for $a\in[0,3]$, $b\in[0,2]$, $g\in[0,2]$. The pads and other terms were drawn at random,
+with six draws for the last two. When $g\ge1$, the run was followed to index $26qn+304$, or
+$12a+6b+304$, in the counting of~\citep{murm2}, without firing.
 
 \emph{Corrections to earlier claims.} \citep[Proposition~1]{clocknote} lists the row ``countdown
 reader, always, $21+23g$''. That row is right only for $m=2$, and only as a 0-based count. By

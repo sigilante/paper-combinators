@@ -143,7 +143,7 @@ Waldmann's work~\citep{waldmann-thesis,waldmann-ic}, and the standard
 references~\citep{barendregt,terese}.
 
 {\raggedright Part~II cites the notes by file name: LOCK1-CT, LOCK1-CTB, LOCK1-structure,
-LOCK1-NTD-probe, LOCK1-INJ, LOCK1-INV, A1-lock1-S3 and OPEN-QUESTIONS. It marks status with the tags explained
+LOCK1-NTD-probe, LOCK1-INJ, LOCK1-INV, LOCK1-CONG, LOCK1-FF, LOCK1-FFALL, A1-lock1-S3 and OPEN-QUESTIONS. It marks status with the tags explained
 in the entry \emph{status tags}. The notes are unpublished; a label from them is a working name, not
 a published result.\par}
 
@@ -1571,10 +1571,10 @@ $n+r+1$ is the T-refill to $(W_n,\nf(B\,W_n))$. The converse is claimed only for
 $W$.
 \end{entry}
 
-\begin{entry}{g:wl-cl1}{CL1, FL1, RF, FF}{2026-11-26}
+\begin{entry}{g:wl-cl1}{CL1, FL1, RF, FF}{2026-11-27}
 \src{LOCK1-structure \S5}
-\status{open [Conj]; Lock~1 $\Rightarrow$ CL1 $\Rightarrow$ FL1 and Lock~1 $\Leftrightarrow$ RF $\wedge$ FF
-proved [P]}
+\status{open [Conj]; Lock~1 $\Leftrightarrow$ CL1 $\Leftrightarrow$ FL1 and Lock~1 $\Leftrightarrow$ RF $\wedge$ FF proved [P]
+(\see{g:wl-theorem-c-cong}, \see{g:wl-ff-block})}
 Conjectures. CL1: terms with equal trees in every context are convertible; FL1: terms with equal folds
 in every model $M_d$ of S6's tower are convertible; each decides the word problem. RF is residual
 finiteness, and FF says that the fold into every finite $S$-model is a function of $t^\infty$.
@@ -1678,6 +1678,15 @@ holds iff from some $n_0$ on every heap is in $\Hc^{x}$ ($\mathrm{HEAP}_x$) and 
 T-round over a two-item member heap or an XB move over $S\,V$, $V\in\Hc^{x}_2$ (TREF).
 \end{entry}
 
+\begin{entry}{g:wl-entry-lin}{Conj.~ENTRY-LIN, entry time $E(n)$}{2026-11-27}
+\src{LOCK1-INV \S I7.4, \S I8, \S I9}
+\status{open [Conj]; computed [C] for $n\le18$ (431{,}336 pairs for $n\le17$ and 817{,}898 for $n=18$), given (S1), (ALG) and the engine's verdicts}
+Conjecture. For a normal pair $(A,W)$ with $A$ two-item, $A\,W$ without hnf and $n=|A|+|W|\ge10$: if every tooth of
+its run normalizes, then some state of index at most $\lfloor(n-8)/2\rfloor$ lies in $\Gc^{x}$. On the pools the
+family $(h^k(S\,(S\,T)\,(S\,T)),S)$ with $h(x)=S\,x\,S$ attains the bound at $n=10+2k$, and a proof route through a
+per-move potential on $n$ is refuted [C]. \see{g:wl-entry} \see{g:wl-calGx}
+\end{entry}
+
 \begin{entry}{g:wl-essential}{essential difference, elex, Theorem P5}{2026-11-26}
 \src{LOCK1-NTD-probe, Round~5 (\S5.3, \S5.5)}
 \status{proved [P]; Theorem P5 as repaired to a containment (WN5.2)}
@@ -1703,6 +1712,27 @@ Facts. S: if $a_m\hred S\,a_{m+1}\,b_{m+1}$ for all $m$, then $a_m\,u$ has no hn
 frame is $a_{m+1}\,u\,(b_{m+1}\,u)$. S$'$: for closed $U_1,\dots,U_r$, $r\ge1$, the terms $a_m\,\vec U$,
 $c_j\,a_m\,\vec U$ and $Q\,a_m\,(a_m\,(Q\,a_m))\,\vec U$ have no hnf; together they replace every
 block-model check in the CT($p_K$) chain.
+\end{entry}
+
+\begin{entry}{g:wl-ff-block}{FF for $\mathbb B$ (the 38-block fold), Lemma B (towers)}{2026-11-27}
+\src{LOCK1-FF (as repaired, WF.1--WF.7)}
+\status{proved [K]}
+\lean{\texttt{FFBlock.fold\_eqv}, \texttt{FFBlock.eq\_tower}}
+Theorem. If $t\approx u$ for closed $S$-terms, then $t$ and $u$ have the same block in S1's 38-block fold.
+Lemma~B: a term of block $0$, $1$, $2$, $4$, $8$ or $17$ is $S^kS$ for some $k\ge0$. With Consequence~4 of
+LOCK1-CONG, the theorem gives FF for every model $M_d$ of S6's tower, and so Lock~1 $\Leftrightarrow$ CL1
+$\Leftrightarrow$ FL1 (\see{g:wl-cl1}); FF for an arbitrary finite $S$-model is not claimed (\see{g:wl-ffall}).
+\end{entry}
+
+\begin{entry}{g:wl-ffall}{FF$\forall$, small-model certificates, split and comb rules}{2026-11-27}
+\src{LOCK1-FFALL \S T1--T3 (as repaired, WFA.1--WFA.7, WT3.1--WT3.8)}
+\status{open [Conj]; 3{,}131 of the 6{,}555 $S$-models of size at most~5 certified [P], given a computed check; 3{,}424 open}
+Conjecture. FF$\forall$: for every finite $S$-model $M$, $\mathrm{fold}_M$ is $\approx$-invariant; Lock~1
+$\Leftrightarrow$ FF$\forall\wedge\mathrm{RF}$. Each model is tested by a greatest fixpoint on pairs of values,
+pruned by the split rule (Lemma~L$'$) and the comb rule (Lemma~C). In 1{,}813 open models an explicit term
+realizes the residue on one side along the whole tree (the family $e^jQ\,(e^{n+1}Q)$, $e=S\,S$, $Q=S\,e\,e$),
+so no one-sided argument closes them; Conj.~IF (finitely many $i$-steps on a path of hnf nodes) would certify
+852 more.
 \end{entry}
 
 \begin{entry}{g:wl-calGplus}{$\Gc^{+}$}{2026-11-26}
@@ -1907,7 +1937,7 @@ teeth and rests agree. Its finite converse is S11, Lemma~6, and CT is the conver
 \see{g:tooth-lemma}
 \end{entry}
 
-\begin{entry}{g:wl-lock1}{Lock 1}{2026-11-26}
+\begin{entry}{g:wl-lock1}{Lock 1}{2026-11-27}
 \src{A1-lock1-S3; LOCK1-structure (header); OPEN-QUESTIONS (A1)}
 \status{open [Conj]; known when one side normalizes [K]; Lock~1 $\Rightarrow$ the word problem is
 decidable proved [P]}
@@ -1917,7 +1947,7 @@ Conjecture. For closed $S$-terms, $t^\infty=u^\infty$ implies $t\conv u$; since 
 prefix of $t^\infty$ computable, it alone would make conversion decidable. It holds iff CT and NTD
 hold (\see{g:wl-lock1-ct-ntd}); CT for normalizing teeth is reduced via $\mathrm{ENTRY}_x$ and $\mathrm{R2}_e$ to
 Conj.~TZX$_e$ and Conj.~$\mathrm{RCL}_2^{r}$, CT for non-normalizing teeth is settled only for $p_K$, and
-NTD has evidence only. \see{g:conj-inf-conv}
+NTD has evidence only. Lock~1 is also equivalent to CL1, to FL1 and to FF$\forall\wedge\mathrm{RF}$ (\see{g:wl-cl1}, \see{g:wl-ffall}). \see{g:conj-inf-conv}
 \end{entry}
 
 \begin{entry}{g:wl-lock2}{Lock 2}{2026-11-26}
@@ -2260,6 +2290,16 @@ reducing it to a known statement.
 \status{proved [P]; not in the final chain}
 A PF frame is $y\hred S\,(S\,S)\,\delta$ (Lemma~F), and a counter frame PFc adds $\delta=Q^jG$.
 Theorem~C: one PFc move after the first B-move of an S-run gives $a'_n\conv a_n$, so $q\conv p_K$.
+\end{entry}
+
+\begin{entry}{g:wl-theorem-c-cong}{Theorem C of LOCK1-CONG ($\approx$ is a congruence)}{2026-11-27}
+\src{LOCK1-CONG \S3 (as repaired, WC.1--WC.8)}
+\status{proved [K]; read as equality of $t^\infty$, given S3's identification of $\mathrm{NF}$ prefixes with the limit}
+\lean{\texttt{Congruence.eqv\_app}, \texttt{Congruence.eqv\_ctx}}
+Theorem (not Theorem~C of LOCK1-CTB, \see{g:wl-theorem-c}). If $t\approx t'$ and $u\approx u'$ for closed
+$S$-terms, then $t\,u\approx t'\,u'$, and $\approx$ is preserved by every context. Hence terms with equal trees in
+every context are exactly the $\approx$-pairs, and Lock~1 $\Leftrightarrow$ CL1 (\see{g:wl-cl1}); in Lean,
+$\approx$ is \texttt{Eqv}, equal $\mathrm{NF}$ prefixes at every depth, on pure $S$-terms.
 \end{entry}
 
 \begin{entry}{g:wl-theorem-k}{Theorem K, Theorem K$_w$}{2026-11-26}

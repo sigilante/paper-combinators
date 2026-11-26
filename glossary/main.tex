@@ -57,7 +57,7 @@
 %% sense.  For an overloaded symbol, write "Overloaded." as the first line of the entry.
 %%
 %% Status grammar (Part II only): \status{<state> [tag]; <conditions>}, where <state> is one of
-%% proved, conditional, open, refuted, computed, and <tag> is [P], [C], [K] or [Conj] (see the entry
+%% proved, conditional, open, refuted, computed, and <tag> is [P], [C], [K], [Conj], [Sketch] or [Lit] (see the entry
 %% "status tags").  Conditions name their inputs, e.g. "given (S1), T10 [K], T20 [C]".  A pure
 %% definition has no \status.  Repair codes such as W26.3 name repair lines of a review in the notes.
 %% "refuted [P]" means shown false by a proof; "refuted [C]" means a computed counterexample.
@@ -143,7 +143,7 @@ Waldmann's work~\citep{waldmann-thesis,waldmann-ic}, and the standard
 references~\citep{barendregt,terese}.
 
 {\raggedright Part~II cites the notes by file name: LOCK1-CT, LOCK1-CTB, LOCK1-structure,
-LOCK1-NTD-probe, LOCK1-INJ, A1-lock1-S3 and OPEN-QUESTIONS. It marks status with the tags explained
+LOCK1-NTD-probe, LOCK1-INJ, LOCK1-INV, A1-lock1-S3 and OPEN-QUESTIONS. It marks status with the tags explained
 in the entry \emph{status tags}. The notes are unpublished; a label from them is a working name, not
 a published result.\par}
 
@@ -246,6 +246,8 @@ Symbol & Meaning & Source & Page\\ \hline\endhead
 \sym{$\mathrm{Ctx}(\zeta)$, $\mathcal X_Z$}{context closure of a self-dead fold}{LOCK1-CT \S26.2}{g:wl-ctx}
 \sym{$\mathcal D(Z)$}{heaps built around $Z$ (not $D(v)$, not the 373-model)}{LOCK1-CT \S26.2}{g:wl-cd}
 \sym{$\mathrm{Ctx}_\cup$, $\mathcal X$, $\mathcal D^{SD}$}{one-base context class and heaps}{LOCK1-CT \S27.1}{g:wl-cdplus}
+\sym{$q(t)$}{state of the normalization automaton NA}{LOCK1-INV \S2}{g:wl-na}
+\sym{$\mathcal T$}{tape class of normal pairs}{LOCK1-INV \S I1}{g:wl-tape}
 \end{longtable}
 \endgroup
 
@@ -1935,6 +1937,20 @@ is literal if it needs no head step; otherwise its last frame is $S\,S\,y\,z$, a
 term of the move.
 \end{entry}
 
+\begin{entry}{g:wl-na}{NA (normalization automaton), $q(t)$, Prop.~NA-SINK}{2026-11-26}
+\src{LOCK1-INV \S2 (as repaired, WI.1--WI.3)}
+\status{conditional [P]; sink side given (ALG) [C] on all 59{,}319 state triples, re-run
+independently by the Wizard; accepting side given [Lit]}
+A bottom-up tree automaton with the 39 states $0,\dots,38$, where $q(S)=0$,
+$q(u\,v)=\delta(q(u),q(v))$ and $34$ is the one absorbing sink; it is isomorphic to the automaton
+of~\citep[Fig.~5.11]{dots} (all 1{,}444 entries of its $38\times38$ table checked, the sink printed
+as $\infty$). (ALG) is the $S$-law on states, $\delta(\delta(\delta(0,a),b),c)=\delta(\delta(a,c),
+\delta(b,c))$. Proposition NA-SINK: if $q(t)=34$ then $t$ has no normal form; if $q(t)\ne34$ then $t$
+normalizes, by~\citep[Thm.~9]{dots} and~\citep[Thm.~56]{waldmann-ic}. NA decides normalization of
+closed $S$-terms [Lit] (not kernel-checked) and differs from the 39-class productivity model of S2
+(\see{g:class-model}).
+\end{entry}
+
 \begin{entry}{g:wl-normal-pair}{normal pair, normalized run, rounds}{2026-11-26}
 \src{LOCK1-CT \S8, \S9.0}
 \appears{S12, \S2}
@@ -2133,12 +2149,12 @@ A counterexample to CT: $p$, $q$ without hnf with all teeth pairwise convertible
 pair with one side $p_K$, and by CT($p_K$) there is none.
 \end{entry}
 
-\begin{entry}{g:wl-status-tags}{status tags [P], [C], [K], [Conj], [Sketch]}{2026-11-26}
-\src{LOCK1-CT header (as repaired, W9.4, W13.8) and \S24}
+\begin{entry}{g:wl-status-tags}{status tags [P], [C], [K], [Conj], [Sketch], [Lit]}{2026-11-26}
+\src{LOCK1-CT header (as repaired, W9.4, W13.8) and \S24; LOCK1-INV status log, WI.2 ([Lit])}
 Tags of the notes. [P]: proved in the note, unmechanized, with the review state recorded per section
 in the note's status log; ``[P], given $X$'' is conditional on the inputs $X$, typically (S1) and table
 facts. [C]: computed, with command and log, and able only to refute; [K]: kernel-checked in Lean on
-lean-ski master; [Conj]: conjectured; [Sketch]: an argument not checked step by step. ``Refuted [P]''
+lean-ski master; [Conj]: conjectured; [Sketch]: an argument not checked step by step; [Lit]: a published theorem, cited and not re-proved. ``Refuted [P]''
 means shown false by a proof, and ``refuted [C]'' by a computed counterexample.
 \end{entry}
 
@@ -2215,6 +2231,20 @@ $y\in\mathrm{Ctx}(\zeta)$ (\see{g:wl-ctx}).
 \item T25 [C, \texttt{s27tab.py}; to port]: $\beta(f,y)=36$ for every $f\in\Self\cup\{36\}$ and every
 $y\in\mathrm{Ctx}_\cup$, with T24 as a special case (\see{g:wl-cdplus}).
 \end{itemize}
+\end{entry}
+
+\begin{entry}{g:wl-tape}{tape class $\mathcal T$, Conj.~LOAD}{2026-11-26}
+\src{LOCK1-INV \S I1 (as repaired, WI.5); the definition is the code's,
+checks/s4/lock1-inv/inv\_data.py (t12) and invlib.py (pop, lam)}
+\status{open [Conj]; computed [C]: 0 failures in 107{,}264 refill landings across 21{,}275 runs
+carried through 30 or 40 moves}
+A class of normal pairs: $(A,W)\in\mathcal T$ if, for some right suffix $\sigma$ of $W$, the stack $A$
+lies on the pop chain $\lambda(\sigma)=(\sigma,\pop\sigma,\pop^2\sigma,\dots)$ and every term on
+$\lambda(\sigma)$ has its fold in $\Self$; the chain stops before $T=S\,S\,S$ or where $\pop$ is
+undefined (\see{g:pop}; not the left spine of \see{g:left-spine}). Conjecture LOAD: in a run whose
+teeth all normalize, every refill after the first lands in $\mathcal T$. A single move with a
+normalizing tooth can leave $\mathcal T$ (487 exits, all in runs that die), so $\mathcal T$ is not an
+inductive invariant, and a proof of LOAD needs more than the current pair and its tooth.
 \end{entry}
 
 \begin{entry}{g:wl-lock1-ct-ntd}{Theorem~4 of LOCK1-structure (Lock~1 $\Leftrightarrow$ CT $\wedge$ NTD)}{2026-11-26}

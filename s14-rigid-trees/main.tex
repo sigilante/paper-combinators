@@ -42,9 +42,9 @@ induction on $i$ does the rest. As a corollary, every closed $S$-term with the s
 $G_i\,G_m$ is convertible with $G_i\,G_m$. These terms do not normalize, and every node on the
 rightmost path of their trees has a head normal form. The proof rests on finitely many computed
 facts about the table of the block model and on the invariance of the block under tree equality,
-proved in a companion paper.
-%% TODO(mech): once Ski/NoImp.lean is released, replace the last sentence by the mechanization
-%% sentence used in S10/S11 ("... mechanized in Lean 4 ... propext and Quot.sound").
+proved in a companion paper. The theorem and the corollary are mechanized in Lean~4, with the
+table facts checked by kernel evaluation, using only the axioms of propositional extensionality
+and quotient soundness.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, infinitary normal form, convertibility, head normal form}
@@ -98,7 +98,8 @@ separates them from the terms of~\citep{s11,s12}, which have none (Remark~\ref{r
 the existence, uniqueness and reduction invariance of its prefixes; the 38-element block model
 of~\citep{s1}, whose fold $b$ is invariant under reduction and has $b(t)=36$ iff $t$ has no hnf;
 the theorem of~\citep{s13} that $t\approx u$ implies $b(t)=b(u)$; and the finite facts about the
-table of $b$ listed in Lemma~\ref{lem:table}, which we computed (Data availability). Every case
+table of $b$ listed in Lemma~\ref{lem:table}, which are checked by kernel evaluation (Data
+availability). Every case
 split is on blocks, which are decidable, or on the syntax of a term, and the inductions are on $i$
 and on size. The proofs are constructive.
 
@@ -178,15 +179,16 @@ $b(t)=0$, $\beta(0,b(a))$ or $\beta(\beta(0,b(a)),b(c))$.
 $(0,1)$ or $(2,1)$ respectively.
 \textup{(T2)} $\beta(1,13)=\beta(1,12)=12$ and $\beta(13,12)=\beta(12,12)=25$.
 \textup{(T3)} $\beta(y,12)=25$ iff $y\in\{11,12,13\}$.
-\textup{(T4)} For all blocks $\alpha,\gamma$: $\beta(0,\alpha)\notin\{12,13\}$;
-$\beta(\beta(0,\alpha),\gamma)\ne11$; and $\beta(\beta(0,\alpha),\gamma)=12$ only if $\alpha=0$.
+\textup{(T4)} For all blocks $\alpha,\gamma$:
+$\beta(\beta(0,\alpha),\gamma)\ne11$, and $\beta(\beta(0,\alpha),\gamma)=12$ only if $\alpha=0$.
 
 \noindent Hence \textup{(a)} $b(u)=0$ iff $u=S$, and $b(u)=13$ iff $u=Q$; \textup{(b)}
 $b(G_0)=13$, $b(G_i)=12$ for $i\ge1$, and $b(G_i\,G_m)=25$ for $i\ge0$, $m\ge1$.
 \end{lemma}
 
 \begin{proof}
-(T1)--(T4) are finite computations on the table (Data availability). (a) By (T1), $b(u)=13$ forces
+(T1)--(T4) are finite computations on the table, checked by kernel evaluation (Data
+availability). (a) By (T1), $b(u)=13$ forces
 $u=f\,x$ with $b(f)=2$ and $b(x)=1$; then $x=S\,S$ and $f=S\,(S\,S)$, so $u=Q$. Conversely
 $b(e)=\beta(0,0)=1$, $b(S\,e)=2$ and $b(Q)=13$. (b) By (a) and (T2), by induction on $i$.
 \end{proof}
@@ -195,17 +197,19 @@ $b(e)=\beta(0,0)=1$, $b(S\,e)=2$ and $b(Q)=13$. (b) By (a) and (T2), by inductio
 
 By induction on $i$, for all $Y$. By~\citep{s13} and Lemma~\ref{lem:table}(b),
 $\beta(b(Y),12)=b(Y\,G_m)=b(G_i\,G_m)=25$, so $b(Y)\in\{11,12,13\}$ by (T3). So $Y$ has an hnf $H$,
-with $b(H)=b(Y)$, and by (T4) and Lemma~\ref{lem:table}(a) there are three cases. In each we compare
-the hnf of $Y\,G_m$ with that of $G_i\,G_m$ (Lemma~\ref{lem:family}(a)) by Lemma~\ref{lem:K}.
+with $b(H)=b(Y)\ne0$, so $H\ne S$. Throughout we compare the hnf of $Y\,G_m$ with that of
+$G_i\,G_m$ (Lemma~\ref{lem:family}(a)) by Lemma~\ref{lem:K}.
 
-\emph{$b(Y)=11$.} Then $H=S\,p$, and $Y\,G_m\hred S\,p\,G_m$, an hnf whose second item is $G_m$. The
-second item of the hnf of $G_i\,G_m$ is $G_{i'}\,G_{m'}$ with $m'\ge1$. So $G_m\approx G_{i'}\,G_{m'}$, but $b(G_m)=12$ and
-$b(G_{i'}\,G_{m'})=25$, against~\citep{s13}.
+\emph{$H=S\,p$.} Then $Y\,G_m\hred S\,p\,G_m$, an hnf whose second item is $G_m$. The second item
+of the hnf of $G_i\,G_m$ is $G_{i'}\,G_{m'}$ with $m'\ge1$. So $G_m\approx G_{i'}\,G_{m'}$, but
+$b(G_m)=12$ and $b(G_{i'}\,G_{m'})=25$, against~\citep{s13}.
+
+So $H$ has two items, and $b(Y)\ne11$ by (T4).
 
 \emph{$b(Y)=13$.} Then $Y=Q=G_0$. If $i\ge1$, the first items of the hnfs of $Q\,G_m$ and
 $G_i\,G_m$ are $G_{m+1}$ and $G_m$, against Lemma~\ref{lem:nf}.
 
-\emph{$b(Y)=12$.} Then $H=S\,p\,q$ with $b(p)=0$, so $p=S$, and
+\emph{$b(Y)=12$.} Then $H=S\,p\,q$ with $b(p)=0$ by (T4), so $p=S$, and
 $Y\,G_m\hred S\,S\,q\,G_m\hstep S\,G_m\,(q\,G_m)$. If $i=0$, the first items are $G_m$ and
 $G_{m+1}$, against Lemma~\ref{lem:nf}. If $i\ge1$, the second items give
 $q\,G_m\approx G_{i-1}\,G_m$, so $q=G_{i-1}$ by induction. By Lemma~\ref{lem:head}(b),
@@ -271,34 +275,39 @@ already known.
 
 \section*{Data availability}
 \sloppy
-The proofs in this paper are not mechanized.
-%% TODO(mech): when lean-ski v1.24.0 is released, replace the sentence above by:
-%%   "Theorem~\ref{thm:main}, Corollary~\ref{cor:lock}, the Remark after Theorem~\ref{thm:main}
-%%   and Lemmas~\ref{lem:nf}--\ref{lem:table} are mechanized in \texttt{lean-ski}~\citep{leanski}
-%%   (Lean~4~\citep{lean4}), version~1.24.0 (merge commit \texttt{TODO}), module
-%%   \texttt{Ski/NoImp.lean}, using only the axioms \texttt{propext} and \texttt{Quot.sound};
-%%   \texttt{Ski/Audit.lean} checks every declaration."
-%% TODO(mech): Lean names, to be confirmed against the release (tentative names on branch
-%%   `noimp` of lean-ski-lock1tab, uncommitted on 2026-11-27): thm:main = NoImp.noimp;
-%%   cor:lock = NoImp.lock1_G (check that it covers all i >= 0, m >= 1, not only N(n,j));
-%%   Remark after thm:main = NoImp.eqv_G; lem:nf = NoImp.nf_reduces; lem:head(b) = NoImp.comb;
-%%   lem:table (T1)-(T4) = NoImp.pre1/pre2/pre13, B3, B4_one, B4_two (decide +kernel);
-%%   lem:table(a) = NoImp.rig13; lem:table(b) = NoImp.fold_G_succ, NoImp.fold_GG;
-%%   lem:K: is Congruence.factK used directly, or a NoImp wrapper?
-%% TODO(mech): update the leanski entry in refs.bib to v1.24.0 and its merge commit.
-%% TODO(mech): say whether lem:family(b) (non-normalization) and the Scope remarks are
-%%   mechanized (the Scope remarks are commentary, presumably not); once (T1)-(T4) are
-%%   kernel-checked, replace "computed ... by two independent programs" accordingly.
-The facts (T1)--(T4) of Lemma~\ref{lem:table} were computed from \texttt{blockTable} in
-\texttt{Ski/HnfS.lean} of \texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}) by two
-independent programs. The inputs are mechanized in \texttt{lean-ski} version~1.23.0 (merge commit
-\texttt{e5e0d29}) with only the axioms \texttt{propext} and \texttt{Quot.sound}: the prefix relation
-is \texttt{InfNF.NF}, with \texttt{nf\_exists}, \texttt{nf\_unique} and \texttt{nf\_wsteps};
-Church--Rosser is \texttt{church\_rosser}; a form of Lemma~\ref{lem:K} is
-\texttt{Congruence.factK}; the invariance of the block under $\approx$ is
-\texttt{FFBlock.fold\_eqv}; and the congruence used in the Remark after Theorem~\ref{thm:main} is
-\texttt{Congruence.eqv\_app}. In \texttt{lean-ski}, $\approx$ is
-\texttt{Congruence.Eqv}, the relation of this paper.
+Theorem~\ref{thm:main}, Corollary~\ref{cor:lock}, the Remark after Theorem~\ref{thm:main}, and
+Lemmas~\ref{lem:K}--\ref{lem:table} except Lemma~\ref{lem:family}(b) are mechanized in
+\texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), version~1.24.0 (merge commit
+\texttt{8874b20}, released 27 November 2026), module \texttt{Ski/NoImp.lean}. They use only the
+axioms \texttt{propext} and \texttt{Quot.sound}, and \texttt{Ski/Audit.lean} checks every
+declaration of the module. The Lean names are:
+\begin{itemize}
+\item Theorem~\ref{thm:main}: \texttt{NoImp.noimp}; the Remark after it: \texttt{NoImp.eqv\_G}.
+\item Corollary~\ref{cor:lock}: \texttt{NoImp.lock1\_G}, which gives a common reduct of $u$ and
+  $G_i\,G_m$; \texttt{NoImp.lock1\_G\_conv}, convertibility; and \texttt{NoImp.lock1\_N}, for
+  $N(n,j)$ with any $n$ and $j$. They prove the stated direction, that $u\approx G_i\,G_m$ implies
+  $u\conv G_i\,G_m$.
+\item Lemma~\ref{lem:K}: a form of it is \texttt{Congruence.factK}. Lemma~\ref{lem:nf}:
+  \texttt{NoImp.nf\_reduces}; its second sentence is mechanized for the $G_i$ only
+  (\texttt{NoImp.G\_eqv\_inj}), which is the case used.
+\item Lemma~\ref{lem:head}: (a) \texttt{NoImp.last\_step}, (b) \texttt{NoImp.comb}.
+  Lemma~\ref{lem:family}(a): \texttt{NoImp.G\_hnf}.
+\item Lemma~\ref{lem:table}: (T1) is \texttt{FFBlock.eq\_S\_of\_fold} (no entry is $0$) and
+  \texttt{NoImp.pre1}, \texttt{pre2}, \texttt{pre13}; (T3) is \texttt{NoImp.B3}; (T4) is
+  \texttt{NoImp.B4\_two}; (T2) is evaluated inside \texttt{NoImp.fold\_G\_succ} and
+  \texttt{NoImp.fold\_GG}, which are~(b); and (a) is \texttt{NoImp.rig13}. The table facts are
+  proved by \texttt{decide +kernel} on \texttt{blockTable} in \texttt{Ski/HnfS.lean}.
+\end{itemize}
+Not mechanized: Lemma~\ref{lem:family}(b), the remarks of Section~\ref{sec:scope}, including the
+sketch in Remark~\ref{rem:bot}, and the identification of the prefixes $\NF(d,t)$ with prefixes
+of $t^\infty$, which no proof here uses. The inputs are mechanized in the same release: the prefix
+relation is \texttt{InfNF.NF}, with \texttt{nf\_exists}, \texttt{nf\_unique} and
+\texttt{nf\_wsteps}; Church--Rosser is \texttt{church\_rosser}; the invariance of the block under
+$\approx$ is \texttt{FFBlock.fold\_eqv}; and the congruence used in the Remark after
+Theorem~\ref{thm:main} is \texttt{Congruence.eqv\_app}. In \texttt{lean-ski}, $\approx$ is
+\texttt{Congruence.Eqv}, the relation of this paper. Convertibility there is weak convertibility
+over $SKI$; since $S$-terms reduce only to $S$-terms, by Church--Rosser it agrees with $\conv$ on
+$S$-terms (\texttt{Conv.conv\_iff\_join}).
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

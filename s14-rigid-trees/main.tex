@@ -1,0 +1,333 @@
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\red}{\twoheadrightarrow}
+\newcommand{\hred}{\twoheadrightarrow_h}
+\newcommand{\hstep}{\to_h}
+\newcommand{\conv}{=_\beta}
+\newcommand{\sz}[1]{\lvert#1\rvert}
+\newcommand{\NF}{\mathrm{NF}}
+\newcommand{\rest}{\mathrm{rest}}
+\newcommand{\Sk}[1]{S_{\times#1}}
+
+\title[Determined by Their Trees]{A Family of $\bm{S}$-Terms Determined by Their Infinite Trees}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+Every closed term built from the combinator $S$ has an infinitary normal form, its tree, and
+convertible terms have the same tree. Whether terms with the same tree are always convertible is
+open. Let $e=S\,S$, $Q=S\,e\,e$ and $G_i=e\,(e\,(\cdots(e\,Q)\cdots))$ with $i$ copies of $e$. We
+prove that if $Y\,G_m$ has the same tree as $G_i\,G_m$, where $i\ge0$ and $m\ge1$, then $Y$ is
+$G_i$ as written. The 38-element block model of the head-normal-form theorem confines $Y$ to three
+blocks; a finite computation on its table fixes the shape of the head normal form of $Y$; an
+induction on $i$ finishes the proof. As a corollary, every closed $S$-term with the same tree as
+$G_i\,G_m$ is convertible with $G_i\,G_m$. These terms do not normalize, and every node on the
+rightmost path of their trees has a head normal form. The proof rests on finitely many facts about
+the table of the block model and on the invariance of the block under tree equality, proved in a
+companion paper. The theorem and the corollary are mechanized in Lean~4, with the table facts
+checked by kernel evaluation, using only the axioms of propositional extensionality and quotient
+soundness. That the terms do not normalize is proved on paper only.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, infinitary normal form, convertibility, head normal form}
+\maketitle
+
+\section{Introduction}
+
+Whether two closed $S$-terms with the same infinitary normal form are convertible is open; this is
+Lock~1 below. We prove that they are when one of them is a term $G_i\,G_m$ with $m\ge1$
+(Theorem~\ref{thm:main}, Corollary~\ref{cor:lock}). These terms do not normalize, and their trees
+have a head normal form at every node on the rightmost path.
+
+Let $\Ter$ be the set of closed terms built from $S$ by application, with
+$S\,x\,y\,z\to x\,z\,(y\,z)$ at any position; write $\red$ for the reflexive--transitive closure of
+$\to$, and $\conv$ for convertibility. The \emph{size} $\sz t$ is the number of occurrences of $S$
+in $t$. Every $t\in\Ter$ is $S\,u_1\cdots u_k$ for a unique $k\ge0$; the $u_i$ are its
+\emph{items}, and $t$ is a \emph{head normal form} (hnf) if $k\le2$. If $k\ge3$, the \emph{head
+step} is $t\hstep u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_k$, and $\hred$ is its reflexive--transitive
+closure. The head run of $t$ stops at its first hnf, if there is one; this is \emph{the} hnf of
+$t$, and its number of items is the \emph{kind} of $t$. A term is \emph{literal} if it is its own
+hnf. Appending arguments does not change a head step, so $t\hred t'$ implies $t\,r\hred t'\,r$. We
+write $=$ for syntactic identity and $x\,\Sk k$ for $x\,S\cdots S$ with $k\ge0$ arguments $S$.
+
+Every $t\in\Ter$ has an infinitary normal form $t^\infty$~\citep{s3}. We use it through its finite
+prefixes $\NF(d,t)$ \citep[Remark~8]{s3}: $\NF(0,t)$ is a hole; $\NF(d+1,S)=S$; and
+$\NF(d+1,t)=\NF(d,f)\cdot\NF(d,w)$ whenever $t\hred f\,w$ and the pair is \emph{stable}: $f$ has no
+hnf, or $f\,w$ is an hnf. These prefixes exist and are unique, and reduction does not change
+them~\citep{s3}. We write $t\approx u$, \emph{$t$ and $u$ have the same tree}, if
+$\NF(d,t)=\NF(d,u)$ for all $d$. By~\citep{s3}, $\NF(d,t)$ is the depth-$d$ prefix of $t^\infty$.
+By Church--Rosser, $t\conv u$ implies $t\approx u$. The converse,
+\begin{center}
+\emph{Lock~1:}\enskip $t\approx u$ implies $t\conv u$,
+\end{center}
+is the conjecture of~\citep[Conjecture~11]{s6}; it would make convertibility of $S$-terms
+decidable~\citep{s6}. Lock~1 is open. We say that Lock~1 holds on the $\approx$-class of $t$ if
+every $u\approx t$ satisfies $u\conv t$. It holds on the $\approx$-class of every normal term
+(Lemma~\ref{lem:nf}).
+
+Put $e=S\,S$, $Q=S\,e\,e$, $G_0=Q$ and $G_{i+1}=e\,G_i$, so that $G_i=e^i\,Q$, and
+$N(n,j)=G_j\,G_{n+1}$ for $0\le j\le n$. The $G_i$ are normal and pairwise distinct, since
+$\sz{G_i}=5+2i$.
+
+\begin{theorem}\label{thm:main}
+Let $i\ge0$ and $m\ge1$. If $Y\in\Ter$ and $Y\,G_m\approx G_i\,G_m$, then $Y=G_i$.
+\end{theorem}
+
+\begin{corollary}\label{cor:lock}
+Let $i\ge0$ and $m\ge1$. Every $u\in\Ter$ with $u\approx G_i\,G_m$ satisfies $u\conv G_i\,G_m$. In
+particular, $u\approx N(n,j)$ implies $u\conv N(n,j)$.
+\end{corollary}
+
+The terms $G_i\,G_m$ do not normalize (Lemma~\ref{lem:family}(b), proved on paper only), so
+Lemma~\ref{lem:nf} does not apply to them. Their trees are infinite~\citep[Theorem~7]{s3}, and
+every node on the rightmost path has an hnf; this separates them from the terms
+of~\citep{s11,s12}, which have no hnf (Remark~\ref{rem:bot}).
+
+\emph{Assumptions.} We use Church--Rosser~\citep{terese}; the prefix relation of~\citep{s3}, with
+the existence, uniqueness and reduction invariance of its prefixes; the 38-element block model
+of~\citep{s1}, whose block $b(t)$ is invariant under reduction and equals $36$ iff $t$ has no hnf;
+the theorem of~\citep[Theorem~F]{s13} that $t\approx u$ implies $b(t)=b(u)$; and the finite facts
+about the table $\beta$ of the model listed in Lemma~\ref{lem:table}, which are checked by kernel
+evaluation (Data availability). Every case split is on blocks, which are decidable, or on the
+syntax of a term, and the inductions are on $i$ and on size. The proofs are constructive.
+
+\section{Trees and head runs}
+
+\begin{lemma}[cf.~{\citep[Lemma~3]{s13}}]\label{lem:K}
+Let $t\approx u$. Then $t$ has an hnf iff $u$ has one. If the hnf of $t$ is $S\,a_1\cdots a_k$,
+then the hnf of $u$ is $S\,a'_1\cdots a'_k$, with the same $k$ and $a_j\approx a'_j$.
+\end{lemma}
+
+\begin{proof}
+If $t$ has the hnf $h$, then $t\red h$, so $\NF(d,t)=\NF(d,h)$. The pairs $(S,a)$ and $(S\,a,c)$
+are stable, so $\NF(3,S)=S$, $\NF(3,S\,a)=S\cdot\NF(2,a)$ and
+$\NF(3,S\,a\,c)=(S\cdot\NF(1,a))\cdot\NF(2,c)$. If $t$ has no hnf, every stable pair $f\,w$ on its
+run has $f$ without an hnf, and by induction on $d$ the leftmost path of $\NF(d,t)$ is $d$
+application nodes ending in a hole. So $\NF(3,\cdot)$ determines the kind. Then
+$\NF(d+1,S\,a)=S\cdot\NF(d,a)$ and $\NF(d+2,S\,a\,c)=(S\cdot\NF(d,a))\cdot\NF(d+1,c)$ give
+$a_j\approx a_j'$.
+\end{proof}
+
+\begin{lemma}\label{lem:nf}
+If $A$ is normal and $a\approx A$, then $a\red A$. Hence distinct normal terms do not have the same
+tree.
+\end{lemma}
+
+\begin{proof}
+Induction on $A$. A normal term has a head step unless it is an hnf, and its items are normal, so
+$A$ is $S$, $S\,A_1$ or $S\,A_1\,A_2$ with $A_j$ normal. By Lemma~\ref{lem:K},
+$a\hred S\,a_1\cdots a_k$ with the same $k$ and $a_j\approx A_j$, so $a_j\red A_j$ by induction,
+and $a\red A$. For the second sentence, if $a$ is also normal, then $a=A$, since a normal term
+has no reduct but itself.
+\end{proof}
+
+\begin{lemma}\label{lem:head}
+\textup{(a)} If $t\hred S\,a\,c$ in at least one step, the last step is $S\,S\,y\,z\hstep S\,z\,(y\,z)$,
+so $a=z$ and $c=y\,z$.
+
+\textup{(b)} If $t\hred S\,S\,c$, then $t=S\,S\,q\,\Sk k$ and $c=q\,\Sk k$ for some $q$ and $k\ge0$.
+\end{lemma}
+
+\begin{proof}
+A head step from $S\,x\,y\,z\,r_1\cdots r_l$ gives a term whose items are those of $x$, followed by
+$z$, $y\,z$, $r_1,\dots,r_l$. (a) Two items force $x=S$ and $l=0$. (b) Suppose the result is
+$S\,S\,A\,\Sk k$. All its items but the second are $S$, and $y\,z$ is an application, so $y\,z$ is
+the second item. Hence $x$ has no items, so $x=S$. Then $z=S$ and $A=y\,S$, and the step comes
+from $S\,S\,y\,\Sk{(k+1)}$. The claim follows by induction along the run, backwards from
+$S\,S\,c$, where $k=0$.
+\end{proof}
+
+\begin{lemma}\label{lem:family}
+\textup{(a)} For all $i,m\ge0$,
+\[
+G_{i+1}\,G_m\hstep S\,G_m\,(G_i\,G_m),\qquad G_0\,G_m\hred S\,G_{m+1}\,(G_m\,G_{m+1}).
+\]
+So the hnf of $G_i\,G_m$ is $S\,A\,(\Gamma\,A)$, where $(\Gamma,A)=(G_{i-1},G_m)$ if $i\ge1$ and
+$(\Gamma,A)=(G_m,G_{m+1})$ if $i=0$; and $\Gamma\,A=G_{i'}\,G_{m'}$ for some $i'$ and some
+$m'\ge m$.
+
+\textup{(b)} No $G_i\,G_m$ normalizes.
+\end{lemma}
+
+\begin{proof}
+(a) $G_{i+1}\,G_m=S\,S\,G_i\,G_m$, and
+\[
+Q\,G_m=S\,e\,e\,G_m\hstep S\,S\,G_m\,(e\,G_m)\hstep S\,(e\,G_m)\,(G_m\,(e\,G_m)).
+\]
+(b) If $t=G_i\,G_m\red N$ with $N$ normal, then $N\approx t$, so by Lemma~\ref{lem:K}
+$N=S\,N_1\,N_2$ with $N_2\approx\Gamma\,A$, and Lemma~\ref{lem:nf} gives $\Gamma\,A\red N_2$, with
+$\sz{N_2}<\sz N$. Repeating the argument on $\Gamma\,A$, again some $G_{i'}\,G_{m'}$, yields normal
+terms of strictly decreasing size, which cannot continue forever.
+\end{proof}
+
+\section{The table}
+
+The fold is $b(S)=0$ and $b(f\,x)=\beta(b(f),b(x))$, where $\beta$ is the $38\times38$ table
+of~\citep{s1}. As $b$ is invariant under reduction, an hnf $S$, $S\,a$ or $S\,a\,c$ of $t$ gives
+$b(t)=0$, $\beta(0,b(a))$ or $\beta(\beta(0,b(a)),b(c))$.
+
+\begin{lemma}\label{lem:table}
+\textup{(T1)} No entry of $\beta$ is $0$, and $\beta(x,y)=1$, $2$ or $13$ exactly when
+$(x,y)=(0,0)$, $(0,1)$ or $(2,1)$ respectively.
+\textup{(T2)} $\beta(1,13)=\beta(1,12)=12$ and $\beta(13,12)=\beta(12,12)=25$.
+\textup{(T3)} $\beta(y,12)=25$ iff $y\in\{11,12,13\}$.
+\textup{(T4)} For all blocks $\alpha,\gamma$:
+$\beta(\beta(0,\alpha),\gamma)\ne11$, and $\beta(\beta(0,\alpha),\gamma)=12$ only if $\alpha=0$.
+
+\noindent Hence \textup{(a)} $b(u)=0$ iff $u=S$, and $b(u)=13$ iff $u=Q$; \textup{(b)}
+$b(G_0)=13$, $b(G_i)=12$ for $i\ge1$, and $b(G_i\,G_m)=25$ for $i\ge0$, $m\ge1$.
+\end{lemma}
+
+\begin{proof}
+(T1)--(T4) are finite computations on the table, checked by kernel evaluation (Data
+availability). (a) The first clause is (T1). By (T1), $b(u)=13$ forces $u=f\,x$ with $b(f)=2$ and
+$b(x)=1$. By (T1) again and the first clause, $b(x)=1$ gives $x=S\,S$, and $b(f)=2$ gives
+$f=S\,x'$ with $b(x')=1$, so $f=S\,(S\,S)$ and $u=Q$. Conversely $b(e)=\beta(0,0)=1$,
+$b(S\,e)=2$ and $b(Q)=13$. (b) By (a) and (T2), by induction on $i$.
+\end{proof}
+
+\section{Proof of Theorem~\ref{thm:main}}
+
+We induct on $i$, for all $Y$. By~\citep[Theorem~F]{s13} and Lemma~\ref{lem:table}(b),
+\[
+\beta(b(Y),12)=b(Y\,G_m)=b(G_i\,G_m)=25,
+\] so $b(Y)\in\{11,12,13\}$ by (T3). Then $b(Y)\ne36$, so
+$Y$ has an hnf $H$. Since $b(H)=b(Y)\ne0$, $H\ne S$. Throughout we compare the hnf of $Y\,G_m$
+with that of $G_i\,G_m$ (Lemma~\ref{lem:family}(a)) by Lemma~\ref{lem:K}.
+
+\emph{$H=S\,p$.} Then $Y\,G_m\hred S\,p\,G_m$, an hnf whose second item is $G_m$. The second item
+of the hnf of $G_i\,G_m$ is $G_{i'}\,G_{m'}$ with $m'\ge1$. So $G_m\approx G_{i'}\,G_{m'}$, but
+$b(G_m)=12$ and $b(G_{i'}\,G_{m'})=25$, contradicting~\citep[Theorem~F]{s13}.
+
+So $H$ has two items, and $b(Y)\ne11$ by (T4).
+
+\emph{$b(Y)=13$.} Then $Y=Q=G_0$ by Lemma~\ref{lem:table}(a). If $i\ge1$, the first items of the
+hnfs of $Q\,G_m$ and $G_i\,G_m$ are $G_{m+1}$ and $G_m$, contradicting Lemma~\ref{lem:nf}, since
+they are distinct normal terms.
+
+\emph{$b(Y)=12$.} Then $H=S\,p\,q$ with $b(p)=0$ by (T4), so $p=S$, and
+$Y\,G_m\hred S\,S\,q\,G_m\hstep S\,G_m\,(q\,G_m)$. If $i=0$, the first items are $G_m$ and
+$G_{m+1}$, contradicting Lemma~\ref{lem:nf} in the same way. If $i\ge1$, the second items give
+$q\,G_m\approx G_{i-1}\,G_m$, so $q=G_{i-1}$ by induction. By Lemma~\ref{lem:head}(b),
+$Y=S\,S\,q_0\,\Sk k$ with $q=q_0\,\Sk k$. The last argument of $G_{i-1}$ is $G_{i-2}$ or, for
+$i=1$, $e$; neither is $S$, so $k=0$ and $Y=S\,S\,G_{i-1}=G_i$. \qed
+
+\begin{remark}\label{rem:congr}
+With the theorem of~\citep[Theorem~C]{s13} that $\approx$ is a congruence, $Y\approx G_i$ gives
+$Y\,G_1\approx G_i\,G_1$, so $Y=G_i$: the term $G_i$ is the only member of its $\approx$-class.
+\end{remark}
+
+\section{Proof of Corollary~\ref{cor:lock}}
+
+We induct on $\sz u$, for all $i$ and $m\ge1$ at once. Let $t=G_i\,G_m$, with hnf
+$S\,A\,(\Gamma\,A)$ as in Lemma~\ref{lem:family}(a). By Lemmas~\ref{lem:K} and~\ref{lem:nf},
+$u\hred S\,a\,c$ with $a\red A$ and $c\approx\Gamma\,A=G_{i'}\,G_{m'}$, $m'\ge1$.
+
+If $u$ is literal, $c$ is a proper subterm of $u$, so $c\conv\Gamma\,A$ by induction, and
+$u=S\,a\,c\conv S\,A\,(\Gamma\,A)\conv t$.
+
+Otherwise $a=z$ and $c=y\,z$ by Lemma~\ref{lem:head}(a). As $z\red A$, we get
+$y\,A\approx y\,z\approx\Gamma\,A$, where $A=G_m$ or $G_{m+1}$ and $\Gamma=G_{i-1}$ or $G_m$. By
+Theorem~\ref{thm:main}, $y=\Gamma$. So $u\hred S\,z\,(\Gamma\,z)\red S\,A\,(\Gamma\,A)$, the hnf
+of $t$, and $u\conv t$. The second claim is the case $i=j$, $m=n+1$. \qed
+
+\section{Scope}\label{sec:scope}
+
+\begin{remark}[Other families]\label{rem:families}
+Let $c=S\,(S\,S)$, $D=S\,c\,c$, $X=S\,c\,e$, $H_j=c^j\,D$ and $E_j=e^j\,X$. Since
+$c\,y\,z\hred S\,(y\,z)\,(z\,(y\,z))$ and $e\,y\,z\hstep S\,z\,(y\,z)$, the trees of
+$H_j\,H_{n+1}$ and $E_j\,E_{n+1}$ also have an infinite path of nodes with an hnf. The proof of
+Corollary~\ref{cor:lock} does not carry over. For $j\ge1$,
+$H_j\,W\hred S\,(H_{j-1}\,W)\,(W\,(H_{j-1}\,W))$ with $W=H_{n+1}$, so the path passes through the
+\emph{first} item, here $H_{j-1}\,H_{n+1}$; for $j=0$ it is $H_{n+1}\,H_{n+2}$. The argument of
+Lemma~\ref{lem:family}(b), applied to the item on the path, shows that these terms do not
+normalize. Lemma~\ref{lem:nf} no longer forces $z$ at a node $u\hred S\,z\,(y\,z)$ reached by a
+head step, and $z$ need not be a subterm of $u$; so the induction on size fails. The terms
+$E_j\,E_{n+1}$ with $j\ge1$ have the hnfs of the $G$-family, but $X\,W\hred S\,N\,(e\,W\,N)$ with
+$W=E_{n+1}$ and $N=W\,(e\,W)=E_{n+1}\,E_{n+2}$, so the first item is again a term of the family,
+without a normal form. We do not know whether Lock~1 holds on these $\approx$-classes.
+\end{remark}
+
+\begin{remark}[Nodes without an hnf]\label{rem:bot}
+For $R$ without an hnf, let $\tau_n(R)$ be its $n$-th tooth, defined in~\citep{s11}. The prefix
+rules give that $u\approx R$ iff $u$ has no hnf and $\tau_n(u)\approx\tau_n(R)$ for all $n\ge1$.
+(Sketch: the first stable pairs of $u$ and $R$ have parts with the same tree, by uniqueness of
+prefixes, and the converse is an induction on $d$.) Say that CT holds at $R$ if every $q$ without
+an hnf with $\tau_n(q)\conv\tau_n(R)$ for all $n$ satisfies $q\conv R$. Granted the sketch,
+Lock~1 on the $\approx$-class of $R$ implies CT at $R$; and if every tooth $\tau_n(R)$ satisfies
+Lock~1 on its $\approx$-class, CT at $R$ implies Lock~1 on the $\approx$-class of $R$. So any proof
+of Lock~1 on the $\approx$-class of such a node proves CT there. With Lemma~\ref{lem:nf}, CT for
+terms with a counter run~\citep[Theorem~2]{s12} gives Lock~1 on the $\approx$-class of each such
+term all of whose teeth normalize, such as $U_j\,U_m$~\citep[Corollary~3]{s12}, under the same
+sketch. Our method treats only nodes with an hnf and adds nothing at nodes without one.
+\end{remark}
+
+\begin{remark}[Finite models]
+Lock~1 implies that the fold of $\Ter$ into every finite model of the $S$-law
+$S\,x\,y\,z=x\,z\,(y\,z)$, that is, the homomorphism sending $S$ to the model's $s$, is constant on
+$\approx$-classes. Corollary~\ref{cor:lock} gives this only on the $\approx$-classes of the
+$G_i\,G_m$, where it is immediate: there each $\approx$-class is a convertibility class, and every
+fold respects convertibility. So the corollary alone proves this invariance for no finite model;
+that needs every $\approx$-class.
+\end{remark}
+
+\section*{Data availability}
+\sloppy
+Theorem~\ref{thm:main}, Corollary~\ref{cor:lock}, Remark~\ref{rem:congr}, and
+Lemmas~\ref{lem:K}--\ref{lem:table} except Lemma~\ref{lem:family}(b) are mechanized in
+\texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), version~1.24.0 (merge commit
+\texttt{8874b20}, released 27 November 2026), module \texttt{Ski/NoImp.lean}. They use only the
+axioms \texttt{propext} and \texttt{Quot.sound}, and \texttt{Ski/Audit.lean} checks every
+declaration of the module. The Lean names are:
+\begin{itemize}
+\item Theorem~\ref{thm:main}: \texttt{NoImp.noimp}; Remark~\ref{rem:congr}: \texttt{NoImp.eqv\_G}.
+\item Corollary~\ref{cor:lock}: \texttt{NoImp.lock1\_G}, which gives a common reduct of $u$ and
+  $G_i\,G_m$; \texttt{NoImp.lock1\_G\_conv}, convertibility; and \texttt{NoImp.lock1\_N}, for
+  $N(n,j)$ with any $n$ and $j$. They prove the stated direction, that $u\approx G_i\,G_m$ implies
+  $u\conv G_i\,G_m$.
+\item Lemma~\ref{lem:K}: its second sentence is \texttt{Congruence.factK}, which compares kinds
+  through the depth-$2$ prefix; its first sentence follows from \texttt{Congruence.eqv\_bot}.
+  Lemma~\ref{lem:nf}: \texttt{NoImp.nf\_reduces}; its second sentence is mechanized for the $G_i$
+  only (\texttt{NoImp.G\_eqv\_inj}), which is the case used.
+\item Lemma~\ref{lem:head}: (a) \texttt{NoImp.last\_step}, (b) \texttt{NoImp.comb}.
+  Lemma~\ref{lem:family}(a): \texttt{NoImp.G\_hnf}.
+\item Lemma~\ref{lem:table}: (T1) is \texttt{FFBlock.tower\_cert} (its first conjunct: no entry is
+  $0$) and \texttt{NoImp.pre1}, \texttt{pre2}, \texttt{pre13}; (T3) is \texttt{NoImp.B3}; (T4) is
+  \texttt{NoImp.B4\_two}; (T2) is evaluated inside \texttt{NoImp.fold\_G\_succ} and
+  \texttt{NoImp.fold\_GG}, which are~(b); and (a) is \texttt{FFBlock.eq\_S\_of\_fold} and
+  \texttt{NoImp.rig13}. (T1), (T3) and (T4) are proved by \texttt{decide +kernel}, and the entries
+  of (T2) by \texttt{decide}, on \texttt{blockTable} in \texttt{Ski/HnfS.lean}.
+\end{itemize}
+Not mechanized: Lemma~\ref{lem:family}(b); the remarks of Section~\ref{sec:scope}, including the
+sketch in Remark~\ref{rem:bot}, whose forward direction is \texttt{Congruence.eqv\_parts} with
+\texttt{Congruence.eqv\_bot}; and the identification of the prefixes $\NF(d,t)$ with prefixes of
+$t^\infty$, which no proof here uses. The inputs are mechanized in the same release: the prefix
+relation is \texttt{InfNF.NF}, with \texttt{nf\_exists}, \texttt{nf\_unique} and
+\texttt{nf\_wsteps}; Church--Rosser is \texttt{church\_rosser}; the invariance of the block under
+$\approx$ is \texttt{FFBlock.fold\_eqv}; and the congruence used in Remark~\ref{rem:congr} is
+\texttt{Congruence.eqv\_app}. In \texttt{lean-ski}, $\approx$ is \texttt{Congruence.Eqv}, the
+relation of this paper. Convertibility there is weak convertibility over $SKI$; since $S$-terms
+reduce only to $S$-terms, by Church--Rosser it agrees with $\conv$ on $S$-terms
+(\texttt{Conv.conv\_iff\_join}).
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}

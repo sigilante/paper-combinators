@@ -23,9 +23,9 @@
 \newcommand{\NF}{\mathrm{NF}}
 \newcommand{\rest}{\mathrm{rest}}
 \newcommand{\B}{\mathbb B}
-\newcommand{\Hd}{\mathrm{H}}
+\newcommand{\Hd}{\mathrm{hf}}
 \newcommand{\dom}{\mathrm{dom}}
-\newcommand{\Bad}{\mathrm{B}}
+\newcommand{\Bad}{\mathrm{Bad}}
 \newcommand{\li}{\mathsf i}
 \newcommand{\la}{\mathsf a}
 \newcommand{\lb}{\mathsf b}
@@ -42,23 +42,24 @@
 
 \begin{document}
 \begin{abstract}
-Two closed terms built from the combinator $S$ are tree-equal when their infinitary normal forms
-agree, and Lock~1 is the conjecture that tree-equal terms are convertible. We split Lock~1 into two
-conjectures of different shape. A term without a head normal form splits off an infinite sequence
-of arguments, its teeth, along an infinite left spine; CT says that two such terms with pairwise
-convertible teeth are convertible. Two tree-equal terms that are not convertible have a pair of
-children that again are tree-equal and not convertible, so they have an infinite descent through
-such pairs; NTD says that no such descent leaves a left spine infinitely often. We prove that Lock~1 holds if and
-only if CT and NTD both hold. The forward direction is constructive; the converse uses excluded
-middle for convertibility. Three short results locate CT. CT at a term is equivalent to CT at the
-next term of its spine, with no further hypothesis, and, when Lock~1 holds on the classes of its
-teeth, to Lock~1 on its own class. Lock~1 on the class of a term passes to every node of its tree;
-so Lock~1 on the class of $D\,(c\,D)$, where $c=S\,(S\,S)$ and $D=S\,c\,c$, implies CT at infinitely
-many explicit terms, the smallest of sizes $50$ and $56$, and a counterexample to CT at one of them
-gives an explicit pair of tree-equal terms that are not convertible. A census shows how little of
-CT is known: of the $65{,}794$ terms of sizes $8$ to $13$ without a head normal form, a computation
-certifies only $535$ as covered by the known cases of CT. Lock~1, CT and NTD are open. Nothing in
-this paper is mechanized; the congruence theorem for tree equality that it uses is.
+Two closed terms built from the combinator $S$ are tree-equal when all finite prefixes of their
+infinitary normal forms agree, and Lock~1 is the conjecture that tree-equal terms are convertible.
+We split Lock~1 into two conjectures of different shape. A term without a head normal form has an
+infinite left spine, and along it an infinite sequence of arguments, its teeth. CT says that two
+such terms with pairwise convertible teeth are convertible. If two tree-equal terms are not
+convertible, some pair of their children is again tree-equal and not convertible, so the terms have
+an infinite descent through such pairs. NTD (no turning descent) says that no such descent turns
+off a left spine infinitely often. We prove that Lock~1 holds if and only if CT and NTD both hold.
+The forward direction is constructive; the converse uses excluded middle, for convertibility and
+for the existence of a non-convertible pair of teeth. We then prove three results about CT. CT at
+a term is equivalent to CT at the next term of its spine. When Lock~1 holds on the classes of the
+teeth, CT at a term is equivalent to Lock~1 on its class. Lock~1 on the class of a term passes to
+every node of its tree, so Lock~1 on the class of $D\,(c\,D)$, where $c=S\,(S\,S)$ and $D=S\,c\,c$,
+implies CT at an infinite family of explicit terms; the two smallest have sizes $50$ and $56$. A
+counterexample to CT at one of them would give an explicit pair of tree-equal terms that are not
+convertible. Of the $65{,}794$ terms of sizes $8$ to $13$ without a head normal form, a program
+finds only $535$ covered by the known cases of CT. Lock~1, CT and NTD remain open. Nothing in this
+paper is mechanized; the congruence theorem for tree equality that it uses is.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, infinitary normal forms, convertibility, head normal forms}
@@ -68,24 +69,25 @@ this paper is mechanized; the congruence theorem for tree equality that it uses 
 
 Let $\Ter$ be the set of closed terms built from $S$, with $S\,x\,y\,z\to x\,z\,(y\,z)$ at any
 position, and write $\conv$ for convertibility. Every $t\in\Ter$ has an infinitary normal form
-$t^\infty$~\citep{s3}, and we write $t\approx u$, \emph{$t$ and $u$ are tree-equal}, if $t$ and $u$
-have the same finite prefixes $\NF_d$ at every depth~\citep[Definition~1]{s13}. Convertible terms are
-tree-equal. The converse is
+$t^\infty$~\citep{s3}, and head reduction computes its finite prefixes $\NF_d(t)$. We write
+$t\approx u$, \emph{$t$ and $u$ are tree-equal}, if $\NF_d(t)=\NF_d(u)$ for every
+$d$~\citep[Definition~1]{s13}. Convertible terms are tree-equal. The converse is
 \begin{center}
 \emph{Lock~1:}\enskip $t\approx u$ implies $t\conv u$,
 \end{center}
 the conjecture of~\citep[Conjecture~11]{s6}. It would make convertibility of $S$-terms
-decidable~\citep{s6}, and it is open.
+decidable~\citep{s6}. We say that \emph{Lock~1 holds on the class of $t$} if every $u\approx t$
+satisfies $u\conv t$.
 
-A term $p$ without a head normal form (hnf) has an infinite left spine: its head run reaches a first
-stable frame $\rest(p)\,\tau_1(p)$, the term $\rest(p)$ again has no hnf, and so on, and the
-arguments split off on the way are the \emph{teeth} $\tau_n(p)$ of $p$~\citep{s11}. The tree of $p$ is
-the infinite left comb of the trees of its teeth (Lemma~\ref{lem:bot}).
+A term $p$ without a head normal form (hnf) has an infinite left spine. Its head run reaches a first
+stable frame $\rest(p)\,\tau_1(p)$ (Section~\ref{sec:prelim}); the term $\rest(p)$ again has no hnf,
+and so on. The arguments split off on the way are the \emph{teeth} $\tau_n(p)$ of
+$p$~\citep{s11}. The tree of $p$ is determined by the trees of its teeth (Lemma~\ref{lem:bot}).
 
 \begin{definition}[CT~\citep{s11,s12}]\label{def:CT}
 For $R\in\Ter$ without an hnf, $\CT(R)$ says: every $u\in\Ter$ without an hnf such that
 $\tau_n(u)\conv\tau_n(R)$ for all $n\ge1$ satisfies $u\conv R$. \emph{CT} says that $\CT(R)$ holds for
-every such $R$.
+every such $R$: the teeth of a term without an hnf determine it up to convertibility.
 \end{definition}
 
 A pair $t\approx u$ with $t\nconv u$ is \emph{bad}. Every bad pair has a bad pair among its
@@ -105,33 +107,34 @@ Lock~1 holds if and only if CT and NTD hold.
 A counterexample to CT is a bad pair whose only descent runs down one left spine with no turn
 (Lemma~\ref{lem:spine}); NTD forbids exactly the descents that turn infinitely often. So the theorem
 splits the possible counterexamples to Lock~1 by the shape of their descents. It is a decomposition
-into two consequences of Lock~1, not a reduction to a known statement: all three statements are
-open.
+into two consequences of Lock~1, not a reduction to a known statement.
 
 Section~\ref{sec:ct} gives two short facts about CT at one term $R$. $\CT(R)$ is equivalent to
-$\CT(\rest(R))$ (Proposition~\ref{prop:shift}). If Lock~1 holds on the $\approx$-class of every tooth of
-$R$, then $\CT(R)$ is equivalent to Lock~1 on the $\approx$-class of $R$
-(Proposition~\ref{prop:bot}). Section~\ref{sec:her} shows that Lock~1 on the $\approx$-class of a term
-passes to every node of its tree (Lemma~\ref{lem:replace}) and applies this to a family of terms
-whose trees meet nodes without an hnf two steps off a path of nodes with an hnf. Section~\ref{sec:known}
-records how few cases of CT are known, and Section~\ref{sec:scope} what is not proved.
+$\CT(\rest(R))$ (Proposition~\ref{prop:shift}). If Lock~1 holds on the class of every tooth of
+$R$, then $\CT(R)$ is equivalent to Lock~1 on the class of $R$
+(Proposition~\ref{prop:bot}). Section~\ref{sec:her} shows that Lock~1 on the class of a term
+passes to every node of its tree (Lemma~\ref{lem:replace}). It applies this to a family of terms
+along a path of first items: at each node on the path, the second item of the second item has no
+hnf. Section~\ref{sec:known} records the known cases of CT and a count of the small terms that they
+cover, and Section~\ref{sec:scope} states what is open, what is classical and what is mechanized.
 
 \emph{Assumptions.} We use the facts on blocks and prefixes listed in~\citep[\S2]{s13}; Fact~K and
 Lemma~2 of~\citep{s13}; Theorem~C of~\citep{s13}, that $\approx$ is a congruence; and
-Lemmas~3--6 of~\citep{s11} on head runs, teeth and convertibility. All of these are mechanized in
-the cited papers. Section~\ref{sec:known} cites the CT theorems of~\citep{s11,s12}; the proofs
-of~\citep{s12} are not mechanized. The converse direction of Theorem~\ref{thm:main} uses excluded
-middle for $\conv$, at the steps marked; all other proofs are constructive, since every case split
-on whether a term has an hnf is the decidable test of its block~\citep{s1}.
+Lemmas~3--6 of~\citep{s11} on head runs, teeth and convertibility. Section~\ref{sec:known} cites the
+CT theorems of~\citep{s11,s12}. The converse direction of Theorem~\ref{thm:main} uses excluded
+middle, for $\conv$ and for statements $\exists n\,\tau_n(x)\nconv\tau_n(y)$, at the steps marked.
+Every case split on whether a term has an hnf is the decidable test of its block~\citep{s1}.
 
 \section{Preliminaries}\label{sec:prelim}
 
-Every $t\in\Ter$ is $S\,u_1\cdots u_m$ for a unique $m\ge0$; the $u_i$ are its \emph{items}, and $t$
-is an \emph{hnf} if $m\le2$. If $m\ge3$ the \emph{head step} is $t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots
-u_m$; $\hred$ is the reflexive--transitive closure of head steps, and the terms of the head run are
-its \emph{frames}. A term \emph{has an hnf} if its head run reaches one; this holds iff its block in the
-38-element model $\B$ of~\citep{s1} is not $\bot=36$, and $\beta(\bot,x)=\bot$ for every $x$. The
-\emph{size} $\sz t$ is the number of occurrences of $S$ in $t$.
+Every $t\in\Ter$ is $S\,u_1\cdots u_\ell$ for a unique $\ell\ge0$; the $u_i$ are its \emph{items}, and
+$t$ is an \emph{hnf} if $\ell\le2$. If $\ell\ge3$ the \emph{head step} is $t\to
+u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_\ell$; $\hred$ is the reflexive--transitive closure of head steps,
+and the terms of the head run are its \emph{frames}. A term \emph{has an hnf} if its head run
+reaches one. This holds iff its block $b(t)$ in the 38-element model $\B$ of~\citep{s1} is not
+$\bot=36$; here $b(S)=0$ and $b(t\,u)=\beta(b(t),b(u))$ for the table $\beta$ of~\citep{s1}, and
+$\beta(\bot,x)=\bot$ for every $x$. The \emph{size} $\sz t$ is the number of occurrences of $S$ in
+$t$.
 
 \emph{Teeth}~\citep[\S1]{s11}. A frame $f\,w$ is \emph{stable} if $f$ has no hnf. Let $t$ have no hnf.
 Its head run reaches a stable frame; if $f\,w$ is the first, then $\rest(t)=f$ and $\tau_1(t)=w$, and
@@ -141,28 +144,28 @@ From~\citep{s11} we use:
 \begin{itemize}
 \item[(L1)] if $f$ has no hnf, then $f\,w$ has none, and $f\,w$ is literal with $\rest(f\,w)=f$ and
   $\tau_1(f\,w)=w$ \citep[Lemmas~3(d) and~4(A)]{s11};
-\item[(L2)] if $t\conv t'$ and $t$ has the hnf $S\,u_1\cdots u_m$, then $t'$ has an hnf $S\,u'_1\cdots
-  u'_m$ with $u_i\conv u'_i$; if $t\conv t'$ and $t$ has no hnf, then $t'$ has none, and
-  $\rest^n(t)\conv\rest^n(t')$ and $\tau_n(t)\conv\tau_n(t')$ for all $n$~\citep[Lemma~5]{s11};
+\item[(L2)] if $t\conv t'$ and $t$ has the hnf $S\,u_1\cdots u_\ell$, then $t'$ has an hnf
+  $S\,u'_1\cdots u'_\ell$ with $u_i\conv u'_i$; if $t\conv t'$ and $t$ has no hnf, then $t'$ has
+  none, and $\rest^n(t)\conv\rest^n(t')$ and $\tau_n(t)\conv\tau_n(t')$ for all
+  $n$~\citep[Lemma~5]{s11};
 \item[(L3)] if $t$ has no hnf, then $t\hred\rest^n(t)\,\tau_n(t)\cdots\tau_1(t)$; hence, for
   $p,q$ without an hnf, $\rest^n(p)\conv\rest^n(q)$ and $\tau_i(p)\conv\tau_i(q)$ for all
   $i\le n$ imply $p\conv q$~\citep[Lemma~6 and its proof]{s11}.
 \end{itemize}
 
-\emph{Trees}~\citep[\S2]{s13}. $\NF_d(t)$ is the prefix of depth $d$; $t\approx u$ iff
-$\NF_d(t)=\NF_d(u)$ for all $d$. We use: (N2) if $t\red u$ then $\NF_d(t)=\NF_d(u)$, so $\conv$
-implies $\approx$; (N4) if $t\hred f\,w$ and $f\,w$ is stable or an hnf, then
-$\NF_{d+1}(t)=\NF_d(f)\cdot\NF_d(w)$; and
+\emph{Trees}~\citep[\S2]{s13}. $\NF_d(t)$ is the prefix of depth $d$. From~\citep{s13} we use the
+following; (N2) and (N4) keep the numbering of~\citep{s13}.
 \begin{itemize}
-\item[(K1)] if $t\approx t'$, then $t$ has an hnf iff $t'$ has one~\citep[Lemma~2(c)]{s13}; if $t\hred
+\item[(N2)] If $t\red u$, then $\NF_d(t)=\NF_d(u)$; so $\conv$ implies $\approx$.
+\item[(N4)] If $t\hred f\,w$ and $f\,w$ is stable or an hnf, then $\NF_{d+1}(t)=\NF_d(f)\cdot\NF_d(w)$.
+\item[(K1)] If $t\approx t'$, then $t$ has an hnf iff $t'$ has one~\citep[Lemma~2(c)]{s13}; if $t\hred
   f\,w$ and $t'\hred f'\,w'$ are stable, then $f\approx f'$ and $w\approx
-  w'$~\citep[Lemma~2(b)]{s13};
-\item[(K2)] \emph{Fact K}: if $t\approx t'$ and $t$ has the hnf $S\,u_1\cdots u_m$, then $t'$ has an
-  hnf $S\,u'_1\cdots u'_m$ with $u_i\approx u'_i$~\citep[Lemma~3]{s13};
+  w'$~\citep[Lemma~2(b)]{s13}.
+\item[(K2)] \emph{Fact K}: if $t\approx t'$ and $t$ has the hnf $S\,u_1\cdots u_\ell$, then $t'$ has an
+  hnf $S\,u'_1\cdots u'_\ell$ with $u_i\approx u'_i$~\citep[Lemma~3]{s13}.
 \item[(C)] \emph{Theorem~C}: if $t\approx t'$ and $u\approx u'$, then $t\,u\approx
   t'\,u'$~\citep{s13}.
 \end{itemize}
-We say that \emph{Lock~1 holds on the class of $t$} if every $u\approx t$ satisfies $u\conv t$.
 
 \begin{lemma}\label{lem:bot}
 Let $R$ have no hnf. Then $u\approx R$ iff $u$ has no hnf and $\tau_n(u)\approx\tau_n(R)$ for all
@@ -178,14 +181,14 @@ $\NF_{d+1}(\rest^n(u))=\NF_d(\rest^{n+1}(u))\cdot\NF_d(\tau_{n+1}(u))$, and like
 induction hypothesis and $\tau_{n+1}(u)\approx\tau_{n+1}(R)$ make the two equal. Take $n=0$.
 \end{proof}
 
-This proves the equivalence sketched in~\citep[Remark~10]{s14}.
+Lemma~\ref{lem:bot} proves the equivalence sketched in~\citep[Remark~10]{s14}.
 
 \section{The descent}\label{sec:descent}
 
 \begin{definition}\label{def:descent}
-The \emph{kind} of $t$ is $m\in\{0,1,2\}$ if $t$ has the hnf $S\,u_1\cdots u_m$, and $\bot$ if $t$ has
-no hnf. The \emph{head form} $\Hd(t)$ is that hnf, or the first stable frame. The \emph{children} of
-$t$ are: none at kind $0$; $t_\li=a$ if $\Hd(t)=S\,a$; $t_\la=a$ and $t_\lb=b$ if $\Hd(t)=S\,a\,b$;
+The \emph{kind} of $t$ is $\ell\in\{0,1,2\}$ if $t$ has the hnf $S\,u_1\cdots u_\ell$, and $\bot$ if $t$
+has no hnf. The \emph{head form} $\Hd(t)$ is that hnf, or the first stable frame. The \emph{children}
+of $t$ are: none at kind $0$; $t_\li=a$ if $\Hd(t)=S\,a$; $t_\la=a$ and $t_\lb=b$ if $\Hd(t)=S\,a\,b$;
 $t_\lr=\rest(t)$ and $t_\lw=\tau_1(t)$ at kind $\bot$. For a word $\sigma$ over
 $\{\li,\la,\lb,\lr,\lw\}$, $t_\sigma$ is defined by $t_\varepsilon=t$ and $t_{\sigma x}=(t_\sigma)_x$, and
 $\dom(t)$ is the set of $\sigma$ for which it is defined. A \emph{turn} is a letter other than $\lr$.
@@ -193,7 +196,7 @@ For $t\approx u$ the \emph{bad set} is $\Bad(t,u)=\{\sigma\in\dom(t):t_\sigma\nc
 \emph{descent} in a set $W$ of words is an infinite word all of whose finite prefixes lie in $W$.
 \end{definition}
 
-In the tree of $t$, the letters $\lr$ and $\lw$ go to the left and right subtree, $\li$ and $\lb$ to
+In the tree of $t$, $\lr$ leads to the left subtree and $\lw$ to the right; $\li$ and $\lb$ lead to
 the right subtree, and $\la$ to the right subtree of the left subtree. So $t_{\lr^{n-1}\lw}=\tau_n(t)$.
 Since $t\hred\Hd(t)$, we have $t\conv\Hd(t)$ and $t\approx\Hd(t)$.
 
@@ -209,8 +212,8 @@ $t\conv u$.
 \end{lemma}
 
 \begin{proof}
-(a) (K1) and (K2); induct on $\sigma$. (b) (L2). (c) $t\conv\Hd(t)\conv\Hd(u)\conv u$, since
-$\conv$ is a congruence.
+(a) follows from (K1) and (K2) by induction on $\sigma$. (b) is (L2). (c)
+$t\conv\Hd(t)\conv\Hd(u)\conv u$, since $\conv$ is a congruence.
 \end{proof}
 
 \begin{lemma}\label{lem:bad}
@@ -252,22 +255,30 @@ $\Bad(t,u)=\emptyset$, which contains no descent. Both arguments are constructiv
 
 \emph{CT and NTD imply Lock~1.} Let $t\approx u$, and suppose $t\nconv u$. To every bad pair $(x,y)$ we
 assign a nonempty word $\delta\in\Bad(x,y)$ that ends with a turn. By Lemma~\ref{lem:bad}(b), $x$ is not
-of kind $0$. At kind $1$ or $2$, let $\delta$ be the first letter in the order $\li,\la,\lb$ with
+of kind $0$.
+
+At kind $1$ or $2$, let $\delta$ be the first letter in the order $\li,\la,\lb$ with
 $\delta\in\Bad(x,y)$; it exists by Lemma~\ref{lem:bad}(b), and finding it uses excluded middle for
-$\conv$. At kind $\bot$, $(x,y)$ is not a spine pair, by $\CT(y)$; so it is not the case that
-$\tau_n(x)\conv\tau_n(y)$ for every $n$, and excluded middle for $\conv$ gives a least $n$ with
-$\tau_n(x)\nconv\tau_n(y)$. Let $\delta=\lr^{n-1}\lw$. In both cases $\delta\in\Bad(x,y)$, and
-$(x_\delta,y_\delta)$ is again bad, by Lemma~\ref{lem:kids}(a).
+$\conv$.
+
+At kind $\bot$, $(x,y)$ is not a spine pair, by $\CT(y)$; so it is not the case that
+$\tau_n(x)\conv\tau_n(y)$ for every $n$. Excluded middle for the statement
+$\exists n\,\tau_n(x)\nconv\tau_n(y)$ gives such an $n$; excluded middle for $\conv$ at each $n$
+would not, since this is the step from $\neg\forall$ to $\exists\neg$. A bounded search, with
+excluded middle for $\conv$, then gives the least such $n$. Let $\delta=\lr^{n-1}\lw$.
+
+In both cases $\delta\in\Bad(x,y)$, and $(x_\delta,y_\delta)$ is again bad, by
+Lemma~\ref{lem:kids}(a).
 
 Put $\sigma_0=\varepsilon$ and $\sigma_{k+1}=\sigma_k\,\delta(t_{\sigma_k},u_{\sigma_k})$. Each
 $\sigma_k$ lies in $\Bad(t,u)$, since $(t_{\sigma_k})_\rho=t_{\sigma_k\rho}$. The infinite word whose
 prefixes are the $\sigma_k$ is a descent in $\Bad(t,u)$, by Lemma~\ref{lem:bad}(a), and it has
-infinitely many turns, one at the end of each $\delta$. This contradicts NTD. So $t\nconv u$ is
-refuted. The choices of $\delta$ are definite (a first letter, a least index), so no choice principle
-beyond excluded middle for $\conv$ is used.
+infinitely many turns, one at the end of each $\delta$. This contradicts NTD, and refutes
+$t\nconv u$. The choices of $\delta$ are definite (a first letter, a least index), so no choice
+principle is used beyond the instances of excluded middle named above.
 
-From $\neg\neg(t\conv u)$ we conclude $t\conv u$. This last step needs only Markov's principle,
-because $t\conv u$ says that a search for a common reduct succeeds; the construction of the descent
+From $\neg\neg(t\conv u)$ we conclude $t\conv u$. Markov's principle suffices for this step,
+because $t\conv u$ says that a search for a common reduct succeeds. The construction of the descent
 before it uses excluded middle.
 \end{proof}
 
@@ -328,12 +339,15 @@ $\rest^{n_0}(u)\approx\rest^{n_0}(R)$ and $\tau_i(u)\approx\tau_i(R)$, hence $\t
 By (iii), $\rest^{n_0}(u)\conv\rest^{n_0}(R)$, and $u\conv R$ by (L3).
 \end{proof}
 
-All steps are constructive. Under the hypothesis on the teeth, any argument that settles Lock~1 on the
-class of $R$, for instance a certificate for the node $R$ of a tree, proves $\CT(R)$; no rule for
-nodes without an hnf is weaker than CT at that node. Statement~(iii) is needed at every $n$: we do not
-know whether it suffices at $n=0$ alone. Every term without an hnf has infinitely many reduced
-$\rest^n$, by the subterm argument above, and at a reduced level (iii) is never vacuous, since
-$\rest^n(R)$ is then a reduced member of its own class.
+All steps are constructive. Any argument that settles Lock~1 on the class of $R$, for instance a
+certificate for the node $R$ of a tree, proves $\CT(R)$, with no hypothesis on the teeth. Under the
+hypothesis on the teeth, $\CT(R)$ is also enough. So no sound rule for nodes without an hnf is
+weaker than CT at that node.
+
+The proof uses (iii) at every $n$; we do not know whether (iii) at $n=0$ alone suffices. The
+subterm argument above, applied to $\rest^N(R)$, finds a reduced level among
+$N,\dots,N+\sz{\rest^N(R)}$; so $\rest^n(R)$ is reduced for infinitely many $n$, and at each such
+$n$, (iii) has a reduced instance, $\rest^n(R)$ itself.
 
 \section{Heredity}\label{sec:her}
 
@@ -344,24 +358,31 @@ of every $t_\sigma$.
 \end{lemma}
 
 \begin{proof}
-By induction on $\sigma$. For $\sigma=\varepsilon$ take $t'=v$. For $\sigma=x\rho$, let $c=t_x$, and let
-$c'$ be given by the induction hypothesis for $c$, $\rho$ and $v$: $c'\approx c$, and $c'\conv c$
-implies $v\conv t_\sigma$. Let $t'$ be $\Hd(t)$ with the child $c$ replaced by $c'$. By (C) and
-$\Hd(t)\approx t$, $t'\approx t$. The term $t'$ is its own head form with $x$-child $c'$ and its other
-children as in $\Hd(t)$: an hnf is its own hnf, and if $x\in\{\lr,\lw\}$, then $t'$ is literal by (L1),
-because its function part, $\rest(t)$ or $c'\approx\rest(t)$, has no hnf (K1). If $t'\conv t$, then
-$t'\conv\Hd(t)$, and Lemma~\ref{lem:kids}(b) gives $c'\conv c$, so $v\conv t_\sigma$. For the last
-sentence, if $v\approx t_\sigma$, then $t'\approx t$, so $t'\conv t$, so $v\conv t_\sigma$.
+By induction on $\sigma$. For $\sigma=\varepsilon$ take $t'=v$. For $\sigma=x\rho$, let $k=t_x$, and let
+$k'$ be the term that the induction hypothesis gives for $k$, $\rho$ and $v$: $k'\approx k$, and
+$k'\conv k$ implies $v\conv t_\sigma$. Let $t'$ be $\Hd(t)$ with the child $k$ replaced by $k'$. Then
+$t'\approx t$ by (C) and $\Hd(t)\approx t$.
+
+The term $t'$ is its own head form with $x$-child $k'$ and its other children as in $\Hd(t)$. An hnf
+is its own hnf. If $x\in\{\lr,\lw\}$, then $t'$ is literal by (L1): its function part is
+$k'\approx\rest(t)$ if $x=\lr$ and $\rest(t)$ if $x=\lw$, and has no hnf by (K1).
+
+If $t'\conv t$, then $t'\conv\Hd(t)$, and Lemma~\ref{lem:kids}(b) gives $k'\conv k$, so $v\conv
+t_\sigma$. For the last sentence, let $v\approx t_\sigma$. Then $t'\approx t$, so Lock~1 on the class
+of $t$ gives $t'\conv t$, hence $v\conv t_\sigma$.
 \end{proof}
 
-The construction is explicit, and the proof is constructive. It is the injectivity of the map
-that sends the class of $t$ to the classes of its children, iterated along $\sigma$.
+The construction is explicit, and the proof is constructive. It is the injectivity of the maps
+$[a]\mapsto[S\,a]$, $([a],[b])\mapsto[S\,a\,b]$ and $([f],[w])\mapsto[f\,w]$ ($f$ without an hnf),
+which build a head form from the classes of its children (Lemma~\ref{lem:kids}(b)), iterated along
+$\sigma$.
 
 \begin{corollary}\label{cor:her}
 Let $\sigma\in\dom(t)$, and let $R=t_\sigma$ have no hnf. If Lock~1 holds on the class of $t$, then
 $\CT(R)$. Explicitly, by contraposition with a witness: if $u$ has no hnf, $\tau_n(u)\conv\tau_n(R)$ for
 all $n$, and $u\nconv R$, then the term $t'$ of Lemma~\ref{lem:replace} for $v=u$ satisfies $t'\approx t$
-and $t'\nconv t$, and it agrees with $\Hd(t)$ except in the child $t_x$, where $\sigma=x\rho$.
+and $t'\nconv t$; and, if $\sigma=x\rho$ is nonempty, it agrees with $\Hd(t)$ except in the child
+$t_x$; if $\sigma=\varepsilon$, then $t'=u$.
 \end{corollary}
 
 \begin{proof}
@@ -370,24 +391,25 @@ hypothesis on the teeth. For the witness, $u\approx R$ by Lemma~\ref{lem:bot}, s
 applies to $v=u$; if $t'\conv t$, then $u\conv R$.
 \end{proof}
 
-The converse, that CT at the nodes without an hnf implies Lock~1 on the class of $t$, is not claimed.
+We do not claim the converse, that CT at the nodes without an hnf implies Lock~1 on the class of $t$.
 
 \emph{An example.} Let $c=S\,(S\,S)$, $D=S\,c\,c$, $H_0=D$, $H_{j+1}=c\,H_j$, and $N_a(n,j)=H_j\,H_{n+1}$
-for $0\le j\le n$. The trees of these terms have an infinite path of nodes with an hnf, and whether
-Lock~1 holds on their classes is open~\citep[Remark~9]{s14}.
+for $0\le j\le n$; the subscript distinguishes these terms from the terms $N(n,j)$ of~\citep{s14}.
+The trees of these terms have an infinite path of nodes with an hnf, and whether Lock~1 holds on
+their classes is open~\citep[Remark~9]{s14}.
 
 \begin{proposition}\label{prop:afam}
 Let $0\le j\le n$. If $j\ge1$, put $A=N_a(n,j-1)$ and $m=n+1$; if $j=0$, put $A=N_a(n+1,n+1)$ and
 $m=n+2$. Then $m\ge2$,
 \[
-N_a(n,j)\hred S\,A\,(H_m\,A),\qquad H_m\,A\hred S\,X\,R(n,j),
+N_a(n,j)\hred S\,A\,(H_m\,A),\qquad H_m\,A\hred S\,Y\,R(n,j),
 \]
-where $X=H_{m-1}\,A$ and $R(n,j)=A\,(H_{m-1}\,A)$, and $R(n,j)$ has no hnf. So $R(n,j)=N_a(n,j)_{\lb\lb}$,
+where $Y=H_{m-1}\,A$ and $R(n,j)=A\,(H_{m-1}\,A)$, and $R(n,j)$ has no hnf. So $R(n,j)=N_a(n,j)_{\lb\lb}$,
 and $N_a(n,j)_\la=A$. Consequently:
 \begin{itemize}
 \item[(a)] if Lock~1 holds on the class of $N_a(n,j)$, then $\CT(R(n,j))$; and if $u$ has no hnf,
-  $\tau_k(u)\conv\tau_k(R(n,j))$ for all $k$, and $u\nconv R(n,j)$, then $S\,A\,(S\,X\,u)\approx
-  N_a(n,j)$ and $S\,A\,(S\,X\,u)\nconv N_a(n,j)$, with the same first item $A$;
+  $\tau_k(u)\conv\tau_k(R(n,j))$ for all $k$, and $u\nconv R(n,j)$, then $S\,A\,(S\,Y\,u)\approx
+  N_a(n,j)$ and $S\,A\,(S\,Y\,u)\nconv N_a(n,j)$, with the same first item $A$;
 \item[(b)] if Lock~1 holds on the class of $N_a(0,0)=D\,(c\,D)$, then $\CT(R(n,j))$ for all $0\le j\le n$.
 \end{itemize}
 The sizes are $\sz{R(n,j)}=35+9n+6j$ for $j\ge1$ and $56+15n$ for $j=0$; the two smallest are $50$, at
@@ -395,59 +417,69 @@ $(1,1)$, and $56$, at $(0,0)$.
 \end{proposition}
 
 \begin{proof}
-$m\ge2$ because $j\ge1$ forces $n\ge1$. Two head steps give $c\,x\,y\hred S\,(x\,y)\,(y\,(x\,y))$.
-For $j\ge1$, $N_a(n,j)=c\,H_{j-1}\,H_{n+1}\hred S\,A\,(H_{n+1}\,A)$. For $j=0$, $D\,W\to c\,W\,(c\,W)\hred
-S\,(W\,(c\,W))\,(c\,W\,(W\,(c\,W)))$ with $W=H_{n+1}$, and $W\,(c\,W)=H_{n+1}\,H_{n+2}=A$. Then $H_m\,A=c\,H_{m-1}\,A\hred
-S\,(H_{m-1}\,A)\,(A\,(H_{m-1}\,A))$. Blocks: $b(c)=2$, $b(D)=22$, and the table entries
-$\beta(2,22)=\beta(2,30)=30$, $\beta(22,30)=\beta(30,30)=31$, $\beta(30,31)=31$ and $\beta(31,31)=36$ give,
-by induction, $b(H_j)=30$ for $j\ge1$, $b(N_a(n,j))=31$ for all $n,j$, and, as $m-1\ge1$,
-$b(R(n,j))=\beta(31,\beta(30,31))=\beta(31,31)=36$. So $R(n,j)$ has no hnf.
+$m\ge2$: if $j\ge1$, then $n\ge j\ge1$ and $m=n+1$; if $j=0$, then $m=n+2$. Two head steps give
+$c\,x\,y\hred S\,(x\,y)\,(y\,(x\,y))$. For $j\ge1$, $N_a(n,j)=c\,H_{j-1}\,H_{n+1}\hred
+S\,A\,(H_{n+1}\,A)$. For $j=0$, $D\,V\to c\,V\,(c\,V)\hred S\,(V\,(c\,V))\,(c\,V\,(V\,(c\,V)))$ with
+$V=H_{n+1}$, and $V\,(c\,V)=H_{n+1}\,H_{n+2}=A$. Then $H_m\,A=c\,H_{m-1}\,A\hred
+S\,(H_{m-1}\,A)\,(A\,(H_{m-1}\,A))$.
 
-(a) is Corollary~\ref{cor:her} with $\sigma=\lb\lb$: the head forms $\Hd(N_a(n,j))=S\,A\,(H_m\,A)$ and
-$\Hd(H_m\,A)=S\,X\,R(n,j)$ are replaced by $S\,A\,(S\,X\,u)$. (b) The first item of $N_a(n,j)$ is
-$N_a(n,j-1)$ for $j\ge1$ and $N_a(n+1,n+1)$ for $j=0$, so $N_a(0,0)_{\la^k}$ runs through every
-$N_a(n,j)$. Apply Lemma~\ref{lem:replace} with $\sigma=\la^k$, then (a). The sizes follow from
+Blocks: $\beta(0,0)=1$, $\beta(0,1)=2$, $\beta(0,2)=4$ and $\beta(4,2)=22$ give $b(c)=2$ and
+$b(D)=22$. The table entries $\beta(2,22)=\beta(2,30)=30$, $\beta(22,30)=\beta(30,30)=31$,
+$\beta(30,31)=31$ and $\beta(31,31)=36$ give, by induction, $b(H_j)=30$ for $j\ge1$,
+$b(N_a(n,j))=31$ for all $n,j$, and, as $m-1\ge1$, $b(R(n,j))=\beta(31,\beta(30,31))=\beta(31,31)=36$.
+So $R(n,j)$ has no hnf.
+
+(a) is Corollary~\ref{cor:her} with $\sigma=\lb\lb$: the head forms of $N_a(n,j)$ and $H_m\,A$ are
+$S\,A\,(H_m\,A)$ and $S\,Y\,R(n,j)$, and they are replaced by $S\,A\,(S\,Y\,u)$. (b) The first item of
+$N_a(n,j)$ is $N_a(n,j-1)$ for $j\ge1$ and $N_a(n+1,n+1)$ for $j=0$, so $N_a(0,0)_{\la^k}$ runs through
+every $N_a(n,j)$. Apply Lemma~\ref{lem:replace} with $\sigma=\la^k$, then (a). The sizes follow from
 $\sz{H_j}=7+3j$.
 \end{proof}
 
-The proof uses six entries of the table $\beta$ of~\citep{s1}, read from it by a short program. We
-also checked by direct reduction, for $n\le4$, the head forms, the identity of $R(n,j)$, its block,
-and its size.
+The proof uses ten entries of the table $\beta$ of~\citep{s1}, the ones displayed above; we read
+them from the table with a short program. We also checked, by direct reduction for $n\le4$, the head
+forms of $N_a(n,j)$ and $H_m\,A$, the term $R(n,j)$, its block and its size.
 
-So any proof of Lock~1 on the one class of $D\,(c\,D)$, a term of size $17$, must prove CT at the
-infinitely many terms $R(n,j)$. An argument that inspects only the path of first items cannot see
-them: by~(a), a counterexample to CT at $R(n,j)$ gives a bad pair that agrees with $N_a(n,j)$ along
-that whole path.
+So any proof of Lock~1 on the one class of $D\,(c\,D)$, a term of size $17$, yields CT at every
+term $R(n,j)$. These are infinitely many terms, pairwise distinct since their sizes are unbounded;
+whether they are pairwise non-convertible we have not examined. An argument that inspects only the
+path of first items does not reach them: by~(a), a counterexample to CT at $R(n,j)$ gives a bad
+pair that agrees with $N_a(n,j)$ along that whole path.
 
-\section{How little of CT is known}\label{sec:known}
+\section{Known cases of CT among small terms}\label{sec:known}
 
 \begin{remark}[The known cases]\label{rem:known}
-CT is proved at one term and at all terms whose run settles into an explicit grammar. Let $Q=S\,(S\,S)$,
-$G=S\,Q\,Q$ and $p_K=S\,(S\,S)\,G\,(Q\,(Q\,G))\,S$. Then $\CT(R)$ holds when $R\conv\rest^n(p_K)$ for
-some $n$~\citep[Theorem~1 and Corollary~2]{s11}, and when $\rest^e(R)\conv Z\,W$ for some $e$ and a pair
-$(Z,W)$ of the grammar of~\citep[Definition~1]{s12} with all teeth of $Z\,W$
-normalizing~\citep[Theorem~2]{s12}; \citep[Corollaries~3 and~4]{s12} give instances, among them the
-runs of $X\,X$ with $X=S\,T\,S$ and $T=S\,S\,S$. By Proposition~\ref{prop:shift}, each case extends to
-every $R$ with $\rest^i(R)\conv\rest^j(R')$ for such an $R'$.
+CT is proved at one term and at every term whose spine reaches a state of the explicit grammar
+of~\citep{s12}. With $c$ and $D$ as in Section~\ref{sec:her}, let $p_K=c\,D\,(c\,(c\,D))\,S$. This
+is the term $S\,(S\,S)\,G\,(Q\,(Q\,G))\,S$ of~\citep{s11}, with $Q=c$ and $G=D$, and $p_K=N_a(1,1)\,S$.
+Then $\CT(R)$ holds when $R\conv\rest^n(p_K)$ for some $n$~\citep[Theorem~1 and
+Corollary~2]{s11}, and when $\rest^e(R)\conv Z\,W$ for some $e$ and a pair $(Z,W)$ of the grammar
+of~\citep[Definition~1]{s12} with all teeth of $Z\,W$ normalizing~\citep[Theorem~2]{s12};
+\citep[Corollaries~3 and~4]{s12} give instances, among them the run of $X\,X$ with $X=S\,T\,S$ and
+$T=S\,S\,S$. By Proposition~\ref{prop:shift}, each case extends to every $R$ with
+$\rest^i(R)\conv\rest^j(R')$ for such an $R'$.
 \end{remark}
 
 \begin{remark}[A census]\label{rem:census}
 We enumerated the terms without an hnf of sizes $8$ to $13$; there are $15$, $136$, $741$, $3{,}200$,
 $12{,}730$ and $48{,}972$ of them, $65{,}794$ in all, and none of smaller size. For each we followed the
 first $24$ steps of its spine, replacing a state by a convertible reduct whose two parts are in normal
-form when one was found, and recorded it as \emph{certified covered} if one of its states equals,
-as written, a state of $p_K$, the start of a run covered by~\citep[Corollary~3 or~4]{s12}, or a state of
-another certified term, which suffices by Remark~\ref{rem:known}. Of the $65{,}794$ terms, $535$ ($0.8\%$)
-are certified covered, in six classes; for example, the seventh state of
-$S\,S\,S\,(S\,(S\,S))\,(S\,(S\,S))\,S$, of size $10$, is $p_K$ as written. No term of size $8$ or $9$
-is certified. The count is a lower bound: a term whose states become convertible with a covered one
-only after $24$ steps, or only up to conversion, is not seen. Shared states were detected by hashing;
-an independent program that compares states as written recovers the same six classes with the same
-members. These counts are computations, not theorems.
+form when one was found. We recorded the term as \emph{certified covered} if one of its states
+equals, as written, a state of $p_K$, computed in the same way; the start of a run covered
+by~\citep[Corollary~3 or~4]{s12}; or a state of another certified term. This suffices by
+Remark~\ref{rem:known}.
 
-Among the terms of least size is $X\,T=S\,(S\,S\,S)\,S\,(S\,S\,S)$, of size $8$. Whether $\CT(X\,T)$
-holds is open. The census certifies CT at no term of size $8$ or $9$. The terms $R(n,j)$ of
-Proposition~\ref{prop:afam}, of sizes $50$ and more, are much larger, and CT at them is open too.
+Of the $65{,}794$ terms, $535$ ($0.8\%$) are certified covered, in six classes. For example,
+$\rest^7(S\,S\,S\,(S\,(S\,S))\,(S\,(S\,S))\,S)$, for a term of size $10$, is $p_K$ as written,
+already for the raw $\rest$, with no normalization. No term of size $8$ or $9$ is certified. The
+count is a lower bound: a term whose states become convertible with a covered one only after $24$
+steps, or only up to conversion, is not seen. We detected shared states by hashing; an independent
+program that compares states as written recovers the same six classes with the same members. These
+counts are computations, not theorems.
+
+The term $X\,T=S\,(S\,S\,S)\,S\,(S\,S\,S)$ has size $8$, the least size of a term without an hnf.
+Whether $\CT(X\,T)$ holds is open. The terms $R(n,j)$ of Proposition~\ref{prop:afam}, of sizes $50$
+and more, are larger, and CT at them is open too.
 \end{remark}
 
 \section{Scope}\label{sec:scope}
@@ -459,13 +491,16 @@ include those of~\citep{s14}, whose trees have an hnf at every node of their rig
 
 \emph{Classical steps.} Only the converse direction of Theorem~\ref{thm:main} is classical. It uses
 excluded middle for $\conv$ to choose a non-convertible pair of children and a least non-convertible
-pair of teeth, and its last step needs Markov's principle. Every other proof is constructive.
+pair of teeth, and excluded middle for $\exists n\,\tau_n(x)\nconv\tau_n(y)$ to know that such a
+pair of teeth exists. Markov's principle suffices for its last step. Every other proof is
+constructive.
 
 \emph{Inputs.} Tree equality is the relation of~\citep[Definition~1]{s13}, equality of all prefixes
-$\NF_d$; we do not use its reading as equality of infinitary normal forms. Lemma~\ref{lem:replace}
-and Proposition~\ref{prop:bot} use Theorem~C of~\citep{s13}. Proposition~\ref{prop:afam} uses six entries
-of the block table, read by a program. Section~\ref{sec:known} rests on~\citep{s12}, which is not
-mechanized, and its counts are computations.
+$\NF_d$; we do not use its reading as equality of infinitary normal forms, except to identify
+Lock~1 with~\citep[Conjecture~11]{s6}, which rests on~\citep{s3}. Lemma~\ref{lem:replace} and
+Proposition~\ref{prop:bot} use Theorem~C of~\citep{s13}. Proposition~\ref{prop:afam} uses ten entries
+of the block table, read by a program. Section~\ref{sec:known} rests on~\citep{s12}, whose proofs are
+not mechanized, and its counts are computations.
 
 \section*{Data availability}
 \sloppy
@@ -473,13 +508,14 @@ Nothing in this paper is mechanized in Lean. The inputs it cites from~\citep{s13
 \texttt{lean-ski}~\citep{leanski} (Lean~4~\citep{lean4}), version~1.24.0, with only the axioms
 \texttt{propext} and \texttt{Quot.sound}: tree equality is \texttt{Congruence.Eqv}; Theorem~C is
 \texttt{Congruence.cong\_eqv}, with the application form \texttt{Congruence.eqv\_app}; Fact~K, used
-as (K2), is \texttt{Congruence.factK}; (K1) is \texttt{Congruence.eqv\_bot} and
-\texttt{Congruence.eqv\_parts}; (N2) and (N4) are \texttt{InfNF.nf\_wsteps} and
-\texttt{Congruence.node\_inv}; Lock~1 is \texttt{WordProblem.Lock1}. The block table is
+as (K2), is \texttt{Congruence.factK}; (K1) is \texttt{Congruence.eqv\_bot}, in block form, and
+\texttt{Congruence.eqv\_parts}; (N2) is \texttt{InfNF.nf\_wsteps} with \texttt{InfNF.nf\_bwd}, and
+(N4) is \texttt{Congruence.node\_inv}; Lock~1 is \texttt{WordProblem.Lock1}, stated with
+\texttt{WordProblem.InfEq}, which has the definition of \texttt{Congruence.Eqv}. The block table is
 \texttt{blockTable} in \texttt{Ski/HnfS.lean}. The lemmas of~\citep{s11} used as (L1)--(L3) are
-part of the mechanization of~\citep{s11}. The census of Remark~\ref{rem:census} and the checks of
-Proposition~\ref{prop:afam} were run with Python programs that read \texttt{blockTable}; they are
-available from the authors on request.
+part of the mechanization reported in~\citep{s11}; we do not name its declarations here. The census
+of Remark~\ref{rem:census} and the checks of Proposition~\ref{prop:afam} were run with Python
+programs that read \texttt{blockTable}; they are available from the authors on request.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

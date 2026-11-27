@@ -37,22 +37,22 @@
 
 \begin{document}
 \begin{abstract}
-Head reduction gives every closed term $t$ built from the combinator $S$ a prefix $\NF_d(t)$ of each
-finite depth $d$, a finite tree; these are the prefixes of its infinitary normal form. Call $t$ and
+Let $t$ be a closed term built from the combinator $S$. Head reduction gives $t$, for each depth $d$,
+a finite tree $\NF_d(t)$; these trees are the prefixes of its infinitary normal form. Call $t$ and
 $u$ tree-equal, $t\approx u$, if $\NF_d(t)=\NF_d(u)$ for every $d$. We prove that tree equality is a
 congruence: if $t\approx t'$ and $u\approx u'$, then $t\,u\approx t'\,u'$, so $\approx$ is preserved by
-every context. The proof mirrors each head step of one side by head steps of the other, on the least
+every context. The proof mirrors each head step of $t\,u$ by head steps of $t'\,u'$, on the least
 relation that contains $\approx$ and is closed under application, and then compares prefixes by
 induction on the depth. With the same tools and a kernel-checked rank table, we prove that the
-38-element block model that decides head normal forms is $\approx$-invariant: tree-equal terms have
-the same block. Three consequences follow. The relation ``tree-equal in every context'' is $\approx$
+38-element block model, which decides head normal forms, is $\approx$-invariant: tree-equal terms have
+the same block. Four corollaries follow. The relation ``tree-equal in every context'' is $\approx$
 itself. Equality of folds in every model of the tower of finite models that computes the prefixes
-is also $\approx$, so the conjecture that tree-equal terms are convertible is equivalent to its
-versions for these two relations. And, by a classical argument, the conjecture is equivalent to
-residual finiteness together with the $\approx$-invariance of the fold into every finite model of the
-$S$-law. The two theorems and their lemmas are mechanized in Lean~4, using only the axioms of
-propositional extensionality and quotient soundness. The consequences, and the reading of $\approx$ as
-equality of infinitary normal forms, are not mechanized.
+is also $\approx$. Hence the conjecture that tree-equal terms are convertible is equivalent to its
+versions for these two relations. By an argument that uses Markov's principle, the conjecture is
+also equivalent to residual finiteness together with the $\approx$-invariance of the fold into every
+finite model of the $S$-law. The two theorems and their lemmas are mechanized in Lean~4, using only
+the axioms of propositional extensionality and quotient soundness. The corollaries, and the reading
+of $\approx$ as equality of infinitary normal forms, are not mechanized.
 \end{abstract}
 
 \keywords{combinatory logic, combinator $S$, infinitary normal forms, congruence, finite models, Lean}
@@ -68,38 +68,38 @@ every depth. We prove:
 
 \begin{thmC}
 If $t\approx t'$ and $u\approx u'$ for closed $S$-terms, then $t\,u\approx t'\,u'$. Hence
-$C[t]\approx C[t']$ for every context $C$, with any number of holes, all filled with $t$ on the left
+$C[t]\approx C[t']$ for every context $C$, a term built from $S$ and holes, with any number of holes, all filled with $t$ on the left
 and with $t'$ on the right.
 \end{thmC}
 
 So two terms with the same tree cannot be told apart by placing them in a context and reading the
 tree. If $t$ has no head normal form, the prefixes of $t\,u$ are built from those of $t$ and $u$.
 If $t$ has one, a prefix of $t\,u$ of fixed depth can depend on prefixes of $t$ of unbounded depth
-(Remark~\ref{rem:modulus}). So the proof does not combine trees. It runs the head reduction of
+(Remark~\ref{rem:modulus}). So the proof does not assemble the prefixes of $t\,u$ from those of $t$
+and $u$. It runs the head reduction of
 $t\,u$ and mirrors each step on $t'\,u'$ (Section~\ref{sec:C}).
 
 Section~\ref{sec:F} applies the same tools to the 38-element block model of~\citep{s1}, whose
-fold $b(t)$ decides whether $t$ has a head normal form.
+fold $b(t)$, the value of $t$ in the model, decides whether $t$ has a head normal form.
 
 \begin{thmF}
 If $t\approx u$, then $b(t)=b(u)$.
 \end{thmF}
 
-Section~\ref{sec:cor} derives three corollaries. Terms that are tree-equal in every context are
+Section~\ref{sec:cor} derives four corollaries. Terms that are tree-equal in every context are
 exactly the tree-equal terms (Corollary~\ref{cor:c}). Terms with equal folds in every model of the
 tower of~\citep{s6}, which computes the prefixes, are again exactly the tree-equal terms
 (Corollary~\ref{cor:F}). So the conjecture that tree-equal terms are convertible~\citep[Conjecture~11]{s6}
 is equivalent to its versions for these two relations (Corollary~\ref{cor:lock}); it is also
-equivalent, classically, to residual finiteness together with the invariance under $\approx$ of the
+equivalent, by an argument that uses Markov's principle, to residual finiteness together with the invariance under $\approx$ of the
 fold into every finite $S$-model (Corollary~\ref{cor:rf}). These are equivalences between open
 statements. Section~\ref{sec:scope} says what is not proved.
 
-\emph{Assumptions.} Theorems~C and~F use three facts about blocks from~\citep{s1}, Waldmann's
-top-termination theorem in the form~(W) below~\citep{s3}, and three facts about prefixes
-from~\citep{s3}, all stated in Section~\ref{sec:prefix} and all mechanized. Theorem~F also uses a
-rank table on blocks, checked by kernel evaluation. The corollaries also use the tower of finite
-models built in the proof of~\citep[Theorem~1]{s6}, \citep[Lemma~10]{s6}, and, for
-Corollary~\ref{cor:rf}, the Church--Rosser theorem~\citep{terese}. Reading $\approx$ as $t^\infty=u^\infty$
+\emph{Assumptions.} Theorems~C and~F use two facts about blocks from~\citep{s1}, (B1) and (B2),
+Waldmann's top-termination theorem in the form~(W) below~\citep{s3}, and three facts about prefixes
+from~\citep{s3}. Section~\ref{sec:prefix} states all six, and all are mechanized. Theorem~F also uses
+a rank table on blocks, checked by kernel evaluation. The corollaries also use the tower of finite
+models built in the proof of~\citep[Theorem~1]{s6}, and~\citep[Lemmas~4 and~10]{s6}. Reading $\approx$ as $t^\infty=u^\infty$
 uses the identification of $\NF$ prefixes with prefixes of $t^\infty$ in~\citep{s3}
 (Section~\ref{sec:scope}).
 
@@ -110,7 +110,7 @@ any position; $\red$ is the reflexive--transitive closure of $\to$, and $\conv$ 
 Every $t\in\Ter$ is $S\,u_1\cdots u_m$ for a unique $m\ge0$; the $u_i$ are its \emph{items}, and $t$ is
 a \emph{head normal form} (hnf) of \emph{kind} $m$ if $m\le2$. If $m\ge3$, the \emph{head step} is
 $t\to u_1\,u_3\,(u_2\,u_3)\,u_4\cdots u_m$, and $\hred$ is the reflexive--transitive closure of head
-steps. A head step of $f$ is a head step of $f\,w$, so $f\hred f'$ implies $f\,w\hred f'\,w$. The term
+steps. The \emph{head run} of $t$ is its sequence of head steps; its terms are its \emph{frames}. A head step of $f$ is a head step of $f\,w$, so $f\hred f'$ implies $f\,w\hred f'\,w$. The term
 $t$ \emph{has an hnf} if it reduces to one.
 
 \emph{Blocks.} Let $\B=\{0,\dots,37\}$ with the table $\beta$ of~\citep{s1}. The \emph{block} of a term
@@ -118,7 +118,7 @@ is $b(S)=0$, $b(t\,u)=\beta(b(t),b(u))$, and $\bot=36$. We use:
 \begin{itemize}
 \item[(B1)] if $t\red u$, then $b(t)=b(u)$~\citep[Lemma~3]{s1};
 \item[(B2)] $b(t)=\bot$ iff $t$ has no hnf, and if $b(t)\ne\bot$, then $t\hred u$ for an hnf
-  $u$~\citep[Proposition~4 and Theorem~9]{s1};
+  $u$~\citep[Proposition~4, and Theorem~9 with its proof]{s1};
 \item[(W)] for every $t$, $t\hred s$ where $s$ is an hnf or $s=f\,w$ with
   $b(f)=\bot$~\citep[Theorem~3 and the proof of Proposition~9(b)]{s3}.
 \end{itemize}
@@ -135,7 +135,7 @@ We use three facts from~\citep{s3}:
 \item[(N2)] if $t\red u$, then $\NF_d(t)=\NF_d(u)$;
 \item[(N3)] $b(t)=\bot$ iff, for every $d$, the left spine of $\NF_d(t)$ consists of $d$ nodes.
 \end{itemize}
-By (N1) and the last clause,
+By (N1) and the last clause of the definition of $\NF$,
 \begin{itemize}
 \item[(N4)] if $t\hred f\,w$ and $f\,w$ is settled, then $\NF_{d+1}(t)=\NF_d(f)\cdot\NF_d(w)$.
 \end{itemize}
@@ -144,7 +144,7 @@ By (N1) and the last clause,
 $t\approx u$ iff $\NF_d(t)=\NF_d(u)$ for every $d$. We say that $t$ and $u$ are \emph{tree-equal}.
 \end{definition}
 
-This is an equivalence relation, and by (N2) and Church--Rosser, $t\conv u$ implies $t\approx u$.
+This is an equivalence relation, and by (N2), $t\conv u$ implies $t\approx u$.
 
 \begin{lemma}\label{lem:parts}
 \textup{(a)} If $t\hred s$, then $t\approx s$.
@@ -161,8 +161,8 @@ every $d$. (c) is (N3).
 \end{proof}
 
 \begin{lemma}[Fact K]\label{lem:K}
-Let $t\approx t'$ and $t\hred u$, an hnf. Then $t'\hred u'$, an hnf of the same kind, and
-corresponding items of $u$ and $u'$ are tree-equal.
+Let $t\approx t'$, and let $t\hred u$ with $u$ an hnf. Then $t'\hred u'$ for some hnf $u'$ of the
+same kind, and corresponding items of $u$ and $u'$ are tree-equal.
 \end{lemma}
 
 \begin{proof}
@@ -170,9 +170,9 @@ By Lemma~\ref{lem:parts}(c) and (B2), $t'\hred u'$ for an hnf $u'$, and $u\appro
 by Lemma~\ref{lem:parts}(a). The prefix $\NF_2$ shows the kind: by (N4), $\NF_2(S)=S$,
 $\NF_2(S\,a)=\NF_1(S)\cdot\NF_1(a)=S\cdot\NF_1(a)$ and
 $\NF_2(S\,a\,c)=\NF_1(S\,a)\cdot\NF_1(c)=(\hole\cdot\hole)\cdot\NF_1(c)$. So $u$ and $u'$ have one kind.
-Hnfs are settled, so Lemma~\ref{lem:parts}(b) gives $a\approx a'$ for $u=S\,a$, $u'=S\,a'$, and
-$S\,a\approx S\,a'$ and $c\approx c'$ for $u=S\,a\,c$, $u'=S\,a'\,c'$; applied once more, to $S\,a\approx
-S\,a'$, it gives $a\approx a'$.
+Hnfs are settled, so Lemma~\ref{lem:parts}(b) applies. For $u=S\,a$ and $u'=S\,a'$ it gives
+$a\approx a'$. For $u=S\,a\,c$ and $u'=S\,a'\,c'$ it gives $S\,a\approx S\,a'$ and $c\approx c'$, and a
+second application, to $S\,a\approx S\,a'$, gives $a\approx a'$.
 \end{proof}
 
 \section{Theorem C}\label{sec:C}
@@ -196,12 +196,13 @@ Hence if $t\hred s$, then $t'\hred s'$ for some $s'$ with $s\cg s'$.
 \end{lemma}
 
 \begin{proof}
-(a) If $t\approx t'$, this is Lemma~\ref{lem:K} with $u=t$. Otherwise $t=E\,r$ and $t'=E'\,r'$ with
+(a) If $t\cg t'$ comes from $t\approx t'$, this is Lemma~\ref{lem:K} with $u=t$. Otherwise it comes
+from the application rule: $t=E\,r$ and $t'=E'\,r'$ with
 $E\cg E'$ and $r\cg r'$, so $m\ge1$, $E=S\,u_1\cdots u_{m-1}$ and $r=u_m$. By induction on $m$,
 $E'\hred S\,u'_1\cdots u'_{m-1}$ with $u_i\cg u'_i$, and so $t'\hred S\,u'_1\cdots u'_{m-1}\,r'$.
 
-(b) If $t\approx t'$, take $t'_1=t'$: $t_1\approx t\approx t'$ by Lemma~\ref{lem:parts}(a). Otherwise
-$t=A\,x$ and $t'=A'\,x'$ with $A\cg A'$ and $x\cg x'$. If the step is a head step $A\to A_1$ of $A$,
+(b) If $t\cg t'$ comes from $t\approx t'$, take $t'_1=t'$: $t_1\approx t\approx t'$ by
+Lemma~\ref{lem:parts}(a). Otherwise, by the application rule, $t=A\,x$ and $t'=A'\,x'$ with $A\cg A'$ and $x\cg x'$. If the step is a head step $A\to A_1$ of $A$,
 then by induction on $t$, $A'\hred A'_1$ with $A_1\cg A'_1$, and $t'\hred A'_1\,x'\cg A_1\,x$. Otherwise
 $A=S\,f\,g$ and $t_1=f\,x\,(g\,x)$. By~(a), $A'\hred S\,f'\,g'$ with $f\cg f'$ and $g\cg g'$, so
 $t'\hred S\,f'\,g'\,x'\to f'\,x'\,(g'\,x')$, and $f\,x\,(g\,x)\cg f'\,x'\,(g'\,x')$. The second claim
@@ -218,8 +219,8 @@ Lemma~\ref{lem:sim}(a), $s'$ head-reduces to an hnf.
 \end{proof}
 
 \begin{lemma}\label{lem:split}
-If $t\cg t'$, then $t\hred s$ and $t'\hred s'$ such that $s\approx s'$, or $s=E\,r$ and $s'=E'\,r'$ are
-settled with $E\cg E'$ and $r\cg r'$.
+If $t\cg t'$, there are $s,s'$ with $t\hred s$ and $t'\hred s'$ such that either $s\approx s'$, or
+$s=E\,r$ and $s'=E'\,r'$ are settled with $E\cg E'$ and $r\cg r'$.
 \end{lemma}
 
 \begin{proof}
@@ -227,8 +228,8 @@ By (W), $t\hred s$ with $s$ an hnf or $s=f\,w$ with $b(f)=\bot$. By Lemma~\ref{l
 s''$ with $s\cg s''$. If $s=S\,u_1\cdots u_m$ is an hnf, Lemma~\ref{lem:sim}(a) gives $s''\hred
 s'=S\,u'_1\cdots u'_m$ with $u_i\cg u'_i$. For $m=0$, $s=s'=S$. For $m\ge1$, $s$ and $s'$ are hnfs,
 hence settled, $r=u_m\cg u'_m=r'$, and $E\cg E'$ by Definition~\ref{def:cong}, since $S\cg S$. Now let
-$s=f\,w$ with $b(f)=\bot$. By Definition~\ref{def:cong}, $s\approx s''$, and we take $s'=s''$; or
-$s''=f'\,w'$ with $f\cg f'$ and $w\cg w'$. In the second case $b(f')=\bot$, for otherwise
+$s=f\,w$ with $b(f)=\bot$. If $s\cg s''$ comes from $s\approx s''$, we take $s'=s''$. Otherwise it
+comes from the application rule, and $s''=f'\,w'$ with $f\cg f'$ and $w\cg w'$. In the second case $b(f')=\bot$, for otherwise
 Lemma~\ref{lem:fold}, applied to $f'\cg f$, would give $f$ an hnf; so $s$ and $s'=s''$ are settled.
 \end{proof}
 
@@ -244,29 +245,33 @@ So $\cg$ is contained in $\approx$, and it contains $\approx$ by definition. If 
 u'$, then $t\,u\cg t'\,u'$, so $t\,u\approx t'\,u'$; and $C[t]\cg C[t']$ by induction on $C$.
 \end{proof}
 
-The proof is constructive: the only case split on kinds is $b(f')=\bot$ in Lemma~\ref{lem:split}.
+The proof is constructive: the case splits are on the last rule of a derivation of $\cg$, on the
+shape of a term, and, once, on the decidable test $b(f')=\bot$ in Lemma~\ref{lem:split}.
 
 \begin{remark}\label{rem:modulus}
 Theorem~C gives equality of prefixes, not a modulus: it does not bound the depth to which $t$ must
 be known to fix $\NF_d(C[t])$. No bound depending on $d$ alone exists. By~\citep[\S6]{s6}, for
-$k\ge8$ and all $x,y$, the terms $t_i=S^k(S\,S\,c_i)$ with $c_1=S\,(S\,S)$ and $c_2=S\,S\,S$ satisfy
-$t_i\,x\,y\hred P\,Q\,(c_i\,P\,Q)$ with $P$ and $Q$ without an hnf. The term $c_2\,P\,Q$ has no hnf,
+$k\ge8$ and all $x,y$, the terms $t_i=S^k(S\,S\,c_i)$, where $S^kv$ is $v$ under $k$ applications of $S$, with
+$c_1=S\,(S\,S)$ and $c_2=S\,S\,S$ satisfy
+$t_i\,x\,y\hred P\,Q\,(c_i\,P\,Q)$ with $(P,Q)=(P_k,Q_k)$ of~\citep[Lemma~7]{s6}, neither with an hnf. The term $c_2\,P\,Q$ has no hnf,
 while $c_1\,P\,Q\hred S\,(P\,Q)\,(Q\,(P\,Q))$, so by (N3) and (N4) the prefixes of $t_1\,x\,y$ and
-$t_2\,x\,y$ differ at depth $4$. The prefixes of $t_1$ and $t_2$ agree to depth $k+2$.
+$t_2\,x\,y$ differ at depth $4$. The prefixes of $t_1$ and $t_2$ agree to depth $k+2$, and those of $t_1\,x$ and $t_2\,x$ to depth
+$k+3$. So for $t=t_i\,x$ and $u=y$, the prefix of $t\,u$ at depth $4$ is not determined by the
+prefixes of $t$ to depth $k+3$.
 \end{remark}
 
 \begin{remark}
 \citep[Theorem~9]{s6} proves, by a simulation of the same kind, that terms related by a relation
 $\simeq_{77}$, defined from values in a finite model, have equal observables in every context. There
-the relation carries a grade, which the simulation spends. Here none is needed: tree equality passes to the items
+the relation carries a grade, which the simulation spends. Here no grade is needed, because tree equality passes to the items
 of an hnf and to the parts of a settled term at every depth (Lemmas~\ref{lem:parts}
 and~\ref{lem:K}).
 \end{remark}
 
 \section{Theorem F}\label{sec:F}
 
-Let $T=\{0,1,2,4,8,17\}$ and $I_0=\{\beta(0,a):a\in\B\}$, a set of $14$ blocks, the blocks of the
-terms $S\,a$. Write $S^0S=S$ and $S^{k+1}S=S\,(S^kS)$. We use the following facts about $\beta$, each
+Let $T=\{0,1,2,4,8,17\}$, and let $I_0=\{\beta(0,a):a\in\B\}$; this set has $14$ elements and
+consists of the blocks of the terms $S\,a$. Write $S^0S=S$ and $S^{k+1}S=S\,(S^kS)$. We use the following facts about $\beta$, each
 checked by evaluation in the Lean kernel.
 \begin{itemize}
 \item[(T1)] No entry of $\beta$ is $0$~\citep[Lemma~8(i)]{s1}, so $b(u)=0$ only for $u=S$. If
@@ -279,7 +284,7 @@ checked by evaluation in the Lean kernel.
     $p\ne p'$ and $\rho(p,p')<r$, or $c\ne c'$ and $\rho(c,c')<r$.
   \end{itemize}
 \end{itemize}
-The rank table was found by computer; the proofs use only (T1) and (T2).
+We found the rank table by computer search; the proofs use only (T1) and (T2).
 
 \begin{lemB}
 \textup{(a)} If $b(u)\in T$, then $u=S^kS$ for some $k\ge0$.
@@ -298,24 +303,26 @@ The blocks of $S^kS$ are $0,1,2,4,8$ for $k\le4$ and $17$ for $k\ge5$, so every 
 normal form.
 
 \begin{proof}[Proof of Theorem~F]
-By strong induction on $\rho(b(t),b(u))$. Suppose $b(t)\ne b(u)$. By Lemma~\ref{lem:parts}(c), neither
+Let $t\approx u$. By strong induction on $\rho(b(t),b(u))$. Suppose $b(t)\ne b(u)$. By Lemma~\ref{lem:parts}(c), neither
 block is $\bot$, for then both would be. Neither is $17$: if $b(t)=17$, then $t=S^kS$ by Lemma~B(a)
 and $b(u)=b(t)$ by Lemma~B(b), and symmetrically for $u$. So $r=\rho(b(t),b(u))>0$ by (T2)(i). By (B2)
 and Lemma~\ref{lem:K}, $t\hred v$ and $u\hred v'$ with hnfs $v,v'$ of one kind and tree-equal items, and
 $b(v)=b(t)$, $b(v')=b(u)$ by (B1). Kind $0$ is excluded, since $v=v'=S$. At kind $1$, $v=S\,a$ and
-$v'=S\,a'$ with $a\approx a'$; by (T2)(ii), $b(a)\ne b(a')$ and $\rho(b(a),b(a'))<r$, against the
+$v'=S\,a'$ with $a\approx a'$; by (T2)(ii), $b(a)\ne b(a')$ and $\rho(b(a),b(a'))<r$, contradicting the
 induction hypothesis. At kind $2$, $v=S\,a\,c$ and $v'=S\,a'\,c'$ with $a\approx a'$ and $c\approx c'$, so
 $S\,a\approx S\,a'$ by Theorem~C. As $b(S\,a),b(S\,a')\in I_0$, (T2)(iii) gives one of the pairs
-$(S\,a,S\,a')$, $(c,c')$ with different blocks and rank below $r$, again against the induction
-hypothesis. So $b(t)=b(u)$.
+$(S\,a,S\,a')$, $(c,c')$ with different blocks and rank below $r$, again contradicting the
+induction hypothesis. So $b(t)=b(u)$.
 \end{proof}
 
 The splits are on equality of numbers, so the proof is constructive.
 
 \begin{remark}
-Block $17$ cannot be handled by the rank alone. As $\beta(0,17)=17$ and $\beta(0,27)=27$, (T2)(ii) at
-$a=17$, $a'=27$ forces $\rho(17,27)=0$: an infinite chain of one-item hnfs could carry either label.
-Lemma~B removes $17$, because only the finite towers carry it. Theorem~F gives no uniform depth: for $k\ge4$, $S^k(S\,S\,S)$ and $S^k(S\,S)$ have blocks
+The rank alone cannot handle block $17$. As $\beta(0,17)=17$ and $\beta(0,27)=27$, (T2)(ii) at
+$a=17$, $a'=27$ forces $\rho(17,27)=0$: an infinite chain of one-item hnfs could take either label.
+Lemma~B treats block $17$ separately, because only the terms $S^kS$ have it.
+
+Theorem~F gives no uniform depth: for $k\ge4$, $S^k(S\,S\,S)$ and $S^k(S\,S)$ have blocks
 $27$ and $17$, and their prefixes agree to depth $k+1$. So $b(t)$ is not a function of $\NF_d(t)$ for
 any fixed $d$.
 \end{remark}
@@ -332,12 +339,14 @@ The empty context gives ${\eqc}\subseteq{\approx}$, and Theorem~C gives the conv
 
 \emph{The tower.} An \emph{$S$-model} is a set $M$ with a binary operation and an element $s$ such that
 $s\,a\,b\,c=a\,c\,(b\,c)$; its fold $t\mapsto\bar t$ sends $S$ to $s$ and $t\,u$ to $\bar t\,\bar u$, and
-convertible terms have equal folds~\citep[\S2]{s6}. The \emph{observable} over $M$~\citep[Definition~3]{s6}
-is $O(t)=(m,\bar u_1,\dots,\bar u_m)$ if the head run of $t$ reaches the hnf $S\,u_1\cdots u_m$, and
-$O(t)=(\bot,\bar f,\bar w)$ if it first reaches a frame $f\,w$ with $b(f)=\bot$. Let $t\equiv_O u$ iff
-$O(C[t])=O(C[u])$ for every context $C$. The proof of~\citep[Theorem~1]{s6} builds $M_0$, the
-one-element model, $M_1=\B$, and $M_{d+1}=\Ter/{\equiv_O}$ for the observable over $M_d$ ($d\ge1$); each
-$M_d$ is a finite $S$-model~\citep[Lemma~10]{s6}, and the fold of $t$ into $M_{d+1}$ is its class. Let
+convertible terms have equal folds~\citep[\S2]{s6}. The \emph{observable} $O_d$ over $M_d$~\citep[Definition~3]{s6}, for an $S$-model $M_d$ in place of
+$M$, is $O_d(t)=(m,\bar u_1,\dots,\bar u_m)$ if the head run of $t$ reaches the hnf $S\,u_1\cdots u_m$, and
+$O_d(t)=(\bot,\bar f,\bar w)$ if it first reaches a frame $f\,w$ with $b(f)=\bot$. Let $t\equiv_{O_d} u$ iff
+$O_d(C[t])=O_d(C[u])$ for every context $C$. The proof of~\citep[Theorem~1]{s6} builds the tower: $M_0$
+is the one-element model, $M_1=\B$, and $M_{d+1}=\Ter/{\equiv_{O_d}}$ ($d\ge1$). Each $M_d$ with $d\ge1$
+maps onto $\B$ by a homomorphism fixing $s$ (proof of~\citep[Theorem~1]{s6}), which is the standing
+hypothesis of~\citep[Lemma~10]{s6}, so each $M_d$ is a finite $S$-model; the fold of $t$ into
+$M_{d+1}$ is its class. Let
 $t\eqF u$ iff $t$ and $u$ have equal folds in every $M_d$.
 
 \begin{corollary}\label{cor:F}
@@ -348,21 +357,21 @@ $t$ and $u$ have equal folds in $M_d$, for every $d$.
 \begin{proof}
 First claim, by induction on $d$. For $d=0$ there is nothing to show. For $d=1$, $\NF_1(t)$ is $S$ if
 $t=S$ and $\hole\cdot\hole$ otherwise, and $b(t)=0$ iff $t=S$ (T1). For $d\ge1$, the class of $t$ in
-$M_{d+1}$ determines $O(t)$, by the empty context. By (N4), $\NF_{d+1}(t)$ is $S$,
+$M_{d+1}$ determines $O_d(t)$, by the empty context. By (N4), $\NF_{d+1}(t)$ is $S$,
 $\NF_d(S)\cdot\NF_d(a)$, $\NF_d(S\,a)\cdot\NF_d(c)$ or $\NF_d(f)\cdot\NF_d(w)$ when the head run of $t$
 reaches $S$, $S\,a$, $S\,a\,c$ or first reaches $f\,w$ with $b(f)=\bot$. By the induction hypothesis
 these are determined by the values in $M_d$ of $a$, of $S\,a$ (that is, $s\,\bar a$) and $c$, and of $f$
-and $w$, which $O(t)$ records.
+and $w$, which $O_d(t)$ records.
 
 Second claim, by induction on $d$. For $d=0$ it is trivial, and for $d=1$ it is Theorem~F. For
-$d\ge1$, let $t\approx u$. Then $O(t)=O(u)$: if $t$ has an hnf, Lemma~\ref{lem:K} gives hnfs of one kind
-with tree-equal items, which have equal values in $M_d$ by the induction hypothesis; if not, neither
-has $u$ (Lemma~\ref{lem:parts}(c)), and their first frames $f\,w$ and $f'\,w'$ with $b(f)=b(f')=\bot$
+$d\ge1$, let $t\approx u$. Then $O_d(t)=O_d(u)$: if $t$ has an hnf, Lemma~\ref{lem:K} gives hnfs of one kind
+with tree-equal items, which have equal values in $M_d$ by the induction hypothesis; if not, then $u$
+has no hnf either (Lemma~\ref{lem:parts}(c)), and their first frames $f\,w$ and $f'\,w'$ with $b(f)=b(f')=\bot$
 are settled, so $f\approx f'$ and $w\approx w'$ by Lemma~\ref{lem:parts}(b). By Theorem~C,
-$C[t]\approx C[u]$, so $O(C[t])=O(C[u])$ for every $C$, and $t\equiv_O u$.
+$C[t]\approx C[u]$, so $O_d(C[t])=O_d(C[u])$ for every $C$, and $t\equiv_{O_d} u$.
 \end{proof}
 
-The conjecture of~\citep[Conjecture~11]{s6} is called Lock~1 in the working notes of the series. For
+We call the conjecture of~\citep[Conjecture~11]{s6} Lock~1. For
 $\approx$ as defined here, it and its two variants read:
 \begin{itemize}
 \item \emph{Lock 1}: $t\approx u$ implies $t\conv u$;
@@ -378,44 +387,49 @@ Lock~1, CL1 and FL1 are equivalent.
 By Corollaries~\ref{cor:c} and~\ref{cor:F}, the three hypotheses are one relation.
 \end{proof}
 
-Let \emph{FF$\forall$} say that $t\approx u$ implies $\bar t=\bar u$ in every finite $S$-model, and
+Let \emph{FF$\forall$} (fold invariance in finite models) say that $t\approx u$ implies $\bar t=\bar u$ in every finite $S$-model, and
 \emph{RF} (residual finiteness) that for all $t\not\conv u$ some finite $S$-model has $\bar t\ne\bar u$.
 
 \begin{corollary}\label{cor:rf}
-Lock~1 holds iff FF$\forall$ and RF hold. The proof of RF from Lock~1 uses Markov's principle, and
-the converse uses excluded middle on $\conv$, or Markov's principle.
+Lock~1 holds iff FF$\forall$ and RF hold. Proving RF from Lock~1 uses Markov's principle; the
+converse uses excluded middle for $\conv$ or, alternatively, Markov's principle.
 \end{corollary}
 
 \begin{proof}
-Assume Lock~1. Folds are invariant under $\conv$, so FF$\forall$ holds. Let $t\not\conv u$. By
-Lock~1, not all $\NF_d(t)$ and $\NF_d(u)$ agree. The prefixes are computable~\citep[Proposition~9]{s3},
-so Markov's principle gives a $d$ with $\NF_d(t)\ne\NF_d(u)$. By Corollary~\ref{cor:F}, the folds of
+Assume Lock~1. By Lock~1, $t\approx u$ implies $t\conv u$, and folds are invariant under $\conv$, so
+FF$\forall$ holds. Let $t\not\conv u$. By Lock~1, not all $\NF_d(t)$ and $\NF_d(u)$ agree. The
+prefixes $\NF_d$ are computable: by (W) and (B2) the head run reaches a settled term, which the block
+detects, and (N4) recurses. So Markov's principle, applied to the decidable predicate
+$\NF_d(t)\ne\NF_d(u)$, gives a $d$ with $\NF_d(t)\ne\NF_d(u)$. By Corollary~\ref{cor:F}, the folds of
 $t$ and $u$ into the finite model $M_d$ differ.
 
 Conversely, let $t\approx u$. If $t\not\conv u$, RF gives a finite $S$-model with $\bar t\ne\bar u$,
 against FF$\forall$. So $t\conv u$ is not refutable. To conclude $t\conv u$ we use excluded middle,
-or Markov's principle, as $t\conv u$ says that some search for a common reduct (Church--Rosser)
-succeeds.
+or Markov's principle, because $t\conv u$ says that a search for a conversion succeeds.
 \end{proof}
 
 \section{Scope}\label{sec:scope}
 
 \emph{Tree equality and $t^\infty$.} Theorems~C and~F are proved for $\approx$ as in
 Definition~\ref{def:eqv}, equality of the prefixes $\NF_d$. The reading of $\approx$ as $t^\infty=u^\infty$
-rests on~\citep{s3}: that the prefixes $\NF_d(t)$ are the depth-$d$ prefixes of the limit of a strongly
-convergent reduction is not mechanized there~\citep[Remark~8]{s3}, and the uniqueness of that limit
-is cited~\citep[Theorem~7]{s3}. Through it, Theorem~C says that $t^\infty=t'^\infty$ and
-$u^\infty=u'^\infty$ imply $(t\,u)^\infty=(t'\,u')^\infty$. The infinitary Church--Rosser property of
-orthogonal non-collapsing systems~\citep{kksv} suggests a second route to that statement; we have not
-checked its hypotheses against the source and do not use it.
+rests on~\citep{s3}. That work does not mechanize the claim that the prefixes $\NF_d(t)$ are the
+depth-$d$ prefixes of the limit of a strongly convergent reduction~\citep[Remark~8]{s3}, and it cites
+the uniqueness of that limit~\citep[Theorem~7]{s3}. Given the reading, Theorem~C says that
+$t^\infty=t'^\infty$ and $u^\infty=u'^\infty$ imply $(t\,u)^\infty=(t'\,u')^\infty$. The rule is
+orthogonal and non-collapsing~\citep[\S2]{s3}, so the infinitary Church--Rosser property
+of~\citep{kksv} holds for it~\citep[proof of Theorem~7]{s3}. It gives a second route: $t\,u$ reduces
+strongly convergently to $t^\infty u^\infty$ and to $(t\,u)^\infty$, so these two have a common reduct,
+which is $(t\,u)^\infty$; likewise $t'\,u'$ and $t^\infty u^\infty$ reach $(t'\,u')^\infty$, and normal
+forms of one term coincide. We do not use this route.
 
-\emph{Finite models.} Corollary~\ref{cor:F} proves that $\approx$ preserves the fold only for the models
-$M_d$ of the tower. FF$\forall$, for an arbitrary finite $S$-model, is open; it would follow if the fold
-into every finite $S$-model factored through the fold into some $M_d$, which we do not know.
+\emph{Finite models.} Corollary~\ref{cor:F} proves only that $\approx$ preserves the fold into the models
+$M_d$ of the tower. FF$\forall$, for an arbitrary finite $S$-model, is open. It would follow if the fold
+into every finite $S$-model factored through the fold into some $M_d$; we do not know whether it
+does.
 
 \emph{Open problems.} Lock~1 is open, and so are CL1, FL1 and RF. By McKinsey and
 Evans~\citep{mckinsey,evans}, RF would make convertibility decidable, since $\conv$ is recursively
-enumerable; Lock~1 would do the same~\citep[\S6]{s6}. The corollaries relate these statements and decide
+enumerable and the finite $S$-models, defined by one law, can be listed; Lock~1 would do the same~\citep[\S6]{s6}. The corollaries relate these statements and decide
 none of them.
 
 \emph{Mechanization.} The definitions of Sections~\ref{sec:prefix} and~\ref{sec:C}, Lemmas~\ref{lem:parts}
@@ -433,7 +447,7 @@ the axioms \texttt{propext} and \texttt{Quot.sound}; \texttt{Ski/Audit.lean} che
 them and pins the axioms of \texttt{eqv\_app}, \texttt{eqv\_ctx}, \texttt{cong\_eqv},
 \texttt{fold\_eqv}, \texttt{eqv\_tower} and \texttt{eq\_tower}. The table facts are proved by
 \texttt{decide +kernel}, with no \texttt{native\_decide}. The Lean datatype of terms also has the
-constructors $K$ and $I$, and every statement assumes \texttt{PureS} for its terms. Lean's
+constructors $K$ and $I$, and every theorem about reduction or blocks assumes \texttt{PureS} for its terms. Lean's
 \texttt{FFBlock.tower k} is $S^kS$. The list gives the Lean names.
 
 {\raggedright
@@ -452,7 +466,9 @@ with \texttt{Congruence.parts\_dir}; (c) \texttt{Congruence.eqv\_bot}.
 \texttt{Congruence.ptKind}, \texttt{Congruence.nargs} and \texttt{Congruence.HnfMatch}.
 \item[Definition~\ref{def:cong}] \texttt{Congruence.Cong}, with \texttt{Cong.symm}, \texttt{Cong.pure},
 \texttt{Cong.S} and \texttt{Congruence.cong\_S\_inv}.
-\item[Lemma~\ref{lem:sim}] (a) \texttt{Congruence.cong\_hnf}; (b) \texttt{Congruence.cong\_step} and
+\item[Lemma~\ref{lem:sim}] (a) \texttt{Congruence.cong\_hnf}, in the form that Lemma~\ref{lem:split}
+uses: $t'\hred S\,u'_1\cdots u'_m$ with $S\,u_1\cdots u_{m-1}\cg S\,u'_1\cdots u'_{m-1}$ and $u_m\cg
+u'_m$; the item-wise form that (b) uses is proved inside \texttt{Congruence.cong\_step}; (b) \texttt{Congruence.cong\_step} and
 \texttt{Congruence.cong\_steps}.
 \item[Lemma~\ref{lem:fold}] \texttt{Congruence.cong\_fold}.
 \item[Lemma~\ref{lem:split}] \texttt{Congruence.cong\_split}, with \texttt{Congruence.head\_target}.

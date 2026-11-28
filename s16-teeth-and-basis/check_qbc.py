@@ -142,7 +142,7 @@ assert size(q) == 188 and count(q, 'S') == 15 and count(q, 's') == 82
 print('A =', show(AA))
 print('q =', show(q))
 
-# ---------------------------------------------------------------- passages (Lemma 3), literal outputs
+# ---------------------------------------------------------------- passages (Lemma 4), literal outputs
 W = ['w1', 'w2', 'w3']
 X = 'x'
 passages = [
@@ -170,12 +170,12 @@ for name, t, hd, items, heads in passages:
     print('%-3s %2d head steps (%s); output literal as stated; %d S-frames, first items: %s'
           % (name, k, hs, len(sf), '; '.join(first) if first else '-'))
 
-# The templates reduce to the stated pure-S bodies (Lemma BA)
+# The templates reduce to the stated pure-S bodies (tooth templates, Section 3)
 assert nf(A(TEM, 'e', 'd')) == TEM_BODY and nf(A(T1, 'd')) == T1_BODY and nf(A(T2, 'd')) == T2_BODY
 print('Tem e d, T1 d, T2 d reduce to their bodies (d, e variables)')
 
 
-# ---------------------------------------------------------------- phases (Lemma 4), literally, k < 40
+# ---------------------------------------------------------------- phases (Lemma 5), literally, k < 40
 def irk(k, t):
     for _ in range(k):
         t = A(IR, t)

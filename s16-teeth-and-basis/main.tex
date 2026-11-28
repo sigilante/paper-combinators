@@ -1,0 +1,585 @@
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[numbers,sort]{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{bm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\Ter}{\mathcal S}
+\newcommand{\red}{\twoheadrightarrow}
+\newcommand{\hred}{\twoheadrightarrow_h}
+\newcommand{\hstep}{\to_h}
+\newcommand{\conv}{=_\beta}
+\newcommand{\nconv}{\neq_\beta}
+\newcommand{\sz}[1]{\lvert#1\rvert}
+\newcommand{\rest}{\mathrm{rest}}
+\newcommand{\CT}{\mathrm{CT}}
+\newcommand{\pK}{p_K}
+\newcommand{\qBC}{q_{BC}}
+\newcommand{\Ir}{I_3}
+\newcommand{\Em}{\mathit{Em}}
+\newcommand{\End}{\mathit{End}}
+\newcommand{\Mz}{M_0}
+\newcommand{\Tem}{\mathit{Tm}}
+\newcommand{\Ch}{\mathit{Ch}}
+\newcommand{\mn}{\mathit{mn}}
+\newcommand{\var}{\mathrm{var}}
+\newcommand{\vw}{\vec w}
+
+\title[Teeth and the Basis]{Convertible Teeth Determine $\bm{p_K}$ over $\bm{S}$ but Not over $\bm{\{S,B,C\}}$}
+\author{Claude Opus \& Fable with N.\ E.\ Davis}
+\address{ZeroAttest, Champaign, Illinois, USA}
+\email{NDavis@ZeroAttest.com}
+\urladdr{https://orcid.org/0000-0002-1131-8319}
+\date{\today}
+
+\begin{document}
+\begin{abstract}
+The head run of a closed combinatory term without a head normal form (hnf) splits off an infinite
+sequence of arguments, the term's teeth. An earlier paper proves, for one term $p_K$ built from $S$,
+that every $S$-term without an hnf whose teeth are convertible with those of $p_K$ is itself
+convertible with $p_K$. We show that this theorem depends on the basis. Over $S$, $B$ and $C$ it
+fails. We give a closed term $q_{BC}$ of $188$ atoms, built from $S$, $B$ and $C$, whose $n$-th tooth
+reduces to the $n$-th tooth of $p_K$ for every $n$, and none of whose reducts is built from $S$ alone.
+So $q_{BC}$ is not convertible with $p_K$ over any basis from $\{S,B,C\}$ up to $\{S,K,I,B,C\}$. The
+term contains no $I$, and the term that drives it is not a fixed-point combinator. It replaces $I$ by
+$B\,C\,C$, which acts as the identity only when three arguments follow, and it replaces a fixed-point
+combinator by a family of terms that gains one such wrapper in each phase.
+
+For pure $S$ we prove a cancellation law: if an $S$-term applied to fresh variables reduces to a term
+applied to the same variables, the variables can be removed from both sides. The lemma behind this
+law, the lemma behind the known absence of a fixed-point combinator, and the known fact that
+reduction never shortens an $S$-term together show that five of the six passages of the run of
+$q_{BC}$ cannot be performed by a pure $S$-term on fresh variables. We do not prove that every term
+with the teeth of $p_K$ over $\{S,B,C\}$ must use such passages. The result concerns $p_K$ only;
+whether teeth determine other terms, over $S$ or over larger bases, is open. The proofs are by hand,
+except that a script computes three head runs. The cancellation law, the leaf count and the absence
+of a fixed-point combinator are mechanized in Lean~4; the main theorem is not.
+\end{abstract}
+
+\keywords{combinatory logic, combinator $S$, head normal form, convertibility, bases of combinators}
+\maketitle
+
+\section{Introduction}
+
+A closed term without a head normal form (hnf) has an infinite head run, and the run splits off an
+infinite sequence of arguments, its \emph{teeth} $\tau_1,\tau_2,\dots$ (Section~\ref{sec:runs}).
+Convertible terms have convertible teeth. CT at a term $p$ is the converse: every term without an
+hnf whose teeth are pairwise convertible with those of $p$ is convertible with
+$p$~\citep[Definition~1]{s15}. For the term
+\[
+\pK=S\,(S\,S)\,G\,(Q\,(Q\,G))\,S,\qquad Q=S\,(S\,S),\quad G=S\,Q\,Q,
+\]
+CT is a theorem in pure $S$~\citep[Theorem~1]{s11}. We ask whether this is a fact about $\pK$ or about
+the basis. For a basis $X$, $\CT_X(\pK)$ is the same statement for closed $X$-terms
+(Definition~\ref{def:CT}). A \emph{rival} of $\pK$ over $X$ is a closed $X$-term of spine type whose
+teeth are convertible with those of $\pK$ but which is not convertible with $\pK$; $\CT_X(\pK)$ says
+that there is none. The bases considered here satisfy $\{S\}\subseteq X\subseteq\{S,K,I,B,C\}$.
+
+\begin{theorem}\label{thm:main}
+There is a closed term $\qBC$ of $188$ atoms over $\{S,B,C\}$ such that, for every basis $X$ with
+$\{S,B,C\}\subseteq X\subseteq\{S,K,I,B,C\}$:
+\textup{(a)} $\qBC$ is of spine type, and $\tau_n(\qBC)\red\tau_n(\pK)$ for every $n\ge1$;
+\textup{(b)} no reduct of $\qBC$ is a pure $S$-term; hence $\qBC\nconv\pK$.
+So $\qBC$ is a rival of $\pK$ over $X$ and $\CT_X(\pK)$ fails, while $\CT_{\{S\}}(\pK)$
+holds~\citep[Theorem~1]{s11}.
+\end{theorem}
+
+The term $\qBC$ is written out in Appendix~\ref{app:q}. It contains no $I$, and the term $A\,A$ that
+drives it is not a fixed-point combinator (Section~\ref{sec:rival}). In place of $I$ it uses
+$\Ir=B\,C\,C$, an identity only when at least three arguments follow ($\Ir\,x\,y\,z\hred x\,y\,z$, while
+$\Ir\,x\,y\hred C\,(C\,x)\,y$ is an hnf). In place of a fixed-point combinator it uses a family $\mn_k$
+of terms with $\mn_k\,u\hred\Mz\,\mn_{k+1}\,u$, where $\mn_{k+1}$ carries one more $\Ir$-wrapper than
+$\mn_k$ (Lemma~\ref{lem:phase}). The teeth of $\qBC$ are instances of three templates whose only free
+variables stand for data, and no head step of the run acts on an item that has already been emitted.
+
+Section~\ref{sec:pure} compares with pure $S$. Reduction never shortens an $S$-term, and $S$ has no
+fixed-point combinator; both facts are known (Remarks~\ref{rem:size} and~\ref{rem:fpc}). We add a
+cancellation law (Theorem~\ref{thm:peel}): if $w_1,\dots,w_r$ are distinct variables occurring in neither
+$M$ nor $N$, then $M\,w_1\cdots w_r\red N\,w_1\cdots w_r$ implies $M\red N$. It fails over $\{S,K\}$ and
+over $\{S,B,C\}$, the latter at $\Ir$ itself. The lemma behind the cancellation law, the lemma that
+excludes fixed-point combinators and the leaf count each exclude one kind of behaviour. Together they
+show that five of the six passages (P1)--(P6) of the run of $\qBC$ are behaviours that no pure $S$-term
+has on fresh variables (Proposition~\ref{prop:class}). This classifies which behaviours of the rival
+pure $S$ lacks. It does not show that every rival over $\{S,B,C\}$ must use such passages.
+
+\emph{What is new.} To our knowledge, Theorem~\ref{thm:main} is new. We have not found the cancellation
+law in~\citep{dots} or~\citep{waldmann-ic}. Its proof traces descendants of nodes, a standard
+technique~\citep[ch.~8]{terese}; the closest published result we know is the theorem of Visser and van
+Oostrom that an $S$-term consumes at most three variables~\citep[Theorem~22]{dots}. (Theorem and remark
+numbers of~\citep{dots} refer to the published chapter.) Leaf-count monotonicity is known: Waldmann
+credits it to Bergstra and Klop~\citep{bergstra-klop79} in the proof of~\citep[Proposition~4]{waldmann-ic},
+and it is the first step of the proof of Bergstra's acyclicity theorem in~\citep[Theorem~13]{dots}.
+That $S$ has no fixed-point combinator is folklore. \citep[Remark~15]{dots} derives the reducing case
+from Waldmann's no-spiral theorem~\citep{waldmann-ic}, and attributes to Statman the general case, for
+convertibility and for proper regular combinators in the sense of~\citep[p.~319]{smullyan94}. We give
+one-line proofs of both facts in our notation and claim neither. That $B\,C\,C$ is the identity up to
+$\eta$ is elementary; the standard bases for the $\lambda I$-calculus contain
+$I$~\citep{church41,curryfeys,broda-damas}, and we make no claim about $B\,C\,C$ beyond its use here.
+
+\emph{Assumptions and status.} We use Church--Rosser (CR) and standardization (Std) for weak reduction
+over $X$, for closed and open terms~\citep{terese,hindley78}, and Theorem~1 and Section~3
+of~\citep{s11}. Theorem~\ref{thm:main} also uses the symbolic computations of Lemma~\ref{lem:pass}
+for (P4)--(P6), which our script \texttt{check\_qbc.py} performs exactly; every other step is proved by
+hand. Theorem~\ref{thm:peel}, Remark~\ref{rem:size} and the absolute form of Remark~\ref{rem:fpc} are
+mechanized in Lean~4 (Data availability). Theorem~\ref{thm:main}, Lemma~\ref{lem:arg} in general,
+Lemmas~\ref{lem:g2} and~\ref{lem:trace}, the form of Remark~\ref{rem:fpc} on spare arguments, and
+Proposition~\ref{prop:class} are not.
+
+\section{Head runs over a basis}\label{sec:runs}
+
+Let $X\subseteq\{S,K,I,B,C\}$ contain $S$. Terms are built from the atoms of $X$ and variables by
+application, with the rules
+\[
+S\,x\,y\,z\to x\,z\,(y\,z),\ \ B\,x\,y\,z\to x\,(y\,z),\ \ C\,x\,y\,z\to x\,z\,y,\ \
+K\,x\,y\to x,\ \ I\,x\to x
+\]
+at any position; $\red$ is the reflexive--transitive closure and $\conv$ is convertibility. The system
+is orthogonal, so CR holds~\citep{terese}. The \emph{arity} of $S,B,C$ is $3$, of $K$ is $2$, of $I$ is
+$1$. Every term is $h\,u_1\cdots u_m$ with $h$ an atom or a variable; the $u_i$ are its \emph{items}. If
+$h$ is a combinator and $m\ge\operatorname{ar}(h)$, the \emph{head step} contracts
+$h\,u_1\cdots u_{\operatorname{ar}(h)}$ and keeps $u_{\operatorname{ar}(h)+1},\dots,u_m$. If $h$ is a
+combinator and $m<\operatorname{ar}(h)$, the term is an \emph{hnf}. Head steps give the \emph{head run},
+whose terms are \emph{frames}; $\hred$ is the reflexive--transitive closure of head steps. A head step
+needs only the first $\operatorname{ar}(h)$ items, so $t\hred t'$ implies $t\,r\hred t'\,r$. A closed
+term is \emph{hnf-less} if its head run is infinite. A step is \emph{internal} if it is not a head step.
+
+\begin{itemize}
+\item[(Std)] \citep{terese,hindley78} If $t\red v$, then $t\hred f\red v$ with every step from $f$ to
+$v$ internal. If moreover $f=h\,u_1\cdots u_m$ with $h$ an atom or a variable, then
+$v=h\,u'_1\cdots u'_m$ with $u_i\red u'_i$, since an internal step lies inside an item.
+\end{itemize}
+
+\begin{definition}\label{def:CT}
+A frame $f\,w$ of a closed term is \emph{stable} if $f$ is hnf-less. Let $f\,w$ be the first stable
+frame in the head run of $t$, if there is one. Then $\rest(t)=f$ and $\tau_1(t)=w$, and
+$\tau_{n+1}(t)=\tau_1(\rest^n(t))$ when defined. The term $t$ is of \emph{spine type} if $\rest^n(t)$ is
+defined for every $n$; its \emph{states} are the $\rest^n(t)$ and its \emph{teeth} the $\tau_n(t)$. For a
+closed $X$-term $p$ of spine type, $\CT_X(p)$ says: every closed $X$-term $q$ of spine type with
+$\tau_n(q)\conv\tau_n(p)$ for all $n\ge1$ satisfies $q\conv p$.
+\end{definition}
+
+In pure $S$ every hnf-less term is of spine type~\citep[(F2)]{s11}, so $\CT_{\{S\}}$ is the CT
+of~\citep{s11,s15}. Over $\{S,C\}$ this property fails: with $D=S\,(C\,C)\,C$,
+\[
+D\,D\,C\hstep C\,C\,D\,(C\,D)\,C\hstep C\,(C\,D)\,D\,C\hstep C\,D\,C\,D\hstep D\,D\,C,
+\]
+and the prefix of each of these frames, the frame without its last item, has an hnf. So $D\,D\,C$ is
+hnf-less with no stable frame, which is why Definition~\ref{def:CT} asks for spine type. No rule creates
+an atom that is not in its redex, so every reduct of a $Y$-term is a $Y$-term for every set $Y$ of
+atoms. Hence the head run, the reducts and the teeth of a pure $S$-term are the same over every $X$, and
+those of an $\{S,B,C\}$-term are the same over every $X\supseteq\{S,B,C\}$.
+
+\begin{lemma}\label{lem:spine}
+Let $a_1,a_2,\dots$ be closed terms. Suppose that for every $n$ the head run of $t$ passes through a
+frame $F_n\,a_n\cdots a_1$ in which $F_n$ is hnf-less. Then $t$ is of spine type and $\tau_n(t)=a_n$ for
+every $n$.
+\end{lemma}
+
+\begin{proof}
+Let $P$ be the earliest frame such that every frame from $P$ to $F_1\,a_1$ has last item $a_1$ (a finite
+syntactic check). Its prefix head-reduces to $F_1$, so it is hnf-less and $P$ is stable. An earlier
+frame $g\,w'$ is not stable: if $g$ were hnf-less, every later head step would act on $g$, so $w'$ would
+be the last item of every later frame, $w'=a_1$, against the choice of $P$. So $P=f\,w$ is the first
+stable frame, $w=a_1$ and $f\hred F_1$. As $f$ is hnf-less, every later head step acts on $f$, so the
+head run of $f=\rest(t)$ passes through $F_n\,a_n\cdots a_2$ for every $n\ge2$. Induct.
+\end{proof}
+
+\section{The rival}\label{sec:rival}
+
+\emph{The term.} Write $c_0=G$ and $c_{j+1}=Q\,c_j$, so that $\pK=Q\,c_0\,c_2\,S$, as
+in~\citep[\S3]{s11}. Bracket abstraction $[x]$ is the $\lambda I$ algorithm with the clause
+$[x](E\,x)=E$ and with $\Ir$ in place of $I$: $[x]x=\Ir$; $[x](E\,x)=E$ if $x\notin E$; and $[x](E\,F)$
+is $S\,[x]E\,[x]F$, $B\,E\,[x]F$ or $C\,[x]E\,F$ according as $x$ occurs in both parts, only in $F$, or
+only in $E$. Vacuous abstraction does not arise, so no $K$ appears. Put
+\begin{align*}
+\Em&=[e][E][d][\Ch]\;E\,d\,\Ch\,\bigl(Q\,(Q\,d)\,(Q\,e\,(Q\,(Q\,d)))\,S\bigr),\\
+\End&=[m][d][\Ch]\;m\,(Q\,d)\,(B\,(\Em\,d)\,\Ch),\\
+\Mz&=[m][d][\Ch]\;\Ch\,(\End\,m)\,d\,\Ch\,\bigl(Q\,(Q\,d)\,(Q\,d\,(Q\,(Q\,d)))\,S\bigr)\\
+&\qquad\qquad\qquad\bigl(Q\,d\,(G\,(Q\,d))\,S\bigr),\\
+A&=[x][f]\;f\,(x\,x\,f)=B\,(S\,\Ir)\,(S\,\Ir\,\Ir),\\
+\qBC&=A\,A\,\Mz\,c_1\,\bigl(B\,(\Em\,c_0)\,\Ir\bigr).
+\end{align*}
+Here $Q$, $G$, $S$ and $c_j$ inside the bodies are constants. The atoms $S$ that come from $Q$, $G$,
+$S$ and $c_j$ in these bodies, and those that come from $c_0$ and $c_1$ in $\qBC$, are \emph{data}; the
+other atoms of $\qBC$ form the \emph{program}. The sizes in atoms of $\Em$, $\End$, $\Mz$, $A$ and $\qBC$
+are $32$, $45$, $111$, $12$ and $188$, respectively; $\qBC$ has $51$ atoms $B$, $40$ atoms $C$ and $97$
+atoms $S$, of which $82$ are data. The \emph{tooth templates} are
+\begin{gather*}
+\Tem=[e][d]\,Q\,(Q\,d)\,(Q\,e\,(Q\,(Q\,d)))\,S,\qquad
+T_1=[d]\,Q\,(Q\,d)\,(Q\,d\,(Q\,(Q\,d)))\,S,\\
+T_2=[d]\,Q\,d\,(G\,(Q\,d))\,S.
+\end{gather*}
+No $\Ir$ occurs in the templates, and $\Tem\,e\,d$, $T_1\,d$ and $T_2\,d$ reduce to their bodies by
+steps of program atoms. The reduction is a direct computation, which the script also checks. In
+general $([x]E)\,x$ need not reduce to $E$, since $\Ir\,x$ does not reduce to $x$.
+
+\begin{lemma}\label{lem:pass}
+For all terms $x,y,z,f,u,m,d,\Ch,e,R,E$, and with any further items appended,
+\begin{align*}
+&(P1)\ \ \Ir\,x\,y\,z\hred x\,y\,z, \qquad (P2)\ \ A\,y\,f\,u\hred f\,(S\,\Ir\,\Ir\,y\,f)\,u,\\
+&(P3)\ \ S\,\Ir\,\Ir\,x\,f\hred x\,(\Ir\,x)\,f,\\
+&(P4)\ \ \Mz\,m\,d\,\Ch\hred\Ch\,(\End\,m)\,d\,(\Ir\,\Ch)\,(T_1\,d)\,(T_2\,d),\\
+&(P5)\ \ \End\,m\,d\,\Ch\hred m\,(Q\,d)\,(B\,B\,\Em\,d\,\Ch),\\
+&(P6)\ \ B\,B\,\Em\,e\,R\,E\,d\,\Ch\hstep B\,(\Em\,e)\,R\,E\,d\,\Ch\hred R\,E\,d\,\Ch\,(\Tem\,e\,d),
+\end{align*}
+with the right-hand sides exactly as displayed. The runs take $3$, $5$, $4$, $25$, $8$ and $1+7$ head
+steps, respectively, and no variable is at the head before the last frame.
+\end{lemma}
+
+\begin{proof}
+For (P1)--(P3),
+\begin{gather*}
+B\,C\,C\,x\,y\,z\hstep C\,(C\,x)\,y\,z\hstep C\,x\,z\,y\hstep x\,y\,z,\\
+A\,y\,f\,u\hstep S\,\Ir\,(S\,\Ir\,\Ir\,y)\,f\,u\hstep\Ir\,f\,(S\,\Ir\,\Ir\,y\,f)\,u,\\
+S\,\Ir\,\Ir\,x\,f\hstep\Ir\,x\,(\Ir\,x)\,f.
+\end{gather*}
+In the last two, (P1) then finishes the run. (P4)--(P6) are head runs of closed code applied to
+variables; the script computes them and compares the final frames literally. Appending items changes
+no head step, because every frame before the last has a combinator at its head with at least three
+items.
+\end{proof}
+
+Put $\mn_k=S\,\Ir\,\Ir\,(\Ir^k\,A)\,\Mz$, where $\Ir^0\,A=A$ and $\Ir^{k+1}\,A=\Ir\,(\Ir^k\,A)$; $d_k=c_{k+1}$;
+$\Ch_0=B\,(\Em\,c_0)\,\Ir$ and $\Ch_{k+1}=B\,B\,\Em\,d_k\,(\Ir\,\Ch_k)$; and the \emph{phase frame}
+$\Phi_k=\Mz\,\mn_k\,d_k\,\Ch_k$.
+
+\begin{lemma}\label{lem:phase}
+$\qBC\hred\Phi_0$, and for every $k\ge0$, in at least one step,
+\[
+\Phi_k\hred\Phi_{k+1}\,(\Tem\,c_0\,d_k)\,(\Tem\,d_0\,d_k)\cdots(\Tem\,d_{k-1}\,d_k)\,(T_1\,d_k)\,(T_2\,d_k).
+\]
+\end{lemma}
+
+\begin{proof}
+$\qBC=A\,A\,\Mz\,c_1\,\Ch_0\hred\Mz\,\mn_0\,c_1\,\Ch_0=\Phi_0$ by (P2). Fix $k$, let $\vec T$ be the items
+displayed after $\Phi_{k+1}$, and $E=\End\,\mn_k$. By (P4),
+$\Phi_k\hred\Ch_k\,E\,d_k\,(\Ir\,\Ch_k)\,(T_1\,d_k)\,(T_2\,d_k)$. For $j\le k$ and all $d,V$,
+\[
+\Ch_j\,E\,d\,V\hred E\,d\,V\,(\Tem\,c_0\,d)\,(\Tem\,d_0\,d)\cdots(\Tem\,d_{j-1}\,d),
+\]
+by induction on $j$, using
+\begin{align*}
+\Ch_0\,E\,d\,V&\hred\Ir\,E\,d\,V\,(\Tem\,c_0\,d)\hred E\,d\,V\,(\Tem\,c_0\,d),\\
+\Ch_{j+1}\,E\,d\,V&\hred\Ir\,\Ch_j\,E\,d\,V\,(\Tem\,d_j\,d)\hred\Ch_j\,E\,d\,V\,(\Tem\,d_j\,d),
+\end{align*}
+by the second half of (P6) and (P1), and by (P6) and (P1). With $d=d_k$ and $V=\Ir\,\Ch_k$, (P5) gives
+\[
+E\,d_k\,(\Ir\,\Ch_k)\hred\mn_k\,(Q\,d_k)\,(B\,B\,\Em\,d_k\,(\Ir\,\Ch_k))=\mn_k\,d_{k+1}\,\Ch_{k+1}.
+\]
+Finally, for every $u$,
+\[
+\mn_k\,u\hred\Ir^k A\,(\Ir^{k+1}A)\,\Mz\,u\hred A\,(\Ir^{k+1}A)\,\Mz\,u\hred\Mz\,\mn_{k+1}\,u
+\]
+by (P3), by (P1) $k$ times (each $\Ir$ at the head has the three items $\Ir^{j-1}A$, $\Ir^{k+1}A$, $\Mz$
+after it), and by (P2). With $u=d_{k+1}$ and $\Ch_{k+1}$ following, this is $\Phi_{k+1}\,\vec T$.
+\end{proof}
+
+The term $A\,A$ is not a fixed-point combinator, since
+\[
+A\,A\,f\hred C\,(C\,f)\,(S\,\Ir\,\Ir\,A\,f),
+\]
+an hnf with head $C$, whose reducts all have head $C$, while those of $f\,(A\,A\,f)$ have head $f$. Each phase
+$k$ adds $k+3$ items. Every frame of the head run lies in one of the passages (P1)--(P6), so no head
+step of the run acts on an item that has already been emitted.
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}\textup{(a)}]
+By Lemma~\ref{lem:phase}, $\qBC\hred\Phi_k\,t_{N_k}\cdots t_1$ for every $k$, where $t_1,t_2,\dots$ lists
+the emitted items, $t_1$ the last item of the frame, and $N_k\to\infty$. The term $\Phi_k\,b_1\cdots b_r$,
+for any items $b_i$, is hnf-less, since Lemma~\ref{lem:phase} with items appended gives an infinite head
+run. So Lemma~\ref{lem:spine} applies over every $X$, and $\tau_n(\qBC)=t_n$. Phase $k$ contributes, in
+order of increasing index, $T_2\,d_k$, $T_1\,d_k$, $\Tem\,d_{k-1}\,d_k,\dots,\Tem\,d_0\,d_k$, $\Tem\,c_0\,d_k$.
+With $\ell=k+2$, so that $Q\,d_k=c_\ell$, these reduce to
+\[
+c_\ell\,(c_0\,c_\ell)\,S,\ \ c_{\ell+1}\,(c_\ell\,c_{\ell+1})\,S,\ \ c_{\ell+1}\,(c_{\ell-1}\,c_{\ell+1})\,S,\ \dots,\
+c_{\ell+1}\,(c_1\,c_{\ell+1})\,S.
+\]
+By~\citep[\S3]{s11}, $\tau_n(\pK)=b_n\,S$, where $a_0=Q\,c_0\,c_2$ and the $a_i$ evolve as follows.
+\begin{itemize}
+\item If $a_i=Q\,c_j\,c_n$, then $b_{i+1}=c_n\,(c_j\,c_n)$ and $a_{i+1}=c_j\,c_n$, which is
+$Q\,c_{j-1}\,c_n$ or $G\,c_n$.
+\item If $a_i=G\,c_n$, then $b_{i+1}=c_{n+1}\,(c_n\,c_{n+1})$ and $a_{i+1}=Q\,c_{n-1}\,c_{n+1}$.
+\end{itemize}
+From $a_i=Q\,c_0\,c_\ell$ the next $\ell+1$ teeth are therefore
+\[
+c_\ell\,(c_0\,c_\ell)\,S\quad\text{and then}\quad c_{\ell+1}\,(c_j\,c_{\ell+1})\,S\ \ (j=\ell,\ell-1,\dots,1),
+\]
+and the state after them is $Q\,c_0\,c_{\ell+1}$.
+ This is the list above. As $\pK$ starts at $a_0=Q\,c_0\,c_2$ and $\qBC$ at $\ell=2$,
+induction on $k$ gives $\tau_n(\qBC)\red\tau_n(\pK)$ for every $n$.
+\end{proof}
+
+The program computes the countdown $j=\ell,\dots,1$ with the chain $\Ch_k$, whose links $\Em\,d_j$ each
+emit one tooth, and it passes the chain, the next phase and the parameter $e$ along by permutations and
+compositions of its arguments. Section~\ref{sec:pure} shows that no pure $S$-term has five of these six
+behaviours on fresh variables.
+
+\section{No pure reduct}\label{sec:nopure}
+
+\begin{lemma}\label{lem:stuck}
+If $t\red H\,b_1\cdots b_l$ with $H\in\{B,C\}$ and $l\le2$, then $t$ has no pure $S$-reduct.
+\end{lemma}
+
+\begin{proof}
+A reduct of the hnf $H\,\vec b$ is $H\,\vec b'$: no step creates a head redex. If $t\red v$ with $v$ pure
+$S$, CR gives a common reduct of $v$ and $H\,\vec b$. It is a reduct of $v$, hence pure $S$, and it has
+head $H$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}\textup{(b)}]
+Let $\qBC\red v$ with $v$ pure $S$. By (Std), $\qBC\hred f\red v$ with internal steps after $f$. The
+head run of $\qBC$ is infinite and deterministic, so $f$ is one of its frames, $f=h\,u_1\cdots u_m$, and
+$v=h\,u'_1\cdots u'_m$ with $u_i\red u'_i$. Since $v$ is pure $S$, $h=S$ and each $u_i$ has the pure
+$S$-reduct $u'_i$. By the proof of Lemma~\ref{lem:phase}, $f$ is an instance of a frame of one of the
+symbolic runs (P1)--(P6), with closed terms for the variables and items appended; an instance runs the
+same head steps, since no variable is at the head before the last frame. The symbolic runs contain seven
+distinct frames with head $S$. In each, the first item head-reduces in at most one step to an hnf with
+head $B$ or $C$ and at most two items (Table~\ref{tab:sframes}), and so does its instance in $f$. By
+Lemma~\ref{lem:stuck}, $u_1$ has no pure $S$-reduct, a contradiction. Every reduct of $\pK$ is pure $S$,
+so $\qBC$ and $\pK$ have no common reduct, and $\qBC\nconv\pK$ by CR.
+\end{proof}
+
+\begin{table}[h]\small
+\caption{The $S$-headed frames of the symbolic runs and their first items. $\mathcal C_1,\dots,\mathcal C_4$
+are closed code terms; \texttt{check\_qbc.py} prints the start of each first item.}\label{tab:sframes}
+\begin{tabular}{lll}
+passage & first item of the $S$-frame & its hnf\\\hline
+(P2), (P3) & $\Ir=B\,C\,C$ & itself, head $B$\\
+(P4), first and second & $B\,(B\,C)\,\mathcal C_1\,m$, $B\,(B\,C)\,\mathcal C_2\,m$ & $B\,C\,(\mathcal C_i\,m)$\\
+(P4), third & $B\,C\,\mathcal C_3\,m\,d$ & $C\,(\mathcal C_3\,m)\,d$\\
+(P5) & $B\,(B\,B)\,\mathcal C_4\,m$ & $B\,B\,(\mathcal C_4\,m)$\\
+(P6), both halves & $B\,C\,(R\,E)$ & itself, head $B$
+\end{tabular}
+\end{table}
+
+\begin{corollary}
+For every $X$ with $\{S,B,C\}\subseteq X\subseteq\{S,K,I,B,C\}$, $\CT_X(\pK)$ is false, and $\qBC$ is
+convertible with no pure $S$-term.
+\end{corollary}
+
+The argument uses nothing about $\pK$ but that its reducts are pure $S$: no reduct of $\qBC$ is pure
+$S$, whatever pure $S$-term it is compared with.
+
+\section{What pure \texorpdfstring{$S$}{S} lacks}\label{sec:pure}
+
+In this section terms are pure $S$-terms with variables, and the variables are inert. $\var(t)$ is the
+set of variables of $t$, $\#_v(t)$ the number of occurrences of $v$, and $\sz t$ the number of leaves.
+In a step $S\,a\,b\,c\to a\,c\,(b\,c)$ every variable occurrence has one descendant, or two if it lies in
+$c$; so $\var$ is invariant and $\#_v$ never decreases. A contractum is an application, so every reduct
+of an application is an application; hence $c\red v$ for a variable $v$ forces $c=v$. A behaviour is
+\emph{on spare arguments} if it is required with any number $r$ of fresh variables $\vw=w_1\cdots w_r$
+appended to both sides, as in $t\,x\,\vw\red x\,\vw$. We avoid ``relative combinatory completeness'' for
+these operations, since it could be confused with relative partial combinatory algebras in
+realizability~\citep{vanoosten}.
+
+\begin{remark}[Leaf count; known]\label{rem:size}
+$\sz{a\,c\,(b\,c)}-\sz{S\,a\,b\,c}=\sz c-1\ge0$, so reduction never shortens a term (see the
+introduction for the sources). Hence for closed $t$ and distinct variables, no reduction
+$t\,x_1\cdots x_k\,w_1\cdots w_r\red N$ has $\sz N\le k+r$. This excludes, on spare arguments, the
+identity ($t\,x\,\vw\red x\,\vw$), every permutation ($t\,x_1\cdots x_k\,\vw\red x_{\pi1}\cdots x_{\pi k}\,\vw$),
+and $C$, $T$, $B$ and $K$. Over $\{S,B,C\}$ the leaf count drops at every $B$- and $C$-step, and
+$\Ir\,x\,y\,z\red x\,y\,z$.
+\end{remark}
+
+Leaf count cannot separate outputs that contain closed subterms, such as those of (P4)--(P6). The next
+lemma tracks nodes instead. A \emph{node} of $t$ is an occurrence of an application $P\,Q$, with left
+child $P$ and right child $Q$. Consider a step with redex $S\,a\,b\,c$. The nodes $S\,a$, $S\,a\,b$ and
+$S\,a\,b\,c$ are destroyed, and the nodes $a\,c$, $b\,c$ and $a\,c\,(b\,c)$ are created. Every node inside
+$c$ has two descendants. Every other node has one, with the same children, except that a redex inside
+one child may have been contracted.
+
+\begin{lemma}\label{lem:arg}
+Let $t=M\,y_1\cdots y_n$, where $y_j$ is a variable $v$ that occurs in $t$ only there. If $t\red N$, $v$
+occurs once in $N$, and $N$ has a node $P\,v$, then $M\,y_1\cdots y_{j-1}\red P$.
+\end{lemma}
+
+\begin{proof}
+$\#_v$ is $1$ throughout the reduction, so no step has $v$ inside its $c$. Follow the node $\nu=P\,v$
+back through its ancestors to a node $\nu_0$ that is created or is a node of $t$. Along the way the right
+child only reduces, so the right child of $\nu_0$ reduces to $v$ and is $v$. A created $a\,c$ or $b\,c$
+with $c=v$ copies $v$, and a created $a\,c\,(b\,c)$ has an application as right child; so $\nu_0$ is a node
+of $t$ with right child $v$, which is $\nu_j=(M\,y_1\cdots y_{j-1})\,y_j$. No ancestor of $\nu$ is the
+node $S\,a$ or $S\,a\,b$ of a redex, which is destroyed, or $S\,a\,b\,c$, which would copy $c=v$. So every
+step lies inside the left child of the ancestor, inside its right child $v$ (impossible: $v$ is
+normal), or outside it, and the left child runs through a reduction $M\,y_1\cdots y_{j-1}\red P$.
+\end{proof}
+
+\begin{theorem}[Cancellation]\label{thm:peel}
+Let $w_1,\dots,w_r$ be distinct variables that occur in neither $M$ nor $N$. Then
+$M\,w_1\cdots w_r\red N\,w_1\cdots w_r$ if and only if $M\red N$.
+\end{theorem}
+
+\begin{proof}
+($\Leftarrow$) is congruence. ($\Rightarrow$) By induction on $r$: $w_r$ occurs once in
+$N\,w_1\cdots w_r$, as the right child of the root, so Lemma~\ref{lem:arg} gives
+$M\,w_1\cdots w_{r-1}\red N\,w_1\cdots w_{r-1}$.
+\end{proof}
+
+\begin{remark}\label{rem:peel}
+\begin{enumerate}
+\item[(i)] The law fails over $\{S,K\}$: $S\,(K\,a)\,(S\,K\,K)\,w\red a\,w$, but for a variable $a$ the
+term $S\,(K\,a)\,(S\,K\,K)$ is normal and is not $a$. It fails over $\{S,B,C\}$ at $\Ir$:
+$\Ir\,x\,y\,w\red x\,y\,w$, but every reduct of $\Ir\,x\,y$ has head $B$ or $C$, so none is $x\,y$.
+\item[(ii)] With $\hred$ on the left the law holds in a stronger form: if $M\,\vw\hred N\,\vw$ then
+$M\hred N$, since a head step of $M\,\vw$ that is not one of $M$ fires $S\,a\,b\,w_1$, $S\,a\,w_1\,w_2$ or
+$S\,w_1\,w_2\,w_3$ and copies a $w_i$. But $M\red N$ does not give $M\,\vw\hred N\,\vw$:
+$M=S\,S\,(S\,S\,S\,S)\to S\,S\,(S\,S\,(S\,S))=N$ by an internal step, while $M\,w\hstep S\,w\,(S\,S\,S\,S\,w)$
+is an hnf.
+\item[(iii)] The law concerns fresh variables. In a run the spare items are closed terms, which can be
+reduced and applied, and Theorem~\ref{thm:peel} says nothing about them.
+\end{enumerate}
+\end{remark}
+
+The head step that puts a variable at the head leaves an item $N_i$ followed by an application
+$N_{i+1}$ that contains the variables of $N_i$. This is the variable-head form
+of~\citep[Lemma~3(a)]{s11}.
+
+\begin{lemma}\label{lem:g2}
+Let $t$ have head $S$, and let $t\red v\,N_1\cdots N_m$ with $v$ a variable. Then $m\ge2$, and for some
+$i<m$ the term $N_{i+1}$ is an application and $\var(N_i)\subseteq\var(N_{i+1})$.
+\end{lemma}
+
+\begin{proof}
+By (Std), $t\hred F=v\,F_1\cdots F_m$ with $F_i\red N_i$. As $t$ has head $S$, $F\ne t$, and the last
+head step is $S\,u_1\,u_2\,u_3\,\vec u\hstep u_1\,u_3\,(u_2\,u_3)\,\vec u$ with $u_1=v\,F_1\cdots F_p$. Take
+$i=p+1$: $F_i=u_3$ and $F_{i+1}=u_2\,u_3$, an application whose variables include those of $u_3$, and
+$\var$ is invariant under reduction.
+\end{proof}
+
+\begin{remark}[No fixed-point combinator; folklore]\label{rem:fpc}
+If $Y$ is closed and $Y\,f\conv f\,(Y\,f)$, a common reduct is $f\,N$, so $Y\,f\red f\,N$ with $m=1$,
+against Lemma~\ref{lem:g2}. For the sources see the introduction. The same argument excludes the version
+on spare arguments: for a closed term $\Theta$, $\Theta\,f\,w_1\cdots w_r\conv f\,N\,w_1\cdots w_r$ (for
+any $N$, which may contain the $w_i$) gives $\Theta\,f\,\vw\red f\,N'\,\vw$, and every item after the first
+is a variable.
+\end{remark}
+
+The proof in~\citep{s11} locates the new state at the two-item hnfs that its moves
+reach~\citep[Lemma~4(B)]{s11}, by Lemma~3(a) there: if a head run reaches a two-item hnf $S\,a\,b$ after
+at least one step, then $b=y\,a$, so the new state $a$ occurs inside $b$. Over a larger basis this can
+fail only at a step of another combinator: by Lemma~\ref{lem:trace}, at a $B$-, $C$- or $I$-step when
+$K\notin X$; with $K$ also at $K\,(S\,a\,b)\,c\to S\,a\,b$.
+
+\begin{lemma}\label{lem:trace}
+Let $X\subseteq\{S,B,C,I\}$, and let $f\hred S\,a\,b$ in at least one head step. The last step is one of
+\begin{gather*}
+S\,S\,y\,a\to S\,a\,(y\,a)\ \text{(so $b=y\,a$)},\qquad B\,(S\,a)\,y\,z\to S\,a\,(y\,z),\\
+B\,S\,y\,z\,b\to S\,(y\,z)\,b,\qquad
+C\,S\,b\,a\to S\,a\,b,\\
+I\,S\,a\,b,\ \ I\,(S\,a)\,b,\ \ I\,(S\,a\,b)\to S\,a\,b.
+\end{gather*}
+\end{lemma}
+
+\begin{proof}
+Let the step be $H\,u_1\cdots u_n\,\vec u\to\rho\,\vec u$ with $n=\operatorname{ar}(H)$ and
+$u_1=S\,F_1\cdots F_p$ (for each $H$ the head of $\rho$ is the head of $u_1$), and let the result have
+exactly two items. The result has $p+2+|\vec u|$ items for $H\in\{S,C\}$, $p+1+|\vec u|$ for $B$ and
+$p+|\vec u|$ for $I$. Setting this to $2$ gives the listed cases.
+\end{proof}
+
+\begin{proposition}\label{prop:class}
+Replace the closed code in the outputs of (P1)--(P6), that is, each occurrence of $\Ir$, $\End$, $Q$,
+$G$, $T_1$, $T_2$, $\Tem$, and the term $B\,B\,\Em$ of (P5), by arbitrary closed pure $S$-terms. Then no
+closed pure $S$-term, applied to fresh variables with any number of fresh trailing variables, reduces to
+the output of (P1), (P2), (P3), (P5) or (P6). For (P6) the same holds when the start term is any pure
+$S$-term with head $S$ in which $R,E,d,\Ch$ do not occur, such as a replacement of the open term
+$B\,(\Em\,e)$. These arguments do not exclude the output of (P4).
+\end{proposition}
+
+\begin{proof}
+(P1) by leaf count, or Lemma~\ref{lem:g2}: the output $x\,y\,z\,\vw$ has no application item.
+(P2) and (P3): the outputs $f\,N\,u\,\vw$ and $x\,N\,f\,\vw$ have a variable head, and every item after
+the first is a variable, against Lemma~\ref{lem:g2}. (P5): in $m\,N\,(K'\,d\,\Ch)\,\vw$ the variable $\Ch$
+occurs once, as the right child of a node with left child $K'\,d$, where $K'$ replaces $B\,B\,\Em$.
+Lemma~\ref{lem:arg} gives $t\,m\,d\red K'\,d$, but $m\in\var(t\,m\,d)\setminus\var(K'\,d)$. (P6): in
+$R\,E\,d\,\Ch\,(T'\,e\,d)\,\vw$ the only application item is $T'\,e\,d$, and
+$\var(\Ch)\not\subseteq\var(T'\,e\,d)$, against Lemma~\ref{lem:g2}. In (P4), $\Ch$ occurs twice, so
+Lemma~\ref{lem:arg} does not apply to it; applied to $m$ it gives only $t\red\End'$; and
+Lemma~\ref{lem:g2} holds with $i=4$, since $\var(T_1'\,d)\subseteq\var(T_2'\,d)$.
+\end{proof}
+
+Proposition~\ref{prop:class} is about behaviour that is uniform on fresh variables. In the run of
+$\qBC$ the parameters are particular closed terms, and a pure $S$-term could treat particular arguments
+differently. So the proposition classifies which behaviours of $\qBC$ pure $S$ lacks; it does not show
+that a rival of $\pK$ over $\{S,B,C\}$ needs them. Whether the run of every such rival reaches infinitely
+many two-item hnfs of its moves by a last step that is a $B$- or $C$-step (Lemma~\ref{lem:trace}) is
+open.
+
+\section{Scope}\label{sec:scope}
+
+\emph{The claim.} Theorem~\ref{thm:main} concerns $\CT_X(\pK)$. It shows that the theorem
+of~\citep{s11} depends on the basis, and it leaves open whether CT fails in pure $S$~\citep{s15}. Among
+the one-atom extensions $\{S,I\}$, $\{S,B\}$ and $\{S,C\}$ of $S$ we know of no rival of $\pK$, and we do
+not know whether $\CT_X(\pK)$ holds there. Whether $\{S,B,C\}$ has a fixed-point combinator is not
+addressed; $\qBC$ does not need one.
+
+\emph{Other terms.} Let $X\,T=S\,(S\,S\,S)\,S\,(S\,S\,S)$, as in~\citep[Remark~15]{s15}; it is a term of
+least size, $8$, without an hnf (there are $15$ of that size). Whether CT holds at $X\,T$ is
+open~\citep[Remark~15]{s15}. The results of Section~\ref{sec:pure} do not decide it. They are about fresh
+variables used linearly (Remark~\ref{rem:peel}(iii)), and in a run the state that is passed on is
+applied as a program. Even the run of $\pK$ shows this. We read its state $\rest^n(\pK)=a_n\,S$ as the
+stack $a_n$ applied to the heap $S$. This stack is applied to a different heap inside its own tooth:
+$\tau_n(\pK)=b_n\,S\hred x_n\,S\,(a_n\,x_n\,S)$, and in the head run of the item $a_n\,x_n\,S$,
+$a_n\,x_n\hred S\,a_{n+1}\,b_{n+1}\,x_n$~\citep[equations~(2) and~(3)]{s11}, where $x_n$ is an
+application and so $x_n\nconv S$. So no property shared by all pure $S$-reductions forbids applying a
+stack to a heap other than its own. We read this as a sign that an argument for $X\,T$ must use facts
+about the run of $X\,T$, not only facts about the basis; that reading is not a theorem.
+
+\section*{Data availability}
+\sloppy
+The script \texttt{check\_qbc.py}, in the directory of this paper, is plain Python~3. It
+\begin{itemize}
+\item builds $\qBC$ by the bracket abstraction above and checks its size and atom counts;
+\item runs (P1)--(P6) on variables and compares each final frame literally with Lemma~\ref{lem:pass};
+\item lists the $S$-headed frames of Table~\ref{tab:sframes} and checks that each first item reaches a
+$B$- or $C$-headed hnf in at most one head step;
+\item follows the head run of $\qBC$ through $\Phi_0,\dots,\Phi_{39}$ and compares the frames and the
+emitted items literally with Lemma~\ref{lem:phase} ($12{,}407$ head steps);
+\item checks $\tau_n(\qBC)\red\tau_n(\pK)$ for $n\le858$ against the formula of~\citep[\S3]{s11},
+contracting only redexes headed by program atoms;
+\item checks the side facts on $A\,A\,f$, $D\,D\,C$ and $\Ir\,x\,y$.
+\end{itemize}
+The teeth beyond $n=858$ rest on the proof, not on the script.
+
+Three results of Section~\ref{sec:pure} are mechanized in \texttt{lean-ski}~\citep{leanski} (Lean~4),
+version 1.25.0 (merge commit \texttt{34229d4}, released 28 November 2026), in the module \texttt{Ski/PureSBasics.lean},
+whose declarations are in the axiom gate \texttt{Ski/Audit.lean} (only \texttt{propext} and
+\texttt{Quot.sound}).
+\begin{itemize}
+\item Theorem~\ref{thm:peel}: \texttt{PureSBasics.Open.peel}, over pure $S$-terms with variables, with
+the same hypotheses.
+\item Remark~\ref{rem:size}: \texttt{wsteps\_leaves} for closed terms and \texttt{Open.vsteps\_leaves}
+with variables; its corollaries are \texttt{Open.no\_rel\_I}, \texttt{Open.no\_rel\_K},
+\texttt{Open.no\_rel\_T}, \texttt{Open.no\_rel\_C}, \texttt{Open.no\_rel\_B}, \texttt{Open.no\_rel\_perm}
+and \texttt{Open.no\_short}.
+\item Remark~\ref{rem:fpc}, absolute form: \texttt{no\_fixed\_point}, which says that no pure $S$-term $Y$
+has $Y\,f\conv f\,(Y\,f)$ for every closed pure $S$-term $f$; its proof uses only $f=S$. It has the
+statement of the earlier \texttt{Ncfp.no\_fpc}, with a shorter proof.
+\end{itemize}
+Lemma~\ref{lem:arg} is mechanized only for the root position, which is the case the cancellation law
+uses. Lemmas~\ref{lem:g2} and~\ref{lem:trace}, the form of Remark~\ref{rem:fpc} on spare arguments,
+Proposition~\ref{prop:class} and Theorem~\ref{thm:main} are not mechanized.
+
+\appendix
+\section{The term \texorpdfstring{$q_{BC}$}{qBC}}\label{app:q}
+{\small\raggedright\ttfamily
+B (S (B C C)) (S (B C C) (B C C)) (B (S (B C C)) (S (B C C) (B C C))) (C (B S (B (B C) (C (B S (B (B C)
+(C (B C (B (B S) (B C (B (C (B C C)) (C (B S (B (B B) (C B (S (S S))))) (B B (B (C (B S (B C))) (C (B C
+(B (S (B (S (S S)) (S (S S)))) (C (B B (S (S S))) (B (S (S S)) (S (S S)))))) S)))))))) (B C C)))) (C (S
+(B (S (S S)) (S (S S))) (S (S (S S)) (B (S (S S)) (S (S S))))) S)))) (C (S (S (S S)) (B (S (S (S S))
+(S (S S))) (S (S S)))) S)) (S (S S) (S (S (S S)) (S (S S)))) (B (B (C (B S (B C))) (C (B C (B (S (B (S
+(S S)) (S (S S)))) (C (B B (S (S S))) (B (S (S S)) (S (S S)))))) S) (S (S (S S)) (S (S S)))) (B C C))
+\par}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}
